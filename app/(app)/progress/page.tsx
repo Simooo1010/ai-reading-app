@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import { Suspense } from "react";
 import { ProgressView } from "@/components/ProgressView";
 import { ScreenSkeleton } from "@/components/Skeleton";
+import { requireAuthOrRedirect } from "@/lib/auth";
 import { getItemsCached } from "@/lib/notion";
 import { progressData } from "@/lib/progress";
 import { todayInRome } from "@/lib/today";
@@ -20,7 +20,9 @@ export default function ProgressPage() {
 async function ProgressContent() {
   // "Today" (Europe/Rome) decides this week, the streak and the projection,
   // so this part is rendered per request, never prerendered with a stale day.
-  await connection();
+  // requireAuthOrRedirect waits for the request first (connection()), then
+  // sends visitors without a valid sign-in cookie to /login.
+  await requireAuthOrRedirect("/progress");
   const items = await getItemsCached();
   return <ProgressView data={progressData(items, todayInRome())} />;
 }
