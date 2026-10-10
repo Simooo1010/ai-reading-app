@@ -1,0 +1,151 @@
+/*
+ * Reading Room — design tokens.
+ * Two colours only: ground + ink. Every other colour is a tint of those two.
+ * Light theme only. Dark theme is NOT designed yet (open item): do not add one.
+ * Open item: wash and rule were derived against an earlier ground (#FFECB7);
+ * review them against #FCF3DC.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Colour */
+  --rr-ground: #FCF3DC;   /* page background */
+  --rr-on-ink: #FCF3DC;   /* text on ink fills (same value as ground) */
+  --rr-ink: #500101;      /* primary text, primary fill, strong rules, filled bars */
+  --rr-ink-2: #7A3A2E;    /* secondary text, track outlines (~7:1 on ground) */
+  --rr-wash: #F8DF9C;     /* bar tracks, "Done" button fill */
+  --rr-rule: #D9BE82;     /* hairlines and chip borders ONLY, never text */
+  --rr-hatch-opacity: 0.55; /* ink opacity of hatch lines in charts */
+
+  /* Font */
+  /* --font-newsreader is set by next/font on <html> (see README); "Newsreader" is the fallback name */
+  --rr-font-serif: var(--font-newsreader, "Newsreader"), Georgia, "Times New Roman", serif;
+
+  /* Type: size / line-height / weight / tracking */
+  --rr-text-display-size: 48px;
+  --rr-text-display-lh: 1.02;
+  --rr-text-display-weight: 600;
+  --rr-text-display-tracking: -0.018em;
+
+  --rr-text-stat-xl-size: 64px;
+  --rr-text-stat-xl-lh: 1;
+  --rr-text-stat-xl-weight: 600;
+  --rr-text-stat-xl-tracking: -0.02em;
+
+  --rr-text-stat-lg-size: 40px;
+  --rr-text-stat-lg-lh: 1.05;
+  --rr-text-stat-lg-weight: 600;
+
+  --rr-text-stat-md-size: 34px;
+  --rr-text-stat-md-lh: 1;
+  --rr-text-stat-md-weight: 600;
+
+  --rr-text-stat-sm-size: 28px;
+  --rr-text-stat-sm-lh: 32px;
+  --rr-text-stat-sm-weight: 600;
+
+  /* stat-note: italic text in place of a number ("Not enough data yet"), from the Progress board */
+  --rr-text-stat-note-size: 21px;
+  --rr-text-stat-note-lh: 26px;
+  --rr-text-stat-note-weight: 500;
+
+  --rr-text-phase-size: 28px;
+  --rr-text-phase-lh: 1.1;
+  --rr-text-phase-weight: 600;
+  --rr-text-phase-tracking: -0.01em;
+
+  --rr-text-author-size: 20px;
+  --rr-text-author-lh: 1.3;
+  --rr-text-author-weight: 500;
+
+  --rr-text-row-title-size: 19px;
+  --rr-text-row-title-lh: 1.25;
+  --rr-text-row-title-weight: 600;
+
+  --rr-text-body-size: 18px;
+  --rr-text-body-lh: 1.45;
+  --rr-text-body-weight: 500;
+
+  --rr-text-body-italic-size: 18px;
+  --rr-text-body-italic-lh: 24px;
+  --rr-text-body-italic-weight: 500;
+
+  --rr-text-meta-size: 16px;
+  --rr-text-meta-lh: 22px;
+  --rr-text-meta-weight: 500;
+
+  --rr-text-meta-italic-size: 15px;
+  --rr-text-meta-italic-lh: 20px;
+  --rr-text-meta-italic-weight: 500;
+
+  --rr-text-label-size: 14px;
+  --rr-text-label-lh: 20px;
+  --rr-text-label-weight: 700;
+  --rr-text-label-tracking: 0.12em;
+
+  --rr-text-chip-size: 14px;
+  --rr-text-chip-hero-size: 15px;
+  --rr-text-chip-weight: 500;
+
+  --rr-text-button-size: 17px;
+  --rr-text-button-weight: 600;
+  --rr-text-button-tracking: 0.01em;
+
+  --rr-text-tab-size: 14px;
+  --rr-text-tab-lh: 18px;
+  --rr-text-tab-weight: 500;
+  --rr-text-tab-weight-active: 700;
+  --rr-text-tab-tracking: 0.12em;
+
+  --rr-text-axis-size: 13px; /* chart ticks only: the smallest allowed size */
+  --rr-text-axis-weight: 600;
+
+  /* Space */
+  --rr-space-1: 4px;
+  --rr-space-2: 8px;
+  --rr-space-3: 12px;
+  --rr-space-4: 16px;
+  --rr-space-5: 24px;
+
+  /* Layout */
+  --rr-page-gutter: 24px;
+  --rr-page-top: 48px;
+  --rr-tabbar-bottom: 34px; /* safe-area space under the tab bar */
+  --rr-tap-min: 44px;
+
+  /* Radius */
+  --rr-radius-sm: 3px;    /* progress bar ends */
+  --rr-radius-md: 6px;    /* buttons, chips: the default */
+  --rr-radius-track: 1px; /* thin chart tracks */
+}
+
+/* Base layer */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--rr-ground);
+  color: var(--rr-ink);
+  font-family: var(--rr-font-serif);
+  font-size: var(--rr-text-body-size);
+  line-height: var(--rr-text-body-lh);
+  font-weight: var(--rr-text-body-weight);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Data numbers: lining, same width */
+.rr-num {
+  font-variant-numeric: lining-nums tabular-nums;
+}

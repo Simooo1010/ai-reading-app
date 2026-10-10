@@ -1,0 +1,856 @@
+/*
+ * Reading Room — component classes. Import after tokens.css.
+ * Uses tokens only: no colour literals in this file.
+ * Measurements come from the Today / Path / Progress boards.
+ */
+
+/* ---------- Focus + motion ---------- */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+  border-radius: var(--rr-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Type utilities ---------- */
+.rr-display {
+  margin: 0;
+  font-size: var(--rr-text-display-size);
+  line-height: var(--rr-text-display-lh);
+  font-weight: var(--rr-text-display-weight);
+  letter-spacing: var(--rr-text-display-tracking);
+  font-variation-settings: "opsz" 72;
+  color: var(--rr-ink);
+  overflow-wrap: break-word;
+}
+
+.rr-author {
+  margin: 0;
+  font-size: var(--rr-text-author-size);
+  line-height: var(--rr-text-author-lh);
+  font-weight: var(--rr-text-author-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+}
+
+.rr-body {
+  margin: 0;
+  font-size: var(--rr-text-body-size);
+  line-height: var(--rr-text-body-lh);
+  font-weight: var(--rr-text-body-weight);
+  font-variation-settings: "opsz" 16;
+  color: var(--rr-ink);
+}
+
+.rr-body-italic {
+  margin: 0;
+  font-size: var(--rr-text-body-italic-size);
+  line-height: var(--rr-text-body-italic-lh);
+  font-weight: var(--rr-text-body-italic-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+}
+
+.rr-meta {
+  margin: 0;
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: var(--rr-text-meta-weight);
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums;
+}
+
+/* Meta line with dot separators: <p class="rr-meta rr-meta-line"><span>Essay</span><span class="rr-sep">·</span>… */
+.rr-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rr-space-2);
+}
+
+.rr-sep {
+  color: var(--rr-rule);
+}
+
+.rr-meta-italic {
+  margin: 0;
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: var(--rr-text-meta-italic-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums;
+}
+
+.rr-row-title {
+  font-size: var(--rr-text-row-title-size);
+  line-height: var(--rr-text-row-title-lh);
+  font-weight: var(--rr-text-row-title-weight);
+  color: var(--rr-ink);
+}
+
+.rr-phase-title {
+  font-size: var(--rr-text-phase-size);
+  line-height: var(--rr-text-phase-lh);
+  font-weight: var(--rr-text-phase-weight);
+  letter-spacing: var(--rr-text-phase-tracking);
+  font-variation-settings: "opsz" 48;
+  font-variant-numeric: lining-nums;
+  color: var(--rr-ink);
+}
+
+.rr-axis {
+  font-size: var(--rr-text-axis-size);
+  font-weight: var(--rr-text-axis-weight);
+  fill: var(--rr-ink-2);
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* ---------- Screen ---------- */
+/* Mobile-first shell: main + tab bar. Fluid, max 480px, centred on desktop. */
+.rr-screen {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background-color: var(--rr-ground);
+}
+
+.rr-screen__main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(var(--rr-page-top) + env(safe-area-inset-top, 0px));
+  padding-right: calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px));
+  padding-bottom: var(--rr-space-5);
+  padding-left: calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
+}
+
+/* ---------- Header ---------- */
+/* Label left (screen name), italic context right, hairline under. */
+.rr-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+  padding-bottom: var(--rr-space-3);
+  border-bottom: 1px solid var(--rr-rule);
+}
+
+.rr-header > .rr-label {
+  color: var(--rr-ink);
+}
+
+.rr-header__context {
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: var(--rr-text-meta-italic-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+  text-align: right;
+}
+
+/* ---------- Label (eyebrow / section title) ---------- */
+.rr-label {
+  margin: 0;
+  font-size: var(--rr-text-label-size);
+  line-height: var(--rr-text-label-lh);
+  font-weight: var(--rr-text-label-weight);
+  letter-spacing: var(--rr-text-label-tracking);
+  text-transform: uppercase;
+  color: var(--rr-ink-2);
+}
+
+.rr-label--ink {
+  color: var(--rr-ink);
+}
+
+/* ---------- Chip (layer chip) ---------- */
+.rr-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--rr-space-2);
+  border: 1px solid var(--rr-rule);
+  border-radius: var(--rr-radius-md);
+  font-size: var(--rr-text-chip-size);
+  font-weight: var(--rr-text-chip-weight);
+  line-height: 1;
+  color: var(--rr-ink-2);
+  white-space: nowrap;
+  font-variant-numeric: lining-nums;
+}
+
+/* Larger chip on the Today card */
+.rr-chip--hero {
+  height: 26px;
+  padding: 0 10px;
+  font-size: var(--rr-text-chip-hero-size);
+}
+
+/* Placeholder / unknown value */
+.rr-chip--dashed {
+  border-style: dashed;
+}
+
+/* ---------- CoreMark (diamond + CORE) ---------- */
+.rr-core {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--rr-text-label-size);
+  line-height: var(--rr-text-label-lh);
+  font-weight: var(--rr-text-label-weight);
+  letter-spacing: var(--rr-text-label-tracking);
+  text-transform: uppercase;
+  color: var(--rr-ink);
+}
+
+.rr-core::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  margin: 0 1.5px;
+  background-color: currentColor;
+  transform: rotate(45deg);
+}
+
+/* ---------- StatusChip ---------- */
+/* Never colour only: Done = fill + check, Reading = outline + dot,
+   To read = hairline, Skipped = dashed + italic. Text always present. */
+.rr-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 84px;
+  height: 26px;
+  padding: 0 var(--rr-space-2);
+  border: 1px solid var(--rr-rule);
+  border-radius: var(--rr-radius-md);
+  background: transparent;
+  font-size: var(--rr-text-chip-size);
+  font-weight: var(--rr-text-chip-weight);
+  line-height: 1;
+  color: var(--rr-ink-2);
+  white-space: nowrap;
+}
+
+.rr-status--done {
+  background-color: var(--rr-ink);
+  border-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+  font-weight: 600;
+}
+
+/* Check mark drawn in CSS (an inline SVG with stroke="currentColor" also works) */
+.rr-status--done::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 4px;
+  height: 7px;
+  margin: 0 2px 2px 1px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(40deg);
+}
+
+.rr-status--reading {
+  border: 1.5px solid var(--rr-ink);
+  color: var(--rr-ink);
+  font-weight: 600;
+}
+
+.rr-status--reading::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.rr-status--todo {
+  /* base style: hairline outline */
+}
+
+.rr-status--skipped {
+  border: 1px dashed var(--rr-ink-2);
+  font-style: italic;
+}
+
+/* ---------- Button ---------- */
+/* 44px tall, content width, 6px radius. Put icons inline with stroke="currentColor". */
+.rr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--rr-radius-md);
+  background: transparent;
+  color: var(--rr-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-button-size);
+  font-weight: var(--rr-text-button-weight);
+  letter-spacing: var(--rr-text-button-tracking);
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-btn:disabled,
+.rr-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.rr-btn--primary {
+  gap: var(--rr-space-2);
+  padding: 0 18px;
+  background-color: var(--rr-ink);
+  border-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+}
+
+.rr-btn--secondary {
+  border-color: var(--rr-ink);
+}
+
+/* "Done": wash fill, heavier ink border */
+.rr-btn--affirm {
+  border: 1.5px solid var(--rr-ink);
+  background-color: var(--rr-wash);
+}
+
+/* Quiet text action (Skip, Edit target). Keeps a 44px hit area. */
+.rr-btn--link {
+  height: auto;
+  min-height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-1);
+  border: 0;
+  color: var(--rr-ink-2);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-decoration: underline;
+  text-decoration-color: var(--rr-rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* Row of actions: primary on top, then Start / Done … Skip pushed right */
+.rr-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rr-space-2);
+}
+
+.rr-actions__row {
+  display: flex;
+  align-items: center;
+  gap: var(--rr-space-2);
+  width: 100%;
+}
+
+.rr-actions__row > .rr-btn--link:last-child {
+  margin-left: auto;
+}
+
+/* ---------- Rules / SectionRule ---------- */
+.rr-rule {
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--rr-rule);
+}
+
+.rr-rule--hair {
+  border-top-color: var(--rr-rule);
+}
+
+.rr-rule--strong {
+  border-top-color: var(--rr-ink);
+}
+
+/* Section opened by a strong ink rule + Label */
+.rr-section {
+  margin-top: var(--rr-space-4);
+  padding-top: 10px;
+  border-top: 1px solid var(--rr-ink);
+}
+
+/* Section split by a hairline (e.g. "Why read this") */
+.rr-section--hair {
+  padding-top: var(--rr-space-3);
+  border-top-color: var(--rr-rule);
+}
+
+.rr-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+}
+
+/* ---------- ListRow ---------- */
+/* <ol class="rr-list"><li><a class="rr-row">order | title + meta line</a></li></ol> */
+.rr-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rr-list--ruled {
+  border-top: 1px solid var(--rr-rule);
+}
+
+.rr-row {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  column-gap: var(--rr-space-2);
+  align-items: baseline;
+  min-height: var(--rr-tap-min);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rr-rule);
+  color: inherit;
+  text-decoration: none;
+}
+
+.rr-row__order {
+  font-size: var(--rr-text-meta-size);
+  font-weight: 600;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.rr-row__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-1);
+  min-width: 0;
+}
+
+.rr-row__title {
+  font-size: var(--rr-text-row-title-size);
+  line-height: var(--rr-text-row-title-lh);
+  font-weight: var(--rr-text-row-title-weight);
+  color: var(--rr-ink);
+  overflow-wrap: break-word;
+}
+
+.rr-row__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rr-space-2);
+}
+
+.rr-row__meta {
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: var(--rr-text-meta-italic-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+/* Dotted leader between meta and chip (Path) */
+.rr-row__leader {
+  flex: 1 1 auto;
+  align-self: center;
+  min-width: var(--rr-space-4);
+  height: 0;
+  margin-top: 6px;
+  border-bottom: 1.5px dotted var(--rr-rule);
+}
+
+/* Skipped item: struck, quiet title (the status chip also says "Skipped") */
+.rr-row--skipped .rr-row__title {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--rr-ink-2);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: var(--rr-ink-2);
+}
+
+/* Unknown / loading row */
+.rr-row--placeholder .rr-row__title {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--rr-ink-2);
+}
+
+/* ---------- PhaseBlock ---------- */
+/* <section class="rr-phase"><button class="rr-phase__toggle" aria-expanded aria-controls>…</button><ol class="rr-list rr-list--ruled" id hidden>…</ol></section> */
+.rr-phase {
+  border-top: 1px solid var(--rr-ink);
+}
+
+.rr-phase__toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-height: var(--rr-tap-min);
+  margin: 0;
+  padding: var(--rr-space-3) 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--rr-ink);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-phase__toggle[aria-expanded="true"] {
+  padding-bottom: var(--rr-space-3);
+}
+
+.rr-phase__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+}
+
+/* "Now" tag after the title of the current phase */
+.rr-phase__now {
+  font-size: var(--rr-text-label-size);
+  line-height: var(--rr-text-label-lh);
+  font-weight: var(--rr-text-label-weight);
+  letter-spacing: var(--rr-text-label-tracking);
+  text-transform: uppercase;
+  color: var(--rr-ink-2);
+}
+
+/* Chevron: put an 18px down-pointing SVG inside with stroke="currentColor" */
+.rr-phase__chevron {
+  display: inline-flex;
+  align-self: center;
+  margin-left: auto;
+  color: var(--rr-ink-2);
+  transform: rotate(-90deg);
+  transition: transform 150ms ease;
+}
+
+.rr-phase__toggle[aria-expanded="true"] .rr-phase__chevron {
+  color: var(--rr-ink);
+  transform: none;
+}
+
+.rr-phase__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+  width: 100%;
+}
+
+.rr-phase__count {
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: var(--rr-text-meta-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* "2.1 of 6.6 h": numbers ink 600, wrap "of" in .rr-phase__of */
+.rr-phase__hours {
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: 600;
+  color: var(--rr-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+.rr-phase__of {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--rr-ink-2);
+}
+
+.rr-phase__toggle .rr-progress {
+  margin-top: 2px;
+}
+
+/* ---------- ProgressBar ---------- */
+/* <div class="rr-progress rr-progress--sm" role="progressbar" aria-valuenow …><div class="rr-progress__fill" style="width: 31.7%"></div></div> */
+.rr-progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--rr-radius-sm);
+  background-color: var(--rr-wash);
+}
+
+.rr-progress__fill {
+  display: block;
+  height: 100%;
+  max-width: 100%;
+  background-color: var(--rr-ink);
+}
+
+.rr-progress--sm { height: 6px; }
+.rr-progress--md { height: 8px; }
+.rr-progress--lg { height: 10px; }
+
+/* Progress-screen style: thin ink-2 outline, 1px ends */
+.rr-progress--outlined {
+  border-radius: var(--rr-radius-track);
+  outline: 1px solid var(--rr-ink-2);
+  outline-offset: -1px; /* drawn inside: keeps the height exact, no shadow */
+}
+
+.rr-progress--outlined .rr-progress__fill {
+  border-radius: var(--rr-radius-track);
+}
+
+/* ---------- StatBlock ---------- */
+.rr-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rr-stat__number {
+  margin: 2px 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--rr-space-1);
+  color: var(--rr-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.rr-stat__number--xl {
+  font-size: var(--rr-text-stat-xl-size);
+  line-height: var(--rr-text-stat-xl-lh);
+  font-weight: var(--rr-text-stat-xl-weight);
+  letter-spacing: var(--rr-text-stat-xl-tracking);
+  font-variation-settings: "opsz" 72;
+}
+
+.rr-stat__number--lg {
+  font-size: var(--rr-text-stat-lg-size);
+  line-height: var(--rr-text-stat-lg-lh);
+  font-weight: var(--rr-text-stat-lg-weight);
+  font-variation-settings: "opsz" 60;
+}
+
+.rr-stat__number--md {
+  font-size: var(--rr-text-stat-md-size);
+  line-height: var(--rr-text-stat-md-lh);
+  font-weight: var(--rr-text-stat-md-weight);
+  font-variation-settings: "opsz" 60;
+}
+
+.rr-stat__number--sm {
+  font-size: var(--rr-text-stat-sm-size);
+  line-height: var(--rr-text-stat-sm-lh);
+  font-weight: var(--rr-text-stat-sm-weight);
+}
+
+/* Unit after an xl number ("2.1 h") */
+.rr-stat__unit {
+  font-size: var(--rr-text-stat-sm-size);
+  line-height: 1;
+  font-weight: var(--rr-text-stat-sm-weight);
+  letter-spacing: 0;
+}
+
+/* Empty state in place of a number ("Not enough data yet") */
+.rr-stat__empty {
+  margin: var(--rr-space-1) 0 0;
+  font-size: var(--rr-text-stat-note-size);
+  line-height: var(--rr-text-stat-note-lh);
+  font-weight: var(--rr-text-stat-note-weight);
+  font-style: italic;
+  color: var(--rr-ink);
+}
+
+.rr-stat__helper {
+  margin: 2px 0 0;
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: var(--rr-text-meta-italic-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums;
+}
+
+.rr-stat__helper--lg {
+  font-size: var(--rr-text-body-italic-size);
+  line-height: var(--rr-text-body-italic-lh);
+}
+
+.rr-stat--end {
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* Two stats side by side between hairlines, split by a hairline */
+.rr-stat-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--rr-rule);
+  border-bottom: 1px solid var(--rr-rule);
+}
+
+.rr-stat-pair > .rr-stat {
+  padding: 10px 14px;
+}
+
+.rr-stat-pair > .rr-stat:first-child {
+  padding-left: 0;
+  padding-right: var(--rr-space-3);
+  border-right: 1px solid var(--rr-rule);
+}
+
+.rr-stat-pair > .rr-stat:last-child {
+  padding-right: 0;
+}
+
+/* Label left, value right, hairline under (Done by priority) */
+.rr-tally {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+  padding: var(--rr-space-2) 0;
+  border-bottom: 1px solid var(--rr-rule);
+  font-size: var(--rr-text-meta-size);
+  font-weight: 500;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.rr-tally strong {
+  font-weight: 700;
+  color: var(--rr-ink);
+}
+
+/* ---------- Charts (inline SVG) ---------- */
+/* Style SVG marks with these classes so no colour goes in markup. */
+.rr-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: inherit;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.rr-chart__caption {
+  margin: 6px 0 0;
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--rr-ink-2);
+}
+
+/* Hatch pattern pieces (inside <pattern id="rr-hatch">) */
+.rr-chart__hatch-bg { fill: var(--rr-ground); }
+.rr-chart__hatch-line {
+  stroke: var(--rr-ink);
+  stroke-width: 1.6;
+  stroke-opacity: var(--rr-hatch-opacity);
+}
+
+/* WeekBars */
+.rr-chart__bar--past { fill: url(#rr-hatch); stroke: var(--rr-ink); stroke-width: 1; }
+.rr-chart__bar--current { fill: var(--rr-ink); }
+.rr-chart__baseline { stroke: var(--rr-ink); stroke-width: 1; }
+.rr-chart__target { stroke: var(--rr-ink); stroke-width: 1.25; stroke-dasharray: 5 4; fill: none; }
+.rr-chart__target-label { font-size: var(--rr-text-label-size); font-style: italic; font-weight: 600; fill: var(--rr-ink); }
+.rr-chart__value { font-size: var(--rr-text-axis-size); font-weight: 600; fill: var(--rr-ink-2); }
+.rr-chart__value--on-ink { font-weight: 700; fill: var(--rr-on-ink); }
+.rr-chart__tick { font-size: var(--rr-text-label-size); font-weight: 600; fill: var(--rr-ink-2); }
+.rr-chart__month { font-size: var(--rr-text-axis-size); font-style: italic; font-weight: 500; fill: var(--rr-ink-2); }
+.rr-chart__tick--current,
+.rr-chart__month--current { font-weight: 700; fill: var(--rr-ink); }
+
+/* LayerBars + SVG progress tracks */
+.rr-chart__track { fill: var(--rr-wash); stroke: var(--rr-ink-2); stroke-width: 1; }
+.rr-chart__fill { fill: var(--rr-ink); }
+.rr-chart__series { font-size: var(--rr-text-meta-size); font-weight: 600; fill: var(--rr-ink); }
+.rr-chart__series-value { font-size: var(--rr-text-meta-italic-size); font-weight: 500; fill: var(--rr-ink-2); }
+.rr-chart__series-value tspan.rr-chart__strong { font-weight: 700; fill: var(--rr-ink); }
+
+/* ---------- TabBar ---------- */
+/* <nav class="rr-tabbar" aria-label="Main"><a class="rr-tabbar__tab" aria-current="page">Today</a>…</nav>
+   Quiet running foot: hairline on top, no panel, no icons. */
+.rr-tabbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) 0 calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
+  padding-bottom: max(var(--rr-tabbar-bottom), env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--rr-rule);
+  background-color: var(--rr-ground); /* same as page: hides scrolled content, not a panel */
+}
+
+.rr-tabbar__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 48px;
+  color: var(--rr-ink-2);
+  font-size: var(--rr-text-tab-size);
+  line-height: var(--rr-text-tab-lh);
+  font-weight: var(--rr-text-tab-weight);
+  letter-spacing: var(--rr-text-tab-tracking);
+  text-transform: uppercase;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Short rule above the label; visible only on the active tab */
+.rr-tabbar__tab::before {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background-color: transparent;
+}
+
+.rr-tabbar__tab[aria-current="page"] {
+  color: var(--rr-ink);
+  font-weight: var(--rr-text-tab-weight-active);
+}
+
+.rr-tabbar__tab[aria-current="page"]::before {
+  background-color: var(--rr-ink);
+}
