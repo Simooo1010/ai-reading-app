@@ -1,0 +1,991 @@
+/*
+ * Reading Room — print screen (SPEC.md §7.4). Imported ONLY by
+ * components/print/PrintClient.tsx, so no other screen loads it.
+ *
+ * Two parts:
+ * 1. Screen chrome (back link, check line, options, print button, page
+ *    captions): normal tokens only, like components.css.
+ * 2. The printed document (.rr-print-sheet): paper OUTPUT, not UI. It is
+ *    black ink on white paper, so it uses its own paper variables, defined
+ *    once below on the sheet. This is the documented exception in
+ *    README.md ("Print document: paper output, not UI"). The preview sheets
+ *    use the same variables, so the preview looks like the paper.
+ */
+
+/* ===================================================================
+ * 1. Screen chrome (tokens only)
+ * =================================================================== */
+
+.rr-print {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--rr-ground);
+  padding-bottom: max(var(--rr-space-5), env(safe-area-inset-bottom, 0px));
+}
+
+/* Same centred column as .rr-screen: 390 first, max 480 */
+.rr-print__chrome {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: calc(var(--rr-space-3) + env(safe-area-inset-top, 0px))
+    calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) 0
+    calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
+}
+
+.rr-print__nav {
+  display: flex;
+  margin: 0 0 var(--rr-space-2) calc(-1 * var(--rr-space-1));
+}
+
+.rr-print__back {
+  gap: 6px;
+}
+
+.rr-print__intro {
+  padding-top: 18px;
+}
+
+/* Smaller than .rr-display: this is a tool screen, the title is long */
+.rr-print__title {
+  margin: 0;
+  font-size: var(--rr-text-phase-size);
+  line-height: var(--rr-text-phase-lh);
+  font-weight: var(--rr-text-phase-weight);
+  letter-spacing: var(--rr-text-phase-tracking);
+  font-variation-settings: "opsz" 48;
+  color: var(--rr-ink);
+  overflow-wrap: break-word;
+}
+
+.rr-print__intro > .rr-author {
+  margin-top: 6px;
+}
+
+.rr-print__ready {
+  margin-top: var(--rr-space-4);
+}
+
+/* Status notice: a section opened by the ink rule + label (no box) */
+.rr-print-notice > .rr-body,
+.rr-print-notice > .rr-body-italic {
+  margin-top: 6px;
+}
+
+.rr-print-notice__list {
+  margin: 6px 0 0;
+  padding-left: 1.1em;
+  font-size: var(--rr-text-body-size);
+  line-height: var(--rr-text-body-lh);
+  color: var(--rr-ink);
+}
+
+.rr-print-notice__actions {
+  margin-top: var(--rr-space-3);
+}
+
+/* Check line */
+.rr-print-check__line {
+  margin: 6px 0 0;
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: var(--rr-text-meta-weight);
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums;
+}
+
+/* Failed page check: ink, bold, a dash in front (never colour only) */
+.rr-print-check__fail {
+  margin: var(--rr-space-2) 0 0;
+  padding-left: var(--rr-space-3);
+  border-left: 2px solid var(--rr-ink);
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: 700;
+  color: var(--rr-ink);
+}
+
+/* Options */
+.rr-print-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-4);
+}
+
+.rr-print-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-1);
+  min-width: 0;
+}
+
+.rr-print-field__label {
+  padding: 0;
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: 600;
+  color: var(--rr-ink);
+}
+
+.rr-print-field__unit {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--rr-ink-2);
+}
+
+.rr-print-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--rr-space-3);
+}
+
+/* Range: 44px hit area, wash track with an ink-2 hairline, ink thumb */
+.rr-print-range {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--rr-tap-min);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  color: var(--rr-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-print-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--rr-radius-sm);
+  background-color: var(--rr-wash);
+  border: 1px solid var(--rr-ink-2);
+}
+
+.rr-print-range::-moz-range-track {
+  height: 6px;
+  border-radius: var(--rr-radius-sm);
+  background-color: var(--rr-wash);
+  border: 1px solid var(--rr-ink-2);
+}
+
+.rr-print-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px; /* centred on the 4px track content box */
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--rr-ink);
+}
+
+.rr-print-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--rr-ink);
+}
+
+.rr-print-range:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+  border-radius: var(--rr-radius-sm);
+}
+
+.rr-print-number {
+  flex: 0 0 auto;
+  width: 4.5em;
+  text-align: right;
+}
+
+/* Font select: same field as .rr-input, full width */
+.rr-print-select {
+  width: 100%;
+  height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-3);
+  border: 1px solid var(--rr-ink-2);
+  border-radius: var(--rr-radius-md);
+  background-color: var(--rr-ground);
+  color: var(--rr-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-body-size); /* 18px: iOS does not zoom in */
+  font-weight: 600;
+}
+
+.rr-print-select:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+}
+
+/* Segmented control (radio group): ink rule outline, chosen = ink fill + check */
+.rr-print-seg {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.rr-print-seg > legend {
+  margin-bottom: var(--rr-space-1);
+}
+
+.rr-print-seg__options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--rr-ink);
+  border-radius: var(--rr-radius-md);
+  overflow: hidden;
+}
+
+.rr-print-seg__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-3);
+  font-size: var(--rr-text-button-size);
+  font-weight: var(--rr-text-button-weight);
+  color: var(--rr-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-print-seg__option + .rr-print-seg__option {
+  border-left: 1px solid var(--rr-ink);
+}
+
+.rr-print-seg__option input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  color: var(--rr-ink);
+  cursor: pointer;
+}
+
+.rr-print-seg__option:has(input:checked) {
+  background-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+}
+
+/* The chosen option also gets a check mark (never colour only) */
+.rr-print-seg__option:has(input:checked)::before {
+  content: "";
+  width: 4px;
+  height: 8px;
+  margin: 0 2px 3px 0;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(40deg);
+}
+
+.rr-print-seg__option:has(input:focus-visible) {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: -5px;
+}
+
+.rr-print-seg__option:has(input:checked:focus-visible) {
+  outline-color: var(--rr-on-ink);
+}
+
+/* Checkbox row */
+.rr-print-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--rr-space-3);
+  min-height: var(--rr-tap-min);
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: 600;
+  color: var(--rr-ink);
+  cursor: pointer;
+}
+
+.rr-print-checkbox input {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  color: var(--rr-ink);
+  accent-color: var(--rr-ink);
+  cursor: pointer;
+}
+
+.rr-print-checkbox input:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+}
+
+.rr-print-checkbox__note {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--rr-ink-2);
+}
+
+/* Print button + tip */
+.rr-print-go {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rr-space-2);
+}
+
+/* Preview area: wider than the chrome column on big screens (the sheets are
+   A4), always inside the screen width: never a horizontal page scroll. */
+.rr-print__preview {
+  width: 100%;
+  max-width: calc(210mm + 2 * var(--rr-page-gutter));
+  margin: var(--rr-space-5) auto 0;
+  padding: 0 calc(16px + env(safe-area-inset-right, 0px)) 0 calc(16px + env(safe-area-inset-left, 0px));
+  overflow-x: hidden;
+}
+
+.rr-print-preview__status {
+  margin: 0 0 var(--rr-space-3);
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: var(--rr-text-meta-italic-weight);
+  font-style: italic;
+  color: var(--rr-ink-2);
+  text-align: center;
+}
+
+.rr-print-pages {
+  --rr-print-scale: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rr-space-5);
+  width: 100%;
+}
+
+/* While the pages are built again, the old ones stay, quieter */
+.rr-print-pages[data-busy] {
+  opacity: 0.55;
+}
+
+.rr-print-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rr-space-2);
+}
+
+/* The scaled A4 sheet: the frame takes the scaled size, the sheet is scaled
+   inside it (layout stays at the real 210 x 297 mm, so measuring is exact). */
+.rr-print-page__frame {
+  width: calc(210mm * var(--rr-print-scale));
+  height: calc(297mm * var(--rr-print-scale));
+  overflow: hidden;
+  outline: 1px solid var(--rr-rule);
+}
+
+.rr-print-page--flow > .rr-print-page__frame {
+  height: calc(var(--rr-print-h, 297mm) * var(--rr-print-scale));
+}
+
+.rr-print-page__frame > .rr-print-sheet {
+  transform: scale(var(--rr-print-scale));
+  transform-origin: 0 0;
+}
+
+.rr-print-page__caption {
+  margin: 0;
+  font-size: var(--rr-text-label-size);
+  line-height: var(--rr-text-label-lh);
+  font-weight: 500;
+  font-style: italic;
+  color: var(--rr-ink-2);
+  font-variant-numeric: lining-nums tabular-nums;
+  text-align: center;
+}
+
+/* Hidden measurer: real page width, out of sight, adds no scroll area */
+.rr-print-measure-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.rr-print-sheet--measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: auto !important;
+}
+
+/* "Remove image" / "Restore image": screen only. The preview is scaled down,
+   so the button is scaled back up to keep a real 44px tap target. */
+.rr-print-imgtoggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  min-width: var(--rr-tap-min);
+  min-height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-3);
+  border: 1px solid var(--rr-ink-2);
+  border-radius: var(--rr-radius-md);
+  background-color: var(--rr-ground);
+  color: var(--rr-ink-2);
+  font-family: var(--rr-font-serif);
+  font-size: var(--rr-text-label-size);
+  line-height: 1;
+  font-weight: 600;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: scale(calc(1 / var(--rr-print-scale)));
+  transform-origin: 100% 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-print-imgtoggle:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+}
+
+.rr-print-imgtoggle--restore {
+  border-style: dashed;
+  font-style: italic;
+}
+
+/* ===================================================================
+ * 2. The printed document: paper output, not UI.
+ * These are the ONLY colour literals outside tokens.css (README.md,
+ * "Print document: paper output, not UI").
+ * =================================================================== */
+
+.rr-print-sheet {
+  --rr-print-paper: #ffffff;  /* paper */
+  --rr-print-ink: #000000;    /* text */
+  --rr-print-ink-2: #444444;  /* byline, captions, notes */
+  --rr-print-rule: #b3b3b3;   /* rules, table lines, note borders */
+  --rr-print-wash: #f2f2f2;   /* code block background */
+
+  /* Fonts (next/font variables from components/print/fonts.ts) */
+  --rr-print-serif: var(--rr-print-font-serif, "Lora"), Georgia, serif;
+  --rr-print-sans: var(--rr-print-font-sans, "Inter"), "Helvetica Neue", Arial, sans-serif;
+  --rr-print-mono: var(--rr-print-font-mono, "JetBrains Mono"), "Courier New", monospace;
+  --rr-print-times: "Times New Roman", Times, "Liberation Serif", serif;
+  --rr-print-body-font: var(--rr-print-serif);
+  --rr-print-head-font: var(--rr-print-sans);
+
+  --rr-print-content-h: calc(297mm - 2 * var(--rr-print-margin, 25mm));
+
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  padding: var(--rr-print-margin, 25mm);
+  overflow: visible;
+  background-color: var(--rr-print-paper);
+  color: var(--rr-print-ink);
+  font-family: var(--rr-print-body-font);
+  font-size: var(--rr-print-size, 12pt);
+  line-height: var(--rr-print-leading, 1.6);
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: normal;
+  letter-spacing: 0;
+  text-align: left;
+  overflow-wrap: break-word;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  -webkit-font-smoothing: auto;
+}
+
+.rr-print-sheet__body {
+  height: 100%;
+}
+
+/* A page holding a block taller than one page: no fixed height, the browser
+   breaks it across sheets; the margin is repeated on every sheet. */
+.rr-print-sheet--flow {
+  height: auto;
+  min-height: 297mm;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.rr-print-sheet--flow > .rr-print-sheet__body {
+  height: auto;
+}
+
+/* Every block holds its own margins (flow-root), so heights add up exactly */
+.rr-print-block {
+  display: flow-root;
+  break-inside: avoid;
+}
+
+.rr-print-sheet--flow .rr-print-block:not(.rr-print-block--atomic) {
+  break-inside: auto;
+}
+
+/* Inside a flow page the browser breaks the sheets: keep the same rules */
+.rr-print-sheet--flow .rr-print-block--keep {
+  break-after: avoid;
+}
+
+.rr-print-sheet--flow p,
+.rr-print-sheet--flow li {
+  orphans: 2;
+  widows: 2;
+}
+
+/* A list packed item by item: one <ol start>/<ul> per block, the list's
+   space only before the first and after the last item */
+.rr-print-sheet .rr-print-block--li > ol,
+.rr-print-sheet .rr-print-block--li > ul {
+  margin: 0;
+}
+
+.rr-print-block--li:not(.rr-print-block--li-first) {
+  padding-top: 0.3em;
+}
+
+.rr-print-sheet .rr-print-block--li-last > ol,
+.rr-print-sheet .rr-print-block--li-last > ul {
+  margin-bottom: 0.85em;
+}
+
+.rr-print-block--removed {
+  position: relative;
+  height: 0;
+}
+
+/* Fonts chosen by the user (the code stays monospace) */
+.rr-print-doc[data-format="monospace"] .rr-print-sheet {
+  --rr-print-body-font: var(--rr-print-mono);
+  --rr-print-head-font: var(--rr-print-mono);
+}
+
+.rr-print-doc[data-font="sans"] .rr-print-sheet {
+  --rr-print-body-font: var(--rr-print-sans);
+  --rr-print-head-font: var(--rr-print-sans);
+}
+
+.rr-print-doc[data-font="serif"] .rr-print-sheet {
+  --rr-print-body-font: var(--rr-print-serif);
+  --rr-print-head-font: var(--rr-print-serif);
+}
+
+.rr-print-doc[data-font="times"] .rr-print-sheet {
+  --rr-print-body-font: var(--rr-print-times);
+  --rr-print-head-font: var(--rr-print-times);
+}
+
+.rr-print-doc[data-font="mono"] .rr-print-sheet {
+  --rr-print-body-font: var(--rr-print-mono);
+  --rr-print-head-font: var(--rr-print-mono);
+}
+
+/* ---------- Default format ---------- */
+.rr-print-sheet p,
+.rr-print-sheet ul,
+.rr-print-sheet ol,
+.rr-print-sheet blockquote,
+.rr-print-sheet figure,
+.rr-print-sheet pre,
+.rr-print-sheet hr,
+.rr-print-sheet .rr-print-table,
+.rr-print-sheet .rr-print-note,
+.rr-print-sheet .rr-print-pullquote {
+  margin: 0 0 0.85em;
+}
+
+.rr-print-sheet a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--rr-print-rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+.rr-print-sheet h1,
+.rr-print-sheet h2,
+.rr-print-sheet h3,
+.rr-print-sheet h4,
+.rr-print-sheet h5,
+.rr-print-sheet h6 {
+  margin: 1.3em 0 0.45em;
+  font-family: var(--rr-print-head-font);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--rr-print-ink);
+}
+
+.rr-print-sheet .rr-print-h--1,
+.rr-print-sheet .rr-print-h--2 { font-size: 1.5em; }
+.rr-print-sheet .rr-print-h--3 { font-size: 1.25em; }
+.rr-print-sheet .rr-print-h--4 { font-size: 1.1em; }
+.rr-print-sheet .rr-print-h--5,
+.rr-print-sheet .rr-print-h--6 { font-size: 1em; }
+
+.rr-print-sheet ul,
+.rr-print-sheet ol {
+  padding-left: 1.6em;
+}
+
+.rr-print-sheet li + li {
+  margin-top: 0.3em;
+}
+
+.rr-print-sheet li > p,
+.rr-print-sheet blockquote > p {
+  margin: 0 0 0.5em;
+}
+
+.rr-print-sheet li > :last-child,
+.rr-print-sheet blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.rr-print-sheet blockquote {
+  padding-left: 1em;
+  border-left: 2px solid var(--rr-print-rule);
+  font-style: italic;
+}
+
+.rr-print-sheet .rr-print-pullquote {
+  padding: 0.6em 0;
+  border-top: 1px solid var(--rr-print-rule);
+  border-bottom: 1px solid var(--rr-print-rule);
+  font-size: 1.2em;
+  font-style: italic;
+  text-align: center;
+}
+
+.rr-print-sheet hr {
+  height: 0;
+  margin-top: 1.2em;
+  margin-bottom: 1.2em;
+  border: 0;
+  border-top: 1px solid var(--rr-print-rule);
+}
+
+.rr-print-sheet .rr-print-figure {
+  position: relative;
+  text-align: center;
+}
+
+.rr-print-sheet .rr-print-figure img {
+  display: block;
+  max-width: 100%;
+  /* Never taller than the text area: a figure always fits on one page */
+  max-height: calc(var(--rr-print-content-h) * 0.8);
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+}
+
+.rr-print-sheet figcaption,
+.rr-print-sheet .rr-print-caption {
+  margin-top: 0.4em;
+  font-family: var(--rr-print-head-font);
+  font-size: 0.8em;
+  line-height: 1.4;
+  font-style: italic;
+  color: var(--rr-print-ink-2);
+  text-align: center;
+}
+
+.rr-print-sheet img {
+  max-width: 100%;
+  height: auto;
+}
+
+.rr-print-sheet pre,
+.rr-print-sheet code,
+.rr-print-sheet kbd,
+.rr-print-sheet samp {
+  font-family: var(--rr-print-mono);
+}
+
+/* Code keeps every space; long lines wrap instead of being cut */
+.rr-print-sheet .rr-print-code {
+  padding: 0.7em 0.8em;
+  background-color: var(--rr-print-wash);
+  font-size: 0.82em;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 4;
+}
+
+.rr-print-sheet .rr-print-table {
+  max-width: 100%;
+}
+
+.rr-print-sheet table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+
+.rr-print-sheet th,
+.rr-print-sheet td {
+  padding: 0.3em 0.5em;
+  border-bottom: 1px solid var(--rr-print-rule);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.rr-print-sheet th {
+  font-family: var(--rr-print-head-font);
+  font-weight: 700;
+}
+
+.rr-print-sheet caption {
+  padding-bottom: 0.4em;
+  font-size: 0.9em;
+  font-style: italic;
+  color: var(--rr-print-ink-2);
+}
+
+.rr-print-sheet math {
+  max-width: 100%;
+}
+
+.rr-print-sheet math[display="block"] {
+  display: block;
+  margin: 0.4em 0;
+}
+
+/* Embeds and parts we could not print: a ruled note with the link as text */
+.rr-print-sheet .rr-print-note {
+  padding: 0.5em 0.7em;
+  border: 1px solid var(--rr-print-rule);
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.rr-print-note__label {
+  margin: 0 !important;
+  font-family: var(--rr-print-head-font);
+  color: var(--rr-print-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.rr-print-note__text {
+  margin: 0.4em 0 0 !important;
+}
+
+/* Document header and source footer */
+.rr-print-dochead {
+  margin: 0 0 1.4em;
+  padding-bottom: 0.9em;
+  border-bottom: 1px solid var(--rr-print-rule);
+}
+
+.rr-print-sheet .rr-print-dochead__title {
+  margin: 0 0 0.3em;
+  font-size: 2em;
+  line-height: 1.15;
+}
+
+.rr-print-dochead__subtitle {
+  margin: 0 0 0.5em !important;
+  font-size: 1.15em;
+  font-style: italic;
+  color: var(--rr-print-ink-2);
+}
+
+.rr-print-dochead__byline,
+.rr-print-dochead__url {
+  margin: 0 !important;
+  font-family: var(--rr-print-head-font);
+  font-size: 0.8em;
+  line-height: 1.45;
+  color: var(--rr-print-ink-2);
+}
+
+.rr-print-dochead__url,
+.rr-print-docfoot__url {
+  overflow-wrap: anywhere;
+}
+
+.rr-print-docfoot {
+  margin-top: 1.6em;
+  padding-top: 0.7em;
+  border-top: 1px solid var(--rr-print-rule);
+  font-family: var(--rr-print-head-font);
+  font-size: 0.8em;
+  line-height: 1.45;
+  color: var(--rr-print-ink-2);
+}
+
+.rr-print-docfoot p {
+  margin: 0 !important;
+}
+
+.rr-print-docfoot__title {
+  font-weight: 700;
+  color: var(--rr-print-ink);
+}
+
+/* ---------- Monospace format (typewriter draft) ---------- */
+.rr-print-doc[data-format="monospace"] .rr-print-sheet h1,
+.rr-print-doc[data-format="monospace"] .rr-print-sheet h2,
+.rr-print-doc[data-format="monospace"] .rr-print-sheet h3,
+.rr-print-doc[data-format="monospace"] .rr-print-sheet h4,
+.rr-print-doc[data-format="monospace"] .rr-print-sheet h5,
+.rr-print-doc[data-format="monospace"] .rr-print-sheet h6 {
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* "## " markers come from CSS, so they are not counted as words */
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-h--1::before { content: "# "; }
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-h--2::before { content: "## "; }
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-h--3::before { content: "### "; }
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-h--4::before,
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-h--5::before,
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-h--6::before { content: "#### "; }
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-dochead__title {
+  font-size: 1.25em;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-dochead__title::before {
+  content: none;
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet blockquote {
+  border-left-style: dashed;
+  font-style: normal;
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet ul {
+  list-style-type: "- ";
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet hr {
+  border: 0;
+  text-align: center;
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet hr::after {
+  content: "* * *";
+  color: var(--rr-print-ink-2);
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-figure img {
+  filter: grayscale(100%);
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-code {
+  background-color: transparent;
+  border: 1px dashed var(--rr-print-rule);
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet table {
+  font-size: 0.8em;
+}
+
+.rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-pullquote {
+  font-size: 1em;
+}
+
+/* ===================================================================
+ * Print: only the pages, at real A4 size, one sheet per page.
+ * =================================================================== */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+  }
+
+  /* Whatever wraps the print screen (layouts) adds no space and nothing else prints */
+  body :has(.rr-print) {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+  }
+
+  body :has(.rr-print) > :not(:has(.rr-print)):not(.rr-print),
+  body > :not(:has(.rr-print)):not(.rr-print) {
+    display: none !important;
+  }
+
+  .rr-print {
+    min-height: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .rr-print__chrome,
+  .rr-print-preview__status,
+  .rr-print-page__caption,
+  .rr-print-measure-box,
+  .rr-print-imgtoggle {
+    display: none !important;
+  }
+
+  .rr-print__preview {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .rr-print-pages,
+  .rr-print-pages[data-busy] {
+    display: block;
+    gap: 0;
+    opacity: 1;
+  }
+
+  .rr-print-page {
+    display: block;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .rr-print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .rr-print-page:not(.rr-print-page--flow) {
+    break-inside: avoid;
+  }
+
+  .rr-print-page__frame {
+    width: auto !important;
+    height: auto !important;
+    overflow: visible;
+    outline: 0;
+  }
+
+  .rr-print-page__frame > .rr-print-sheet {
+    transform: none !important;
+  }
+}

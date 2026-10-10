@@ -4,98 +4,15 @@
 // source side ("found") and the output side ("printed").
 
 import { JSDOM } from "jsdom";
-import { escapeHtml, NON_TEXT_TAGS } from "./sanitize";
+import { escapeHtml } from "./sanitize";
+import { countNodeWords, countWords } from "./text";
+import { TOLERANCE } from "./format";
 import type { FidelityCheck, PrintElement } from "./types";
 import { placeholderText } from "./types";
 
-/** Tags that never add visible text (content skipped by the counter). */
-const SKIP_TEXT = new Set<string>([...NON_TEXT_TAGS, "input", "embed", "img", "link", "meta", "base", "source", "track"]);
-
-/** Tags that start a new line of text (a word boundary around them). */
-const BLOCK_BOUNDARY = new Set<string>([
-  "address", "article", "aside", "blockquote", "caption", "dd", "details", "dialog", "div", "dl", "dt",
-  "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header",
-  "hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table", "tbody", "td",
-  "tfoot", "th", "thead", "tr", "ul", "body", "html", "center", "menu", "mtd", "mtr", "mtable",
-]);
-
-const ELEMENT_NODE = 1;
-const TEXT_NODE = 3;
-const CDATA_NODE = 4;
-
-/**
- * Visible text of a DOM subtree, with a separator at every block boundary and
- * <br> (a space by default; code blocks use "\n").
- * Skips script/style/svg/iframe/... (NON_TEXT_TAGS). Iterative (no recursion limit).
- */
-export function visibleText(root: Node, boundary: " " | "\n" = " "): string {
-  const parts: string[] = [];
-  const pushBoundary = () => {
-    if (boundary === " ") {
-      parts.push(" ");
-      return;
-    }
-    const last = parts.length ? parts[parts.length - 1] : "";
-    if (last && !last.endsWith("\n")) parts.push("\n");
-  };
-  // Stack of nodes; a `null` marks "push a boundary".
-  const stack: (Node | null)[] = [root];
-  while (stack.length) {
-    const n = stack.pop();
-    if (n === null) {
-      pushBoundary();
-      continue;
-    }
-    if (n === undefined) continue;
-    const type = n.nodeType;
-    if (type === TEXT_NODE || type === CDATA_NODE) {
-      const v = n.nodeValue ?? "";
-      if (v) parts.push(v);
-      continue;
-    }
-    if (type === ELEMENT_NODE) {
-      const tag = (n as Element).localName.toLowerCase();
-      if (SKIP_TEXT.has(tag)) continue;
-      if (tag === "br") {
-        parts.push(boundary);
-        continue;
-      }
-      if (BLOCK_BOUNDARY.has(tag)) {
-        pushBoundary();
-        stack.push(null);
-      }
-    } else if (type !== 9 && type !== 11) {
-      continue; // comments, processing instructions...
-    }
-    const kids = n.childNodes;
-    for (let i = kids.length - 1; i >= 0; i--) stack.push(kids[i]);
-  }
-  return parts.join("");
-}
-
-const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu;
-const WORD = /[\p{L}\p{N}\p{M}]+(?:['’‐‑-][\p{L}\p{N}\p{M}]+)*/gu;
-
-/**
- * Unicode-aware word count. A word is a run of letters/numbers (marks
- * included), joined by inner apostrophes or hyphens ("don't", "state-of-the-art").
- * Each Chinese/Japanese character counts as one word.
- * Linear time: the joining characters are not word characters, so there is no backtracking.
- */
-export function countWords(text: string): number {
-  if (!text) return 0;
-  let count = 0;
-  CJK.lastIndex = 0;
-  while (CJK.exec(text) !== null) count++;
-  const rest = count > 0 ? text.replace(CJK, " ") : text;
-  WORD.lastIndex = 0;
-  while (WORD.exec(rest) !== null) count++;
-  return count;
-}
-
-export function countNodeWords(node: Node): number {
-  return countWords(visibleText(node));
-}
+// Moved to client-safe files (no jsdom); re-exported here so old imports keep working.
+export { countNodeWords, countWords, visibleText, NON_TEXT_TAGS } from "./text";
+export { formatCheckLine, formatNumber, HIDDEN_NOTE_MIN, LOW_COVERAGE, TOLERANCE } from "./format";
 
 /** Counts collected while converting the content area. */
 export interface ConvertReport {
@@ -195,12 +112,8 @@ function countKept(elements: PrintElement[], dedicated: PrintElement["type"], ta
   return n;
 }
 
-export const TOLERANCE = 0.02;
-/** Hidden words below this are not mentioned in the check line (tiny tooltips, labels). */
-export const HIDDEN_NOTE_MIN = 20;
 /** Hidden words from which the result becomes a 'warning' (also needs >= 2 % of the words found). */
 export const HIDDEN_WARN_MIN = 100;
-export const LOW_COVERAGE = 0.6;
 
 export function computeCheck(input: {
   wordsFound: number;
@@ -267,60 +180,6 @@ export function emptyCheck(wordsPage = 0, details: string[] = []): FidelityCheck
     withinTolerance: false,
     details,
   };
-}
-
-/** 8651 -> "8,651" (fixed format, not locale-dependent). */
-export function formatNumber(n: number): string {
-  const s = String(Math.round(Math.abs(n)));
-  let out = "";
-  for (let i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 === 0) out += ",";
-    out += s[i];
-  }
-  return (n < 0 ? "-" : "") + out;
-}
-
-/**
- * The check line for the UI, in simple English. It never says the check
- * passed when `withinTolerance` is false.
- */
-export function formatCheckLine(check: FidelityCheck): string {
-  const parts: string[] = [];
-  parts.push(`Words: ${formatNumber(check.wordsFound)} found, ${formatNumber(check.wordsPrinted)} printed.`);
-  parts.push(`Images: ${check.imagesKept} of ${check.imagesFound}.`);
-  parts.push(`Tables: ${check.tablesKept} of ${check.tablesFound}.`);
-  if (check.codeFound > 0 || check.codeKept > 0) parts.push(`Code blocks: ${check.codeKept} of ${check.codeFound}.`);
-  if (check.embedsPlaceholdered > 0) {
-    parts.push(
-      `${check.embedsPlaceholdered} video${check.embedsPlaceholdered === 1 ? " or embed is" : "s or embeds are"} shown as links.`,
-    );
-  }
-  if (check.skippedUnsupported > 0) {
-    parts.push(
-      `${check.skippedUnsupported} part${check.skippedUnsupported === 1 ? "" : "s"} of the page could not be printed and ${check.skippedUnsupported === 1 ? "is" : "are"} marked in the text.`,
-    );
-  }
-  if (!check.withinTolerance) {
-    const diff = Math.round(Math.abs(1 - check.ratio) * 100);
-    if (check.wordsFound === 0) {
-      parts.push("Check failed: we found no text to compare.");
-    } else if (check.ratio < 1) {
-      parts.push(`Check failed: about ${diff}% of the words are not in the printout.`);
-    } else {
-      parts.push(`Check failed: the printout has about ${diff}% more words than we found.`);
-    }
-  } else if (check.imagesKept < check.imagesFound || check.tablesKept < check.tablesFound || check.codeKept < check.codeFound) {
-    parts.push("Check: all words are here, but some images, tables or code blocks are missing.");
-  } else {
-    parts.push("Check passed.");
-  }
-  if (check.wordsHidden >= HIDDEN_NOTE_MIN) {
-    parts.push(`${formatNumber(check.wordsHidden)} words in collapsed or hidden parts of the page are not printed.`);
-  }
-  if (check.wordsPage > 0 && check.coverage < LOW_COVERAGE) {
-    parts.push(`We may have missed part of this page: the printout has ${Math.round(check.coverage * 100)}% of the page text.`);
-  }
-  return parts.join(" ");
 }
 
 // ─── Content-based detection ─────────────────────────────────────────

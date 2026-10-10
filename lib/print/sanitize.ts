@@ -5,6 +5,7 @@
 // Relative URLs are made absolute against the page URL.
 
 import sanitizeHtml from "sanitize-html";
+import { NON_TEXT_TAGS } from "./text";
 
 export const INLINE_TAGS = [
   "a",
@@ -104,37 +105,8 @@ export const BLOCK_TAGS = [
   "dd",
 ] as const;
 
-/**
- * Tags whose CONTENT is dropped together with the tag (not visible text, or
- * unsafe). The same list is used by the word counter (lib/print/fidelity.ts),
- * so "found" and "printed" are measured the same way.
- */
-export const NON_TEXT_TAGS = [
-  "script",
-  "style",
-  "noscript",
-  "template",
-  "textarea",
-  "option",
-  "select",
-  "button",
-  "svg",
-  "iframe",
-  "frame",
-  "frameset",
-  "video",
-  "audio",
-  "object",
-  "canvas",
-  "head",
-  "title",
-  "xmp",
-  "plaintext",
-  "noembed",
-  "noframes",
-  "annotation",
-  "annotation-xml",
-] as const;
+// NON_TEXT_TAGS lives in ./text (client-safe, shared with the word counter).
+export { NON_TEXT_TAGS };
 
 const MATH_ATTRS = [
   "display",

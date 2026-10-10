@@ -135,3 +135,19 @@ One pattern id per page: if two charts need hatching, give each its own id and s
 - [ ] Visible `:focus-visible` (ink outline comes from `components.css`); motion off under `prefers-reduced-motion`.
 - [ ] UI copy in simple English (B1), short labels.
 - [ ] Add the class to `components.css` with the `rr-` prefix and a row to the table above.
+
+## Print screen (`print.css`)
+
+Loaded only by `components/print/PrintClient.tsx` (the print page), never by Today, Path or Progress. Its fonts (Inter, Lora, JetBrains Mono, from `components/print/fonts.ts`) load only there too.
+
+| Class | Use |
+|---|---|
+| `.rr-print` + `__chrome`, `__nav`, `__back`, `__intro`, `__title`, `__ready`, `__preview` | Page shell: chrome in the 480 column, preview up to A4 width (never a horizontal scroll) |
+| `.rr-print-notice` (+ `__list`, `__actions`) | Status notice: `.rr-section` with an ink label (paywalled, too short, blocked, warnings) |
+| `.rr-print-check__line`, `.rr-print-check__fail` | Check line; a failed page check is bold ink with an ink bar on the left (not colour only) |
+| `.rr-print-controls`, `.rr-print-field` (`__label`, `__unit`, `__row`), `.rr-print-range`, `.rr-print-number`, `.rr-print-select`, `.rr-print-seg` (`__options`, `__option`), `.rr-print-checkbox` (`__note`) | Print options: 44px range, field, select, segmented radio group (chosen = ink fill + check mark), checkbox row |
+| `.rr-print-go` | Print button + tip |
+| `.rr-print-pages`, `.rr-print-page` (`--flow`), `__frame`, `__caption`, `.rr-print-preview__status` | Preview: A4 sheets scaled to the screen (`--rr-print-scale`), "Page 2 of 7" under each sheet (not printed) |
+| `.rr-print-imgtoggle` (`--restore`) | "Remove image" / "Restore image" on a preview image: scaled back up to a real 44px target, not printed |
+
+**Print document: paper output, not UI.** The printed sheet (`.rr-print-sheet` and everything in it: `.rr-print-block`, `.rr-print-dochead`, `.rr-print-docfoot`, `.rr-print-note`, `.rr-print-code`, `.rr-print-table`, `.rr-print-figure`, ...) is what comes out of the printer, so it is black ink on white paper, not the two-colour UI. It uses its own variables, defined once on `.rr-print-sheet` in `print.css`: `--rr-print-paper` (white), `--rr-print-ink` (black), `--rr-print-ink-2` (dark grey), `--rr-print-rule` (grey rules), `--rr-print-wash` (code background). These are the only colour literals outside `tokens.css`, and only paper may use them; every UI element (chrome, captions, buttons) stays on the normal tokens. The preview sheets use the same variables, so the preview looks like the paper. Formats: Default (Lora text, Inter headings) and Monospace (JetBrains Mono, typewriter draft), switched by `data-format` / `data-font` on `.rr-print-doc`.
