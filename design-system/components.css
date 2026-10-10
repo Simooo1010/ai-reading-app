@@ -1220,3 +1220,68 @@
 
 /* Loading block the size of the weekly chart */
 .rr-skeleton--chart { height: 182px; }
+
+/* ---------- Sign in (login form, text field) ---------- */
+/* Not in the boards: built from the checklist. Tokens only, serif, hairline
+   under the field instead of a box, 44px+ tap targets. Shares .rr-field and
+   .rr-field__error with the Progress target form; login-only rules are
+   scoped under .rr-login. */
+.rr-login {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-5);
+  max-width: 100%;
+}
+
+.rr-login__actions {
+  display: flex;
+}
+
+.rr-login .rr-field {
+  gap: var(--rr-space-2);
+}
+
+.rr-login .rr-field__label {
+  font-size: var(--rr-text-label-size);
+  line-height: var(--rr-text-label-lh);
+  font-weight: var(--rr-text-label-weight);
+  letter-spacing: var(--rr-text-label-tracking);
+  text-transform: uppercase;
+  font-style: italic;
+  color: var(--rr-ink);
+}
+
+/* Text field: ground fill, ink hairline under, 48px tall (>= tap-min). */
+.rr-field__input {
+  display: block;
+  width: 100%;
+  min-height: calc(var(--rr-tap-min) + var(--rr-space-1));
+  margin: 0;
+  padding: var(--rr-space-2) var(--rr-space-1);
+  border: 0;
+  border-bottom: 1px solid var(--rr-ink-2);
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--rr-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-body-size); /* >= 16px: no zoom on iPhone */
+  line-height: var(--rr-text-body-lh);
+  font-weight: var(--rr-text-body-weight);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.rr-field__input:focus {
+  outline: none;
+}
+
+.rr-field__input:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+  border-radius: var(--rr-radius-sm);
+}
+
+.rr-field__input[aria-invalid="true"] {
+  border-bottom-color: var(--rr-ink);
+  border-bottom-width: 2px;
+}

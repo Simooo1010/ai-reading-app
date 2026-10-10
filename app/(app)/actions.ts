@@ -3,8 +3,10 @@
 // Server actions for Today and Path. Each one changes only `Status`
 // (and `Done on`) through lib/notion.ts, then expires the "items" cache so
 // the page re-render in the same response shows the new data.
+// Every action checks the auth cookie first (proxy.ts checks it too).
 
 import { updateTag } from "next/cache";
+import { requireAuth } from "@/lib/auth";
 import {
   ITEMS_TAG,
   isPageId,
@@ -16,6 +18,8 @@ import type { Status } from "@/lib/types";
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 async function setStatus(id: unknown, status: Status): Promise<ActionResult> {
+  const auth = await requireAuth();
+  if (!auth.ok) return auth;
   if (!isPageId(id)) {
     return { ok: false, error: "This item is not valid. Please reload." };
   }
@@ -58,6 +62,8 @@ export async function undoSkip(
   id: string,
   previous: string,
 ): Promise<ActionResult> {
+  const auth = await requireAuth();
+  if (!auth.ok) return auth;
   if (previous !== "Reading" && previous !== "To read") {
     return { ok: false, error: "Could not undo. Please reload." };
   }

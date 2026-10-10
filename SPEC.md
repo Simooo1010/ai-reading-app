@@ -169,6 +169,10 @@ The controls look like the rest of this app. Pressroom's own styling is not copi
 
 ## 8. Access
 - One password gate: form → compare with `APP_PASSWORD` on the server → set an httpOnly, secure cookie (30 days). All pages and server actions check it.
+- Built (step 5): the cookie `rr_auth` holds a signed token (`v1.<expiry>.<HMAC-SHA256>`), never the password. The signing key comes from `APP_PASSWORD`, so **changing `APP_PASSWORD` logs everyone out**. Cookie: httpOnly, secure in production, SameSite Lax, 30 days.
+- `proxy.ts` (Next.js 16 name for middleware) sends every request without a valid cookie to `/login?next=…` (only same-site paths, default `/today`); server actions are refused, not run. Each server action and each data read also checks the cookie.
+- Fail closed: if `APP_PASSWORD` is not set, nobody can sign in.
+- Login screen: label "Sign in", line "Enter the password to open your reading list.", field "Password", button "Enter". Wrong password: "That password is not right. Try again." After 5 wrong tries in 15 minutes: "Too many tries. Wait a few minutes." (best effort: the count is per server instance and resets on a cold start). A wrong try always takes at least 0.4 s.
 
 ## 9. Design
 - Visual model: the Reading Room design system (`design-system/`). Mobile-first (iPhone width first): one centred column, fluid up to 480 px, the same column on all widths (no separate desktop layout).
