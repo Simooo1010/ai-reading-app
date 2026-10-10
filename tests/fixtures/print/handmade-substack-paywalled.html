@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- HAND-MADE TEST FIXTURE (not a real page). Minimal copy of Substack's real
+     paywall markup: JSON-LD isAccessibleForFree=false, .paywall-jump inside
+     the free body, and the .paywall block with "This post is for paid
+     subscribers" after the free preview. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A Paid Post - Example Letters</title>
+<link rel="preconnect" href="https://substackcdn.com">
+<meta property="og:title" content="A Paid Post">
+<meta property="og:site_name" content="Example Letters">
+<meta name="author" content="Test Author">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"A Paid Post","description":"Only the start is free","datePublished":"2025-03-01T10:00:00+00:00","isAccessibleForFree":false,"author":[{"@type":"Person","name":"Test Author"}],"publisher":{"@type":"Organization","name":"Example Letters"}}</script>
+</head>
+<body>
+<div class="single-post-container" role="main"><article class="typography newsletter-post post">
+<div class="post-header"><h1 class="post-title published">A Paid Post</h1><h3 class="subtitle">Only the start is free</h3></div>
+<div class="available-content"><div class="body markup" dir="auto">
+<p>This is the first free paragraph of the preview. It has a few words so we can count them.</p>
+<p>This is the second free paragraph. The writer sets up the main idea here.</p>
+<p>Third paragraph: the last part that everyone can read.</p>
+<div class="paywall-jump" data-component-name="PaywallToDOM"></div>
+</div></div>
+<div class="paywall" data-component-name="Paywall"><div class="paywall-content">
+<h2 class="paywall-title">This post is for paid subscribers</h2>
+<div class="paywall-cta"><a class="button primary" href="https://example.substack.com/subscribe">Subscribe</a></div>
+<div class="paywall-login">Already a paid subscriber? <a href="https://example.substack.com/sign-in">Sign in</a></div>
+</div></div>
+</article></div>
+<script>window._preloads = {"post":{"audience":"only_paid"}}</script>
+</body>
+</html>
