@@ -190,7 +190,7 @@ describe("loadPrintable: documents", () => {
     expect(s.extractCalls[0].opts.expectedMinutes).toBeUndefined();
   });
 
-  it.each<PrintStatus>(["ok", "warning", "paywalled", "too-short"])("status %s is returned and cached", async (status) => {
+  it.each<PrintStatus>(["ok", "warning", "paywalled"])("status %s is returned and cached", async (status) => {
     const s = setup({ status });
     const a = await loadPrintable(item("https://example.com/p"), s.deps);
     const b = await loadPrintable(item("https://example.com/p"), s.deps);
@@ -199,7 +199,7 @@ describe("loadPrintable: documents", () => {
     expect(s.pageCalls).toHaveLength(1); // second load is a cache hit
   });
 
-  it.each<PrintStatus>(["blocked", "failed"])("status %s is returned but NOT cached", async (status) => {
+  it.each<PrintStatus>(["blocked", "failed", "too-short"])("status %s is returned but NOT cached", async (status) => {
     const s = setup({ status });
     const a = await loadPrintable(item("https://example.com/p"), s.deps);
     await loadPrintable(item("https://example.com/p"), s.deps);

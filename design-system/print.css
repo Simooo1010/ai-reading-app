@@ -816,6 +816,19 @@
   overflow-wrap: anywhere;
 }
 
+/* Printed note on a partial printout (paywalled or very short source): the
+   paper must say it is not the whole text. A word, a rule and bold type, not colour. */
+.rr-print-partial {
+  margin: 0.6em 0 0 !important;
+  padding: 0.35em 0.6em;
+  border: 1px solid var(--rr-print-ink);
+  font-family: var(--rr-print-head-font);
+  font-size: 0.85em;
+  line-height: 1.45;
+  font-weight: 700;
+  color: var(--rr-print-ink);
+}
+
 .rr-print-docfoot {
   margin-top: 1.6em;
   padding-top: 0.7em;

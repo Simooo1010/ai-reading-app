@@ -100,6 +100,7 @@ export default function PrintClient({
       doc,
       fallbackTitle: item.title,
       fallbackAuthor: item.author,
+      partialNote: partial ? result.message : undefined,
       traits: { keepWithNext: true, breakable: false, atomic: true },
     });
     const els = doc.elements;
@@ -146,10 +147,11 @@ export default function PrintClient({
       fallbackTitle: item.title,
       fallbackAuthor: item.author,
       fallbackUrl: item.link,
+      partialNote: partial ? result.message : undefined,
       traits: { keepWithNext: false, breakable: false, atomic: true },
     });
     return out;
-  }, [doc, printable, options, item.title, item.author, item.link]);
+  }, [doc, printable, options, item.title, item.author, item.link, partial, result.message]);
 
   const blocksKey = useMemo(() => blocks.map((b) => b.id).join(","), [blocks]);
 

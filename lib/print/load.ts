@@ -45,8 +45,13 @@ export const LOAD_MESSAGES = {
   notText: "We could not read this page. Open the source instead.",
 } as const;
 
-/** Only these results are kept in the cache. 'blocked' and 'failed' are tried again next time. */
-const CACHEABLE: ReadonlySet<PrintStatus> = new Set<PrintStatus>(["ok", "warning", "paywalled", "too-short"]);
+/**
+ * Only these results are kept in the cache. 'blocked', 'failed' and 'too-short'
+ * are tried again next time: a short answer can be a temporary page (a
+ * challenge, a script shell that did not load), and SPEC §7.4 says a failed
+ * parse is not cached.
+ */
+const CACHEABLE: ReadonlySet<PrintStatus> = new Set<PrintStatus>(["ok", "warning", "paywalled"]);
 
 type Cached = Extract<PrintLoad, { kind: "document" | "open-pdf" }>;
 
@@ -57,7 +62,9 @@ export function isCacheableLoad(value: Cached): boolean {
 }
 
 /** One cache per server instance (best effort on serverless, see cache.ts). */
-const sharedCache: PrintCache<Cached> = createPrintCache<Cached>({ isCacheable: isCacheableLoad });
+// A parsed article can be large and jsdom needs a lot of memory for big pages
+// (up to ~1 GB at the peak), so keep the number of cached documents small.
+const sharedCache: PrintCache<Cached> = createPrintCache<Cached>({ isCacheable: isCacheableLoad, maxEntries: 30 });
 
 export type PrintPageFetch = (url: string) => Promise<SafeFetchResult>;
 
@@ -144,7 +151,12 @@ export async function loadPrintable(item: PrintItemInput, deps: LoadDeps = {}): 
       const finalUrl = p.source === "arxiv-html" ? res.finalUrl.replace(/\/+$/, "") : res.finalUrl;
       const opts: ExtractOptions = { httpStatus: res.status, expectedMinutes };
       if (p.source === "arxiv-html") opts.source = "arxiv-html";
-      return { kind: "document", result: extract(res.text, finalUrl, opts) };
+      const result = extract(res.text, finalUrl, opts);
+      // extract() is synchronous and jsdom frees a closed page only after a later
+      // turn of the event loop: yield once so the memory can be released before
+      // the next request starts (big pages peak near 1 GB).
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      return { kind: "document", result };
     });
 
     const took = clock() - started;

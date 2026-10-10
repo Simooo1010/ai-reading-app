@@ -16,8 +16,8 @@ import type { BlockTraits } from "@/lib/print/pages";
 import { placeholderText, type PrintDocument, type PrintElement } from "@/lib/print/types";
 
 export type BlockSpec =
-  | { id: string; kind: "head"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; traits: BlockTraits }
-  | { id: string; kind: "foot"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; fallbackUrl: string; traits: BlockTraits }
+  | { id: string; kind: "head"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; partialNote?: string; traits: BlockTraits }
+  | { id: string; kind: "foot"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; fallbackUrl: string; partialNote?: string; traits: BlockTraits }
   | { id: string; kind: "el"; el: PrintElement; traits: BlockTraits }
   /** One item of a list: lists are packed item by item, so a long list never needs a page of its own. */
   | { id: string; kind: "li"; list: Extract<PrintElement, { type: "list" }>; item: number; traits: BlockTraits }
@@ -132,7 +132,7 @@ function Element({ el, actions }: { el: PrintElement; actions: ImageActions }) {
   }
 }
 
-function DocHead({ doc, fallbackTitle, fallbackAuthor }: { doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string }) {
+function DocHead({ doc, fallbackTitle, fallbackAuthor, partialNote }: { doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; partialNote?: string }) {
   const date = formatPrintDate(doc.date);
   const byline = [doc.author || fallbackAuthor, doc.publication, date].filter((s) => s && s.trim()).join(" · ");
   return (
@@ -141,11 +141,12 @@ function DocHead({ doc, fallbackTitle, fallbackAuthor }: { doc: PrintDocument; f
       {doc.subtitle ? <p className="rr-print-dochead__subtitle">{doc.subtitle}</p> : null}
       {byline ? <p className="rr-print-dochead__byline">{byline}</p> : null}
       {doc.url ? <p className="rr-print-dochead__url">{doc.url}</p> : null}
+      {partialNote ? <p className="rr-print-partial">Partial printout. {partialNote}</p> : null}
     </header>
   );
 }
 
-function DocFoot({ doc, fallbackTitle, fallbackAuthor, fallbackUrl }: { doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; fallbackUrl: string }) {
+function DocFoot({ doc, fallbackTitle, fallbackAuthor, fallbackUrl, partialNote }: { doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; fallbackUrl: string; partialNote?: string }) {
   const date = formatPrintDate(doc.date);
   const who = [doc.author || fallbackAuthor, date].filter((s) => s && s.trim()).join(" · ");
   return (
@@ -153,6 +154,7 @@ function DocFoot({ doc, fallbackTitle, fallbackAuthor, fallbackUrl }: { doc: Pri
       <p className="rr-print-docfoot__title">{doc.title || fallbackTitle}</p>
       {who ? <p>{who}</p> : null}
       <p className="rr-print-docfoot__url">Source: {doc.url || fallbackUrl}</p>
+      {partialNote ? <p className="rr-print-partial">Partial printout. {partialNote}</p> : null}
     </footer>
   );
 }
@@ -162,11 +164,11 @@ export const PrintBlock = memo(function PrintBlock({ block, actions }: { block: 
   let inner: ReactNode;
   switch (block.kind) {
     case "head":
-      inner = <DocHead doc={block.doc} fallbackTitle={block.fallbackTitle} fallbackAuthor={block.fallbackAuthor} />;
+      inner = <DocHead doc={block.doc} fallbackTitle={block.fallbackTitle} fallbackAuthor={block.fallbackAuthor} partialNote={block.partialNote} />;
       break;
     case "foot":
       inner = (
-        <DocFoot doc={block.doc} fallbackTitle={block.fallbackTitle} fallbackAuthor={block.fallbackAuthor} fallbackUrl={block.fallbackUrl} />
+        <DocFoot doc={block.doc} fallbackTitle={block.fallbackTitle} fallbackAuthor={block.fallbackAuthor} fallbackUrl={block.fallbackUrl} partialNote={block.partialNote} />
       );
       break;
     case "removed":
