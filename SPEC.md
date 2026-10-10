@@ -94,56 +94,73 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 
 ### 7.4 Print source (function "Print")
 
-**Goal.** From any item, give Marcus a clean A4 printout (or PDF) of the source with all of its text and none of the clutter. Read-only: it never writes to Notion (§5 is unchanged).
+**Goal.** From any source, give Marcus a clean A4 printout (or PDF) with all of its text and none of the clutter. Read-only: it never writes to Notion (§5 is unchanged).
 
-**Origin.** Inspired by Marcus's own tool Pressroom (`pressroom.onrender.com`, repo `Simooo1010/pressroom-2`). Its mechanism, which we copy in spirit:
-1. The server downloads the page and extracts it to structured JSON: title, subtitle, author, date, hero image, and an ordered `elements[]` list (paragraph, heading, blockquote, pullquote, image, list, code, table, separator, embed). Inline formatting stays in the text.
-2. The browser renders that JSON with a template and the user's options (font, size, line spacing, margin, remove images, exclude embeds).
+**Place in the build.** After the new design is applied to the app (it uses the new design, not the current screens). Build order: new design → Print → deploy checks. The extraction code in `lib/print/` has no UI and can be built before the design lands.
+
+**Used sometimes, not always.** Print is a quiet, secondary feature:
+- It is a small option on each source, not a main button: a small icon or "⋯" menu entry on the Today card, on Path rows and in the Path detail sheet. It must never compete with Open source, Start, Done or Skip.
+- It costs nothing until used: no background fetching, no extra Notion calls, no effect on how fast Today loads. Its code loads only on the print page.
+- It remembers the last customization in `localStorage` (try/catch, per §7.3), so a rare use is still quick.
+
+**Origin and rule of reuse.** Inspired by Marcus's tool Pressroom (`pressroom.onrender.com`, repo `Simooo1010/pressroom-2`). We reuse its *mechanism*, not its look or its code layout. The print page is rebuilt in this app's design and in this app's stack.
+
+Pressroom's mechanism:
+1. The server downloads the page and extracts it to structured content: title, subtitle, author, date, hero image, and an ordered list of elements (paragraph, heading, blockquote, pullquote, image, list, code, table, separator, embed). Inline formatting stays in the text.
+2. The browser renders that content with a format and the user's options.
 3. The browser builds real A4 pages itself: it measures each block, packs blocks onto pages, and keeps headings and lead-in lines (ending with ":") with what follows. Figures never split.
 4. Print CSS hides all UI, `@page` is A4 with zero margin, each page ends with a page break, `document.title` is set to the article title (so the PDF gets a good file name), then `window.print()`.
 
-**Do not depend on Pressroom as a service.** Its server runs on a free Render plan that sleeps when idle and needs about a minute to wake (to be confirmed on Marcus's plan). A print call from this app could hang or hit serverless time limits. The extraction code lives inside this app instead.
+**Do not depend on Pressroom as a service.** Its server runs on a free Render plan that sleeps when idle and needs about a minute to wake (to be confirmed on Marcus's plan). The extraction runs inside this app.
 
 **What not to copy from Pressroom** (found by reading its code):
 - It merges consecutive short paragraphs (under 160 characters) into one. This changes the author's text structure (poems, dialogue, one-line paragraphs). We keep paragraphs exactly as the source has them.
-- It silently prints only the free preview of paywalled posts. We must detect this and say so.
-- Headings lose inline links and formatting (`.text()`).
+- It silently prints only the free preview of paywalled posts. We detect this and say so.
+- Headings lose inline links and formatting.
 - Unknown elements become plain paragraphs with no report; there is no completeness check.
-- The `/api/parse` endpoint fetches any URL it is given (server-side request risk). We only fetch URLs that come from the Notion `Link` property, allow only http(s), block private or local addresses, and set a timeout and a size limit.
-- The Puppeteer PDF endpoint is not used by its own front end. We do not build it.
+- Its parse endpoint fetches any URL it is given. We only fetch URLs that come from the Notion `Link` property, allow only http(s), block private or local addresses, and set a timeout and a size limit.
+- Its Puppeteer PDF endpoint is not used by its own front end. We do not build it.
 
-**Source kinds in the real data (189 links, checked 2026-10-10)**
+**Coverage: every non-PDF source.** Print works for all sources that are web pages. Real data (189 links, checked 2026-10-10):
 
 | Kind | Items | How Print works |
 |---|---|---|
-| Substack (19 on substack.com, 32 on custom domains) | 51 | Extract and render (v1) |
-| arXiv abstract pages (all `Paper`) | 51 | Open the PDF: rewrite `arxiv.org/abs/<id>` to `arxiv.org/pdf/<id>` |
-| Direct PDF links | 15 | Open the PDF as it is |
-| Other web pages | 72 | v2: generic extraction with a warning |
+| Substack (19 on substack.com, 32 on custom domains) | 51 | Extract and render (Substack-aware: free content area, widgets removed) |
+| Other web pages | 72 | Extract and render (generic article extraction) |
+| arXiv abstract pages (all `Paper`) | 51 | Print the paper's HTML version (`arxiv.org/html/<id>`) when it exists; otherwise offer to open the PDF (`arxiv.org/pdf/<id>`). The abstract page alone is never printed as if it were the paper. |
+| Direct PDF links | 15 | No processing. The option reads "Open PDF" (a PDF is already print-ready). |
 
-Known hard pages (flag them "may not print well"): interactive sites (`ai-2027.com`, `situational-awareness.ai`, `intelligence-curse.ai`), landing pages whose PDF sits behind a link (`nber.org`, `papers.nips.cc`), publisher pages (`academic.oup.com`), and site roots (`swarmtraces.org`).
+Whether the arXiv HTML version exists for each paper is not verified yet; older papers often have none, so the PDF fallback matters.
 
-**UI**
-- A **Print** button next to **Open source** on the Today card and in the Path detail sheet.
-- It opens `/print/<item id>` with a preview and a small toolbar: format, font, size, spacing, margin, remove images, exclude embeds. Defaults are Pressroom's (12 pt, 1.6 spacing, 25 mm margin).
-- A **Print / Save as PDF** button runs the browser print dialog. Tip shown: set margins to "None".
-- PDF and arXiv items skip the preview and open the PDF.
-- v1 formats: **Default** and **Monospace** only (the two simplest). Others can be added later with the same renderer registry.
-- The extraction code is UI-free in `lib/print/` (pure functions, unit-tested with fixtures), so it does not depend on the visual design.
+Known hard pages (show "may not print well" before the user starts): interactive sites (`ai-2027.com`, `situational-awareness.ai`, `intelligence-curse.ai`), landing pages whose real text sits behind a link (`nber.org`, `papers.nips.cc`), publisher pages (`academic.oup.com`), and site roots (`swarmtraces.org`).
+
+**Customization: all of Pressroom's options**
+- **Format:** Default and Monospace (the two simplest; others can be added later with the same registry).
+- **Font:** Format default, Modern Sans (Inter), Classic Serif (Lora), Times New Roman, Typewriter.
+- **Size:** 8–36 pt (default 12).
+- **Line spacing:** 1.0–3.0 (default 1.6).
+- **Margin:** 0–80 mm (default 25).
+- **Exclude video embeds:** on/off.
+- **Remove single images:** a tap on an image removes it from the printout (and back).
+- **Print / Save as PDF** button, with the tip: set margins to "None" in the print dialog.
+- Not carried over: Pressroom's "latest N posts from a publication" mode and its own light/dark toggle (this app follows the system).
+
+The controls look like the rest of this app. Pressroom's own styling is not copied.
 
 **Fidelity rules ("no bugs, truthfully")**
-1. Nothing is dropped silently. Before printing, a check line shows words found against words printed, and images, tables and code blocks kept against found.
+1. Nothing is dropped silently. Before printing, a check line shows words found on the page against words printed, and images, tables and code blocks kept against found.
 2. An element we cannot print becomes a visible placeholder with its link, for example "[Video not printed: <link>]".
-3. Paywall or login wall detected, or the text is far too short for the page: no half-clean page. Show a clear message and an **Open source** button.
-4. Every printout ends with title, author, date and the source URL.
-5. Content from outside is sanitized before it reaches the page (no scripts, no event handlers).
-6. Parsed articles are cached per URL (about 24 h). A failed parse is not cached.
+3. Paywall or login wall detected, or the extracted text is far too short for the page: no half-clean page. Show a clear message and an **Open source** button.
+4. Generic extraction can remove real content by mistake, so the check in rule 1 compares against the full page text, not against what the extractor kept.
+5. Every printout ends with title, author, date and the source URL.
+6. Content from outside is sanitized before it reaches the page (no scripts, no event handlers).
+7. Parsed articles are cached per URL (about 24 h). A failed parse is not cached.
 
-**Acceptance tests.** Saved real pages as test fixtures (fixtures in tests are allowed): at least 5 Substack posts (one with images, one with a table or code, one with a video embed, one paywalled), 2 arXiv items and 2 PDF items. For each Substack fixture, the printed word count is within 2 % of the source word count. Plus unit tests for the URL rewriting and for the paragraph-structure guarantee.
+**Acceptance tests.** Saved real pages as test fixtures (fixtures in tests are allowed): at least 5 Substack posts (one with images, one with a table or code, one with a video embed, one paywalled), 5 non-Substack pages from the real list, 2 arXiv items (one with an HTML version, one without) and 2 PDF items. For each page fixture the printed word count is within 2 % of the source word count, or the check line says why not. Plus unit tests for URL rewriting, the paragraph-structure guarantee, the paywall and too-short detection, and the page-packing rules (heading stays with the next block, figure does not split).
 
-**Dependencies (approved by Marcus 2026-10-10, in the order of need).** `cheerio` for Substack extraction (same as Pressroom; asking to confirm), `sanitize-html`, and for v2 only `@mozilla/readability` with `jsdom`.
+**Dependencies (approved by Marcus 2026-10-10).** `jsdom`, `@mozilla/readability`, `sanitize-html`. `cheerio` is not needed (jsdom does the same job), so the list stays at the three approved.
 
-**Out of scope for Print v1.** Substack Notes, "latest N posts from a publication" batch mode, the four other Pressroom formats (Newspaper, Scientific, Book, Magazine), saving PDFs on the server.
+**Out of scope for Print v1.** Substack Notes, "latest N posts from a publication" mode, the four other Pressroom formats (Newspaper, Scientific, Book, Magazine), saving PDFs on the server.
 
 ## 8. Access
 - One password gate: form → compare with `APP_PASSWORD` on the server → set an httpOnly, secure cookie (30 days). All pages and server actions check it.
