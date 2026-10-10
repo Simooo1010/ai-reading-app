@@ -1,118 +1,81 @@
 "use client";
 
-// Start / Done / Skip buttons for the next item. Skip asks first, then the
-// UndoProvider shows an Undo toast. Render with key={item.id} so the confirm
-// step and errors reset when the next item changes.
+// Runs the item actions (server actions) and holds the Skip confirm step.
+// After Skip it offers Undo (UndoProvider). Render with a key that changes
+// with the item and its status, so the confirm step and errors reset.
 
 import { useState, useTransition } from "react";
 import {
   doneItem,
+  resetItem,
   skipItem,
   startItem,
   type ActionResult,
-} from "@/app/(app)/today/actions";
+} from "@/app/(app)/actions";
+import { ActionButtons, type ActionKind } from "@/components/ActionButtons";
 import { useOfferUndo } from "@/components/UndoProvider";
+import type { Status } from "@/lib/types";
+
+const RUN: Record<ActionKind, (id: string) => Promise<ActionResult>> = {
+  start: startItem,
+  done: doneItem,
+  skip: skipItem,
+  reset: resetItem,
+};
 
 type Props = {
   id: string;
-  title: string;
-  status: "To read" | "Reading";
+  status: Status;
+  allowReset: boolean;
+  /** Called after a successful Skip, before the Undo toast shows. */
+  onSkipped?: () => void;
 };
 
-export function ItemActions({ id, title, status }: Props) {
-  const [pending, startTransition] = useTransition();
-  const [busy, setBusy] = useState<"start" | "done" | "skip" | null>(null);
+export function ItemActions({ id, status, allowReset, onSkipped }: Props) {
+  const [, startTransition] = useTransition();
+  const [busy, setBusy] = useState<ActionKind | null>(null);
   const [confirmSkip, setConfirmSkip] = useState(false);
+  const [focusSkip, setFocusSkip] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const offerUndo = useOfferUndo();
 
-  function run(
-    which: "start" | "done" | "skip",
-    action: () => Promise<ActionResult>,
-    onOk?: () => void,
-  ) {
+  function onAction(kind: ActionKind) {
     setError(null);
-    setBusy(which);
+    setFocusSkip(false);
+    setBusy(kind);
     startTransition(async () => {
-      const result = await action();
-      if (result.ok) {
-        onOk?.();
-      } else {
+      const result = await RUN[kind](id);
+      setBusy(null);
+      if (!result.ok) {
         setError(result.error);
         setConfirmSkip(false);
+        return;
       }
-      setBusy(null);
+      if (kind === "skip" && (status === "To read" || status === "Reading")) {
+        setConfirmSkip(false);
+        onSkipped?.();
+        offerUndo({ id, previous: status });
+      }
     });
   }
 
-  if (confirmSkip) {
-    return (
-      <div className="actions">
-        <p className="confirm-text">Skip this item?</p>
-        <div className="actions-row">
-          <button
-            type="button"
-            className="btn btn-danger"
-            disabled={pending}
-            onClick={() =>
-              run("skip", () => skipItem(id), () =>
-                offerUndo({ id, title, previous: status }),
-              )
-            }
-          >
-            {busy === "skip" ? "Skipping…" : "Yes, skip"}
-          </button>
-          <button
-            type="button"
-            className="btn"
-            disabled={pending}
-            onClick={() => setConfirmSkip(false)}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="actions">
-      <div className="actions-row">
-        {status !== "Reading" && (
-          <button
-            type="button"
-            className="btn"
-            disabled={pending}
-            onClick={() => run("start", () => startItem(id))}
-          >
-            {busy === "start" ? "Starting…" : "Start"}
-          </button>
-        )}
-        <button
-          type="button"
-          className="btn btn-done"
-          disabled={pending}
-          onClick={() => run("done", () => doneItem(id))}
-        >
-          {busy === "done" ? "Saving…" : "Done"}
-        </button>
-        <button
-          type="button"
-          className="btn"
-          disabled={pending}
-          onClick={() => {
-            setError(null);
-            setConfirmSkip(true);
-          }}
-        >
-          Skip
-        </button>
-      </div>
-      {error && (
-        <p className="error-text" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
+    <ActionButtons
+      status={status}
+      allowReset={allowReset}
+      confirmSkip={confirmSkip}
+      busy={busy}
+      error={error}
+      focusSkip={focusSkip}
+      onAction={onAction}
+      onAskSkip={() => {
+        setError(null);
+        setConfirmSkip(true);
+      }}
+      onCancelSkip={() => {
+        setConfirmSkip(false);
+        setFocusSkip(true);
+      }}
+    />
   );
 }

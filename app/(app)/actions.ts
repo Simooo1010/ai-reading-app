@@ -1,8 +1,8 @@
 "use server";
 
-// Server actions for the Today screen. Each one changes only `Status`
+// Server actions for Today and Path. Each one changes only `Status`
 // (and `Done on`) through lib/notion.ts, then expires the "items" cache so
-// the page re-render in the same response shows the new next item.
+// the page re-render in the same response shows the new data.
 
 import { updateTag } from "next/cache";
 import {
@@ -40,6 +40,14 @@ export async function doneItem(id: string): Promise<ActionResult> {
 
 export async function skipItem(id: string): Promise<ActionResult> {
   return setStatus(id, "Skipped");
+}
+
+/**
+ * "Back to To read" (Path detail sheet): Status = To read. Leaving Done
+ * clears `Done on` (SPEC §5, done by buildStatusUpdate).
+ */
+export async function resetItem(id: string): Promise<ActionResult> {
+  return setStatus(id, "To read");
 }
 
 /**

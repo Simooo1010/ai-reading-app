@@ -56,6 +56,7 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 - `Status` → `Done`: set `Done on` = today (date only, Europe/Rome).
 - `Status` leaves `Done` (to anything else): clear `Done on`.
 - `Start` → `Status = Reading`. `Skip` → `Status = Skipped` (with a confirm step; offer Undo for a few seconds).
+- `Back to To read` (Path detail sheet) → `Status = To read`; if the item was `Done`, `Done on` is cleared. Only `Status` and `Done on` change.
 
 ## 6. Calculation rules
 - **Hours read** = sum of `Reading time (min)` of items with `Status = Done`, ÷ 60.
@@ -69,19 +70,22 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 
 ### 7.1 Today (home)
 - **Next item** = lowest `Order` with `Status` in {`Reading`, `To read`}. (A `Reading` item is naturally picked if it is lowest; do not reorder.)
-- Card shows: Title, Author, Reading time, Difficulty, Phase, "Why read this", reading scope from `Notes` if it starts with "Read:".
-- Big button **Open source** → `Link` in a new tab.
-- Buttons: **Start** (hidden if already Reading), **Done**, **Skip**.
-- If the item is in `5 · Counterweights`: show "This answers: <title(s) of Paired with>".
-- Below: the next 3 items (title, reading time, layer chip).
+- Header context: "Phase N · item X of T" (N = phase of the next item, X = its `Order`, T = all items in the database); "All done" when there is no next item.
+- Card shows: Layer chip (+ Core mark; a Reading chip when the item is Reading), Title, "by Author", meta line Type · Reading time · Difficulty · Phase, "Why read this", reading scope from `Notes` if it starts with "Read:" (italic line under "Why read this").
+- Big button **Open source** → `Link` in a new tab (thin arrow icon).
+- Buttons: **Start** (play icon; hidden if already Reading), **Done** (check icon), **Skip** (quiet text button; inline confirm "Skip this item?" then an Undo toast for 6 s).
+- If the item is in `5 · Counterweights`: show "This answers: <title(s) of Paired with>" (italic line under "Why read this").
+- Below: "Up next", the next 0–3 real items (order, title, author · reading time, layer chip). No placeholder rows.
 - After an action, the screen refreshes to the new next item.
 
 ### 7.2 Path
 - All items grouped by Phase (1→5), in `Order`.
 - Each row: Order, Title, reading time, status chip (To read / Reading / Done / Skipped).
-- Per phase: progress bar = hours Done / hours total (excluding Skipped), plus "x of y items".
-- Phases collapsed except the current one (the phase of the Today item).
-- Tap a row → small detail sheet with the same actions as Today.
+- Header context: "<non-Skipped items> items · <their hours, 1 decimal> h".
+- Every phase that has items is shown, in phase order (none is dropped).
+- Per phase: progress bar = hours Done / hours total (excluding Skipped), plus "x of y items done" (y = non-Skipped items), with " · N skipped" added only when N > 0, and "done of total h".
+- Phases collapsed except the current one (the phase of the Today item; it is marked "Now"). None is open when everything is done.
+- Tap a row → detail sheet (bottom sheet) with the same card as Today and actions by status: To read → Start, Done, Skip · Reading → Done, Skip, Back to To read · Done → Back to To read · Skipped → Back to To read. Esc or "Close" closes it. After Skip the sheet closes and the Undo toast shows.
 
 ### 7.3 Progress
 - Hours read: total and this week.
@@ -166,8 +170,9 @@ The controls look like the rest of this app. Pressroom's own styling is not copi
 - One password gate: form → compare with `APP_PASSWORD` on the server → set an httpOnly, secure cookie (30 days). All pages and server actions check it.
 
 ## 9. Design
-- Mobile-first (iPhone width first), one clean layout, bottom tab bar: Today · Path · Progress.
-- Dark/light follows the system. Large tap targets (≥44 px). No clutter.
+- Visual model: the Reading Room design system (`design-system/`). Mobile-first (iPhone width first): one centred column, fluid up to 480 px, the same column on all widths (no separate desktop layout).
+- Bottom tab bar with text-only tabs: Today · Path · Progress.
+- Light theme only for now (a dark theme is not designed yet). Large tap targets (≥44 px). No clutter.
 - English UI, simple words (B1). Short labels.
 - Fast: server-side fetch with short caching (e.g. revalidate 60 s) and revalidate immediately after any write.
 

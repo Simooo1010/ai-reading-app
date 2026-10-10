@@ -45,6 +45,63 @@ export function pairedTitles(item: Item, all: readonly Item[]): string[] {
   });
 }
 
+/**
+ * Today header context: "Phase 1 · item 1 of 189" (phase and `Order` of the
+ * next item, out of all items in the database), or "All done".
+ */
+export function todayContext(items: readonly Item[]): string {
+  const next = pickNext(items);
+  if (!next) return "All done";
+  return `${next.phase} · item ${next.order} of ${items.length}`;
+}
+
+/**
+ * The fields an item card (Today card, Path detail sheet) needs. This is what
+ * goes to the browser: never the whole Notion payload.
+ */
+export type CardData = Pick<
+  Item,
+  | "id"
+  | "order"
+  | "title"
+  | "author"
+  | "type"
+  | "layer"
+  | "priority"
+  | "phase"
+  | "status"
+  | "difficulty"
+  | "readingTimeMin"
+  | "whyRead"
+  | "link"
+> & {
+  /** Notes text when it starts with "Read:", else null. */
+  scope: string | null;
+  /** "This answers" titles (only for 5 · Counterweights items). */
+  answers: string[];
+};
+
+export function toCardData(item: Item, all: readonly Item[]): CardData {
+  return {
+    id: item.id,
+    order: item.order,
+    title: item.title,
+    author: item.author,
+    type: item.type,
+    layer: item.layer,
+    priority: item.priority,
+    phase: item.phase,
+    status: item.status,
+    difficulty: item.difficulty,
+    readingTimeMin: item.readingTimeMin,
+    whyRead: item.whyRead,
+    link: item.link,
+    scope: readScope(item.notes),
+    answers:
+      item.layer === "5 · Counterweights" ? pairedTitles(item, all) : [],
+  };
+}
+
 /** Today's date in Europe/Rome as YYYY-MM-DD. */
 export function todayInRome(now: Date = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {

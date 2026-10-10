@@ -35,7 +35,8 @@ export type Status = (typeof STATUSES)[number];
 
 // The Notion property has options Phase 1…Phase 6, but only Phase 1–5 are
 // used by items. `Phase 6` is accepted so the mapping never fails on a valid
-// Notion option; the screens only show Phase 1–5.
+// Notion option; Path shows every phase that has items (so a Phase 6 item
+// would get its own group, never dropped).
 export const PHASES = [
   "Phase 1",
   "Phase 2",
@@ -45,15 +46,6 @@ export const PHASES = [
   "Phase 6",
 ] as const;
 export type Phase = (typeof PHASES)[number];
-
-/** Phases that are actually used by items (SPEC §4). */
-export const USED_PHASES = [
-  "Phase 1",
-  "Phase 2",
-  "Phase 3",
-  "Phase 4",
-  "Phase 5",
-] as const satisfies readonly Phase[];
 
 export const ADDED_IN = [
   "Chat 2",

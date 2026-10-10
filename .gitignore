@@ -35,3 +35,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# fixture screenshots / HTML (tests/visual)
+/tests/visual/out/
+
+# agent work folders
+/.claude/worktrees/

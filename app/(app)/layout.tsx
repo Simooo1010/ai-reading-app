@@ -1,11 +1,17 @@
 import type { ReactNode } from "react";
 import { TabBar } from "@/components/TabBar";
+import { UndoProvider } from "@/components/UndoProvider";
 
+// Reading Room shell: one centred column (max 480px) on every width,
+// text-only tab bar at the bottom. The Undo toast lives here so it stays
+// on screen while the page re-renders after Skip.
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="shell">
-      <TabBar />
-      <main className="content">{children}</main>
-    </div>
+    <UndoProvider>
+      <div className="rr-screen">
+        <main className="rr-screen__main">{children}</main>
+        <TabBar />
+      </div>
+    </UndoProvider>
   );
 }

@@ -347,6 +347,7 @@
 .rr-btn--link {
   height: auto;
   min-height: var(--rr-tap-min);
+  min-width: var(--rr-tap-min); /* short words ("Skip") keep a 44px hit area */
   padding: 0 var(--rr-space-1);
   border: 0;
   color: var(--rr-ink-2);
@@ -497,6 +498,20 @@
   text-decoration-color: var(--rr-ink-2);
 }
 
+/* Row that opens something (Path row -> detail sheet): a <button> with row looks */
+.rr-row--button {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--rr-rule);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Unknown / loading row */
 .rr-row--placeholder .rr-row__title {
   font-weight: 500;
@@ -596,8 +611,11 @@
   color: var(--rr-ink-2);
 }
 
+/* Path board: 6px bar with a thin ink-2 outline drawn inside (keeps radius-sm) */
 .rr-phase__toggle .rr-progress {
   margin-top: 2px;
+  outline: 1px solid var(--rr-ink-2);
+  outline-offset: -1px;
 }
 
 /* ---------- ProgressBar ---------- */
@@ -853,4 +871,214 @@
 
 .rr-tabbar__tab[aria-current="page"]::before {
   background-color: var(--rr-ink);
+}
+
+/* ===================================================================
+ * Components added for screens and states that are not on the boards.
+ * Each one follows the "Adding a component" checklist in README.md.
+ * =================================================================== */
+
+/* ---------- Utilities ---------- */
+/* Text for screen readers only */
+.rr-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Content under the header (18px gap on the Today and Path boards) */
+.rr-screen__body {
+  display: flex;
+  flex-direction: column;
+  padding-top: 18px;
+}
+
+/* ---------- ItemCard (Today card, detail sheet) ---------- */
+/* chips row, title, "by Author", meta line, Why read this, actions.
+   Spacing from the Today board. */
+.rr-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.rr-item__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rr-space-2) var(--rr-space-3);
+}
+
+.rr-item__title {
+  margin: 14px 0 0;
+}
+
+.rr-item__author {
+  margin-top: 6px;
+}
+
+.rr-item__meta {
+  margin-top: var(--rr-space-2);
+}
+
+/* "Why read this" body, then optional italic notes (reading scope, This answers) */
+.rr-item__why > .rr-body {
+  margin-top: 6px;
+}
+
+.rr-item__note {
+  margin-top: var(--rr-space-2);
+}
+
+.rr-item__actions {
+  margin-top: 18px;
+}
+
+/* ---------- Sheet (detail sheet, native <dialog>) ---------- */
+/* Bottom sheet: ground, ink rule on top, no shadow, no box. Same width as the
+   screen column. Open with showModal(); the page under it cannot scroll. */
+.rr-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - var(--rr-page-top));
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--rr-ink);
+  border-radius: 0;
+  background-color: var(--rr-ground);
+  color: var(--rr-ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* The page behind fades into the ground colour (no new tint, no shadow) */
+.rr-sheet::backdrop {
+  background-color: var(--rr-ground);
+  opacity: 0.85;
+}
+
+:root:has(.rr-sheet[open]) {
+  overflow: hidden;
+}
+
+.rr-sheet__inner {
+  padding:
+    var(--rr-space-1)
+    calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px))
+    max(var(--rr-space-5), env(safe-area-inset-bottom, 0px))
+    calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
+}
+
+/* Label left, "Close" right, hairline under (like .rr-header) */
+.rr-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+  margin-bottom: var(--rr-space-4);
+  border-bottom: 1px solid var(--rr-rule);
+}
+
+/* ---------- Toast (Undo) ---------- */
+/* Ink bar above the tab bar. Tab bar height = 48px tab + 1px rule + bottom space. */
+.rr-toast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(49px + max(var(--rr-tabbar-bottom), env(safe-area-inset-bottom, 0px)) + var(--rr-space-2));
+  z-index: 20;
+  width: calc(100% - 2 * var(--rr-page-gutter));
+  max-width: calc(480px - 2 * var(--rr-page-gutter));
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+.rr-toast__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+  min-height: 52px;
+  padding: var(--rr-space-1) var(--rr-space-1) var(--rr-space-1) var(--rr-space-4);
+  border-radius: var(--rr-radius-md);
+  background-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+  pointer-events: auto;
+}
+
+.rr-toast__text {
+  margin: 0;
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: var(--rr-text-meta-weight);
+}
+
+.rr-toast__actions {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.rr-toast__action {
+  min-width: var(--rr-tap-min);
+  height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-3);
+  border: 0;
+  border-radius: var(--rr-radius-md);
+  background: transparent;
+  color: var(--rr-on-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-button-size);
+  font-weight: var(--rr-text-button-weight);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-toast__action:focus-visible {
+  outline-color: var(--rr-on-ink);
+  outline-offset: -4px;
+}
+
+.rr-toast__action:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------- Skeleton (loading) ---------- */
+/* Neutral wash blocks, no text, no motion. Wrap in .rr-skeleton-group. */
+.rr-skeleton-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rr-space-3);
+}
+
+.rr-skeleton {
+  display: block;
+  width: 100%;
+  height: var(--rr-space-4);
+  border-radius: var(--rr-radius-sm);
+  background-color: var(--rr-wash);
+}
+
+.rr-skeleton--chip { width: 128px; height: 26px; border-radius: var(--rr-radius-md); }
+.rr-skeleton--title { width: 85%; height: 48px; }
+.rr-skeleton--short { width: 55%; }
+.rr-skeleton--button { width: 152px; height: var(--rr-tap-min); border-radius: var(--rr-radius-md); }
+.rr-skeleton--rule { height: 0; border-top: 1px solid var(--rr-rule); border-radius: 0; background: none; }
+
+/* ---------- State (empty, error, coming soon) ---------- */
+.rr-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rr-space-3);
 }

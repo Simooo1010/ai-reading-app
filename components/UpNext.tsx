@@ -1,23 +1,37 @@
+import { formatOrder } from "@/lib/path";
 import { formatMinutes } from "@/lib/today";
 import type { Item } from "@/lib/types";
 
-export function UpNext({ items }: { items: Item[] }) {
-  if (items.length === 0) return null;
+export type UpNextRow = Pick<
+  Item,
+  "id" | "order" | "title" | "author" | "readingTimeMin" | "layer"
+>;
+
+/** "Up next": 0-3 real rows (order, title, author · time, layer chip). */
+export function UpNext({ rows }: { rows: UpNextRow[] }) {
+  if (rows.length === 0) return null;
   return (
-    <section className="up-next" aria-labelledby="up-next-title">
-      <h2 id="up-next-title" className="section-title">
+    <section className="rr-section" aria-labelledby="up-next-title">
+      <h2 id="up-next-title" className="rr-label">
         Up next
       </h2>
-      <ol className="up-list">
-        {items.map((item) => {
-          const time = formatMinutes(item.readingTimeMin);
+      <ol className="rr-list">
+        {rows.map((row) => {
+          const meta = [row.author, formatMinutes(row.readingTimeMin)]
+            .filter(Boolean)
+            .join(" · ");
           return (
-            <li key={item.id} className="up-row">
-              <span className="up-title">{item.title}</span>
-              <span className="up-meta">
-                {time && <span className="up-time">{time}</span>}
-                <span className="chip">{item.layer}</span>
-              </span>
+            <li key={row.id}>
+              <div className="rr-row">
+                <span className="rr-row__order">{formatOrder(row.order)}</span>
+                <span className="rr-row__body">
+                  <span className="rr-row__title">{row.title}</span>
+                  <span className="rr-row__line">
+                    <span className="rr-row__meta">{meta}</span>
+                    <span className="rr-chip">{row.layer}</span>
+                  </span>
+                </span>
+              </div>
             </li>
           );
         })}
