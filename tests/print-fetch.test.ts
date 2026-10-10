@@ -643,3 +643,17 @@ describe("safeFetch — node transport (local test server)", () => {
     }
   });
 });
+
+describe("test hook is ignored outside the test runner", () => {
+  it("does not allow loopback when NODE_ENV is production, even if testOnly is passed", async () => {
+    const previous = process.env.NODE_ENV;
+    (process.env as Record<string, string>).NODE_ENV = "production";
+    try {
+      await expect(
+        safeFetch("http://127.0.0.1:8080/", {}, { testOnly: { allowLoopback: true, extraPorts: [8080] } }),
+      ).rejects.toMatchObject({ code: expect.stringMatching(/blocked-address|bad-url/) });
+    } finally {
+      (process.env as Record<string, string>).NODE_ENV = previous as string;
+    }
+  });
+});

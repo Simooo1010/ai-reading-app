@@ -257,14 +257,21 @@ function stripBrackets(host: string): string {
   return host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;
 }
 
+// The test hook only works under the test runner (NODE_ENV === "test").
+// In a production or dev server it is ignored even if app code passed it,
+// so localhost can never be reached through this switch.
+function testHook(deps: SafeFetchDeps): SafeFetchDeps["testOnly"] {
+  return process.env.NODE_ENV === "test" ? deps.testOnly : undefined;
+}
+
 function allowedPorts(deps: SafeFetchDeps): Set<string> {
   const ports = new Set(["", "80", "443"]);
-  for (const p of deps.testOnly?.extraPorts ?? []) ports.add(String(p));
+  for (const p of testHook(deps)?.extraPorts ?? []) ports.add(String(p));
   return ports;
 }
 
 function addressAllowed(ip: string, deps: SafeFetchDeps): boolean {
-  if (deps.testOnly?.allowLoopback) {
+  if (testHook(deps)?.allowLoopback) {
     const v4 = parseIPv4(ip);
     if (v4 && v4[0] === 127 && v4[1] === 0 && v4[2] === 0 && v4[3] === 1) return true;
     if (ip === "::1") return true;
