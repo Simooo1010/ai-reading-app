@@ -6,7 +6,9 @@ The single visual model for the AI Reading App. Bookish and quiet: one serif (Ne
 
 Visual source of truth: the Design System artifact https://claude.ai/artifact/ADzKSrembPx1X6ZEur54AX and the screens board https://claude.ai/artifact/SmmXSGmcU3JAgy8sBzGSLA. If code and boards disagree, the boards win.
 
-Open items: dark theme is not designed yet (light only, do not invent one). `wash` and `rule` were derived against an older ground and need a review against `#FCF3DC`.
+Open items: dark theme is not designed yet (light only, do not invent one).
+
+Tint review (resolved): `wash` and `rule` keep their values. `wash` on ground is only 1.2:1 and `rule` 1.6:1, so `rule` stays for hairlines only, and every progress track has a 1px `ink-2` outline (see ProgressBar below).
 
 ## Import
 
@@ -36,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | Colour | `ground` page · `on-ink` text on ink · `ink` text, fills, strong rules · `ink-2` secondary text, track outlines · `wash` tracks, Done button · `rule` hairlines only (never text) · `hatch-opacity` .55 |
 | Font | `font-serif` (Newsreader). Class `.rr-num` = `lining-nums tabular-nums` for data |
 | Type | `text-<name>-size/-lh/-weight/-tracking` for display 48, stat-xl 64, stat-lg 40, stat-md 34, stat-sm 28, stat-note 21, phase 28, author 20, row-title 19, body 18, body-italic 18, meta 16, meta-italic 15, label 14, chip 14 (hero 15), button 17, tab 14, axis 13 |
+| Type: stat-note | `--rr-text-stat-note-*` = 21px / 26px / 500, set in italic (`.rr-stat__empty`). Used for "Not enough data yet" in place of a number |
 | Space | `space-1..5` = 4 · 8 · 12 · 16 · 24 |
 | Layout | `page-gutter` 24 · `page-top` 48 · `tabbar-bottom` 34 · `tap-min` 44 |
 | Radius | `radius-sm` 3 (bar ends) · `radius-md` 6 (default) · `radius-track` 1 (chart tracks) |
@@ -54,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | `.rr-rule` (`--strong`, `--hair`); `.rr-section` (`--hair`) | rule; section opened by ink rule + label | `<section class="rr-section"><h2 class="rr-label">Up next</h2>…</section>` |
 | `.rr-list` (`--ruled`) + `.rr-row` | ListRow (Up next, Path); `--skipped`, `--placeholder` | see below |
 | `.rr-phase` | collapsible PhaseBlock, chevron turns via `aria-expanded` | see below |
-| `.rr-progress` `--sm/--md/--lg` (`--outlined`) | 6 / 8 / 10px bar; outlined on Progress | `<div class="rr-progress rr-progress--md rr-progress--outlined" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="100" aria-label="2% read"><div class="rr-progress__fill" style="width:2%"></div></div>` |
+| `.rr-progress` `--sm/--md/--lg` (`--outlined`) | 6 / 8 / 10px bar. Every track: `wash` fill, 1px `ink-2` outline inside the height (wash on ground is only 1.2:1), ink fill laid over it. `--outlined` only sets 1px ends (Progress screen) | `<div class="rr-progress rr-progress--md rr-progress--outlined" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="100" aria-label="2% read"><div class="rr-progress__fill" style="width:2%"></div></div>` |
 | `.rr-stat` (`--end`), `.rr-stat-pair`, `.rr-tally` | label, number `__number--xl/lg/md/sm` (+`__unit`), `__empty`, `__helper` (`--lg`) | `<div class="rr-stat"><h2 class="rr-label">Streak</h2><p class="rr-stat__number rr-stat__number--sm">2 days</p><p class="rr-stat__helper">since Fri 9 Oct</p></div>` |
 | `.rr-tabbar` + `__tab` | hairline top, rule over active (`aria-current="page"`) | `<nav class="rr-tabbar" aria-label="Main"><a class="rr-tabbar__tab" href="/today" aria-current="page">Today</a>…</nav>` |
 | Type | `.rr-display .rr-author .rr-body .rr-body-italic .rr-meta (+.rr-meta-line, .rr-sep) .rr-meta-italic .rr-row-title .rr-phase-title .rr-axis` | `<h1 class="rr-display">The Bitter Lesson</h1>` |

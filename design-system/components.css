@@ -602,13 +602,19 @@
 
 /* ---------- ProgressBar ---------- */
 /* <div class="rr-progress rr-progress--sm" role="progressbar" aria-valuenow …><div class="rr-progress__fill" style="width: 31.7%"></div></div> */
+/* Every track has a 1px ink-2 outline: wash on ground is only 1.2:1, so an
+   empty track would vanish without it. The outline is an inset box-shadow
+   (a stroke, not a visual shadow): drawn inside, so the height stays exact,
+   and painted under the fill, so the ink fill lies over it with no gap. */
 .rr-progress {
   display: block;
   width: 100%;
   height: 6px;
+  box-sizing: border-box;
   overflow: hidden;
   border-radius: var(--rr-radius-sm);
   background-color: var(--rr-wash);
+  box-shadow: inset 0 0 0 1px var(--rr-ink-2);
 }
 
 .rr-progress__fill {
@@ -622,11 +628,10 @@
 .rr-progress--md { height: 8px; }
 .rr-progress--lg { height: 10px; }
 
-/* Progress-screen style: thin ink-2 outline, 1px ends */
+/* Kept for old markup: the outline is now in the base class. This modifier
+   only switches to the Progress screen's 1px ends. */
 .rr-progress--outlined {
   border-radius: var(--rr-radius-track);
-  outline: 1px solid var(--rr-ink-2);
-  outline-offset: -1px; /* drawn inside: keeps the height exact, no shadow */
 }
 
 .rr-progress--outlined .rr-progress__fill {
