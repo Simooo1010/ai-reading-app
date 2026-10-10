@@ -22,8 +22,18 @@ lib/
   stats.ts         # pure functions: hours, weeks, streak, projection (unit-tested)
   auth.ts          # password gate helpers
 components/
+design-system/
+  tokens.css       # --rr- tokens + base layer (import first)
+  components.css   # rr- component classes (import second)
+  README.md        # how to use it, rules for new components
 middleware.ts      # redirects to /login without the auth cookie
 ```
+
+## Design system
+- All UI follows `design-system/` ("Reading Room"). Read `design-system/README.md` before any UI work.
+- Use only `--rr-` tokens and `rr-` classes. No hex literals, no new colours, no sans fonts.
+- New components not in the designs must follow the "Adding a component" checklist in the README.
+- UI copy in simple English (B1).
 
 ## Where this runs
 - Development happens in Claude Code on the web (cloud sandbox). There is no local machine.
