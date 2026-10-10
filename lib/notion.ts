@@ -14,6 +14,7 @@ import {
   isFullPage,
   type PageObjectResponse,
 } from "@notionhq/client";
+import { cacheLife, cacheTag } from "next/cache";
 import {
   ADDED_IN,
   DIFFICULTIES,
@@ -23,6 +24,7 @@ import {
   PRIORITIES,
   STATUSES,
   type Item,
+  type Status,
 } from "@/lib/types";
 
 const NOTION_VERSION = "2025-09-03";
@@ -102,7 +104,7 @@ async function getDataSourceId(notion: Client): Promise<string> {
  * Fully paginated (page_size 100, follows has_more / next_cursor).
  * Throws if any page does not match the schema in SPEC.md §4.
  *
- * Caching: none yet. Short caching + revalidate-after-write comes in step 2.
+ * Not cached. Screens use getItemsCached() below.
  */
 export async function getAllItems(): Promise<Item[]> {
   const notion = getClient();
@@ -141,6 +143,114 @@ export async function getAllItems(): Promise<Item[]> {
   // the API sort ever changes.
   items.sort((a, b) => a.order - b.order);
   return items;
+}
+
+/** Cache tag of all item data. Every write calls updateTag(ITEMS_TAG). */
+export const ITEMS_TAG = "items";
+
+/**
+ * getAllItems() with a short server cache (SPEC §9: ~60 s).
+ *
+ * - revalidate 60 s: after 60 s the next read refreshes the data.
+ * - expire 120 s (< 5 min): Next.js treats this as a short-lived cache, so it
+ *   is never baked into the build output. The data is always read at request
+ *   time (a "dynamic hole"), and a Notion error can never break `next build`.
+ * - stale 30 s: how long the browser router may reuse the data without
+ *   asking the server again (30 s is the minimum Next.js allows here).
+ * - Every write (server actions) calls updateTag(ITEMS_TAG). That expires the
+ *   entry at once, and the page re-render in the same response reads fresh.
+ */
+export async function getItemsCached(): Promise<Item[]> {
+  "use cache";
+  cacheLife({ stale: 30, revalidate: 60, expire: 120 });
+  cacheTag(ITEMS_TAG);
+  return getAllItems();
+}
+
+// ---------------------------------------------------------------------------
+// Write (SPEC §5): the app changes only `Status` and `Done on`.
+// ---------------------------------------------------------------------------
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+// Notion page ids: 32 hex characters, with or without dashes.
+const PAGE_ID_RE = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+
+export function isStatus(value: unknown): value is Status {
+  return (
+    typeof value === "string" && (STATUSES as readonly string[]).includes(value)
+  );
+}
+
+export function isPageId(value: unknown): value is string {
+  return typeof value === "string" && PAGE_ID_RE.test(value);
+}
+
+/** The exact `properties` payload for a status change. */
+export type StatusUpdate = {
+  Status: { select: { name: Status } };
+  "Done on": { date: { start: string } | null };
+};
+
+/**
+ * Pure. Builds the only properties the app ever writes (SPEC §5):
+ * - `Status` = the new status (one of the 4 known labels)
+ * - `Done on` = today (YYYY-MM-DD) when the new status is Done, else cleared.
+ * Throws on an unknown status or a bad date, so Notion never gets a new
+ * select option or a broken date.
+ */
+export function buildStatusUpdate(status: Status, today: string): StatusUpdate {
+  if (!isStatus(status)) {
+    throw new Error(`Unknown status "${String(status)}".`);
+  }
+  if (status === "Done" && !DATE_RE.test(today)) {
+    throw new Error(`Bad date "${today}", expected YYYY-MM-DD.`);
+  }
+  return {
+    [PROP.status]: { select: { name: status } },
+    [PROP.doneOn]: { date: status === "Done" ? { start: today } : null },
+  } as StatusUpdate;
+}
+
+function normalizeId(id: string): string {
+  return id.replace(/-/g, "").toLowerCase();
+}
+
+/**
+ * The ONLY Notion write in the app. Sets `Status` (and `Done on`, see
+ * buildStatusUpdate) on one item of `AI Reading List`.
+ *
+ * Before writing it checks that the page really is a row of this database,
+ * so a bad id can never change any other Notion page. It never creates,
+ * deletes or archives anything and never touches any other property.
+ */
+export async function updateItemStatus(
+  id: string,
+  status: Status,
+  today: string,
+): Promise<void> {
+  if (!isPageId(id)) {
+    throw new Error("Invalid item id.");
+  }
+  const properties = buildStatusUpdate(status, today);
+
+  const notion = getClient();
+  const ourDataSourceId = await getDataSourceId(notion);
+
+  const page = await notion.pages.retrieve({ page_id: id });
+  if (!isFullPage(page)) {
+    throw new Error("Notion: could not read the item.");
+  }
+  if (
+    page.parent.type !== "data_source_id" ||
+    normalizeId(page.parent.data_source_id) !== normalizeId(ourDataSourceId)
+  ) {
+    throw new Error("Notion: this page is not an item of the reading list.");
+  }
+  if (page.in_trash) {
+    throw new Error("Notion: this item is in the trash.");
+  }
+
+  await notion.pages.update({ page_id: id, properties });
 }
 
 // ---------------------------------------------------------------------------
