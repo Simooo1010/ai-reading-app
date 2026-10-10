@@ -40,8 +40,8 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 | `Done on` | date | **added 2026-10-10 for this app.** Empty on all items today |
 
 ### Current data snapshot (2026-10-10)
-- 189 items, all `Status = To read`, ~89.2 h total.
-- By Layer: Foundations 15 (5.2 h) · Leaders 22 (16.1 h) · Species 110 (50.1 h) · Frontier essays 32 (11.1 h) · Counterweights 10 (6.8 h).
+- 189 items, all `Status = To read`, ~89.3 h (5,355 min) total.
+- By Layer: Foundations 15 (5.3 h) · Leaders 22 (16.1 h) · Species 110 (50.1 h) · Frontier essays 32 (11.1 h) · Counterweights 10 (6.8 h).
 - By Phase: P1 13 (6.9 h) · P2 54 (28.1 h) · P3 17 (15.3 h) · P4 54 (19.8 h) · P5 51 (19.2 h).
 - By Priority: Core 43 (29.8 h) · Recommended 57 (22.8 h) · Optional 89 (36.6 h).
 - More than 100 items → **Notion queries must paginate** (`has_more` / `next_cursor`).
@@ -63,7 +63,7 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 - `Skipped` items are excluded from all totals, percentages and projections (both numerator and denominator).
 - A week runs Monday–Sunday, Europe/Rome. An item counts in the week of its `Done on`.
 - **Streak** = consecutive days up to today (or yesterday, if nothing done yet today) with at least one item `Done on` that day.
-- **Projected finish** = remaining hours (non-Done, non-Skipped) ÷ average weekly hours of the last 4 weeks. If that average is 0, show "Not enough data yet".
+- **Projected finish** = remaining hours (non-Done, non-Skipped) ÷ average weekly hours of the last 4 weeks. Exact rule: average weekly hours = hours Done in the trailing 28 days (today−27 … today, Europe/Rome, by `Done on`) ÷ 4; finish date = today + remaining ÷ average weeks (rounded up to a whole day). If that average is 0, show "Not enough data yet". If nothing is left (every item is Done or Skipped), show "All read".
 - Items with `Done` but empty `Done on` (e.g. edited directly in Notion) count in totals but not in weekly charts/streak.
 
 ## 7. Screens
@@ -90,11 +90,12 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 ### 7.3 Progress
 - Hours read: total and this week.
 - Bar chart: weekly hours, last 8 weeks, with a target line (default **5 h**, editable; store the target in `localStorage`, wrapped in try/catch).
+- Edit target: "Edit target" opens a small inline form in its place: a number field "Weekly target (hours)" (0.5–40 h, whole or half hours; a comma works as the decimal mark), **Save** and **Cancel**. Enter saves, Esc cancels. A wrong value shows "Enter a number from 0.5 to 40." (or "Use whole or half hours, like 4 or 4.5."). The value is saved in `localStorage` on this device only; if storage is blocked the page still works with 5 h (a saved value then lasts for the visit only).
 - Hours by Layer (done vs total).
 - Done items by Priority.
 - Core completion % (Core hours done / Core hours total, excluding Skipped).
-- Current streak (days).
-- Projected finish date at last-4-weeks pace.
+- Current streak (days): "2 days" (or "1 day") with "since Fri 9 Oct" (the first day of the streak); with no streak, "0 days" and "Read something today to start".
+- Projected finish date at last-4-weeks pace, three states: a date ("12 Mar 2027") with "at your pace of 2.6 h a week" (the 4-week average, 1 decimal); "Not enough data yet" with "Keep reading a few weeks" (average 0); "All read" with "Nothing left in the list" (nothing left to read).
 
 ### 7.4 Print source (function "Print")
 

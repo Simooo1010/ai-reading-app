@@ -41,3 +41,4 @@ next-env.d.ts
 
 # agent work folders
 /.claude/worktrees/
+**/node_modules/

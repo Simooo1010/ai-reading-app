@@ -73,7 +73,8 @@ export type WeekBarsGeometry = {
   target: {
     hours: number;
     y: number;
-    label: { text: string; x: number; y: number };
+    /** text-anchor "end" at x 342 (default) or "start" at x 0. */
+    label: { text: string; x: number; y: number; anchor: "start" | "end" };
   };
   bars: WeekBar[];
 };
@@ -150,14 +151,57 @@ export function weekBars(
     target: {
       hours: target,
       y: targetY,
-      label: {
-        text: targetText(target),
-        x: C.width,
-        y: r1(targetY - C.targetLabelGap),
-      },
+      label: placeTargetLabel(targetText(target), targetY, bars),
     },
     bars,
   };
+}
+
+/** Rough text box sizes (Newsreader): label 14px italic, values 13px. */
+const LABEL_CHAR_WIDTH = 7.2;
+const VALUE_CHAR_WIDTH = 7;
+const TEXT_ASCENT = 11;
+const TEXT_DESCENT = 3;
+
+/**
+ * Where the "Target 5 h" label goes. Default (README): right-aligned, 8px
+ * above the line. If a bar or value label is in that spot (a week near or
+ * above the target at the right end), use left-aligned above the line. If
+ * both spots are taken, keep the default. (A spot under the line never
+ * helps: a bar that reaches the label also covers the space below it.)
+ */
+export function placeTargetLabel(
+  text: string,
+  targetY: number,
+  bars: readonly WeekBar[],
+): WeekBarsGeometry["target"]["label"] {
+  const C = WEEK_CHART;
+  const width = text.length * LABEL_CHAR_WIDTH + 4;
+  const above = r1(targetY - C.targetLabelGap);
+  const candidates = [
+    { x: C.width, y: above, anchor: "end" as const },
+    { x: 0, y: above, anchor: "start" as const },
+  ];
+
+  const hits = (c: (typeof candidates)[number]) => {
+    const left = c.anchor === "end" ? c.x - width : c.x;
+    const right = c.anchor === "end" ? c.x : c.x + width;
+    const bottom = c.y + TEXT_DESCENT;
+    return bars.some((b) => {
+      const half = Math.max(
+        C.currentBarWidth / 2,
+        (b.value.text.length * VALUE_CHAR_WIDTH) / 2,
+      );
+      if (b.cx + half < left || b.cx - half > right) return false;
+      // Highest point used in this slot: the bar top or the value above it.
+      const valueTop = b.value.inside ? Infinity : b.value.y - TEXT_ASCENT;
+      const slotTop = Math.min(b.bar ? b.bar.y : Infinity, valueTop);
+      return slotTop < bottom;
+    });
+  };
+
+  const free = candidates.find((c) => !hits(c)) ?? candidates[0];
+  return { text, ...free };
 }
 
 function plural(n: number, one: string, many: string): string {

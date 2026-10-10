@@ -37,7 +37,7 @@ describe("weekBars", () => {
     expect(g.target).toEqual({
       hours: 5,
       y: 42,
-      label: { text: "Target 5 h", x: 342, y: 34 },
+      label: { text: "Target 5 h", x: 342, y: 34, anchor: "end" },
     });
   });
 
@@ -83,6 +83,23 @@ describe("weekBars", () => {
     expect(big.target.y).toBe(92);
     expect(big.target.label.y).toBe(84);
     expect(big.bars[7].bar?.height).toBe(50);
+  });
+
+  it("moves the target label left when the right-hand weeks reach it", () => {
+    // Week before 5 h, this week 7 h: both reach the label's default spot.
+    const high = weekBars(weeks([0, 0, 0, 0, 0, 0, 300, 420]), 5);
+    expect(high.target.y).toBe(70.6);
+    expect(high.target.label).toEqual({ text: "Target 5 h", x: 0, y: 62.6, anchor: "start" });
+  });
+
+  it("keeps the default spot when both ends are taken, or only the left is", () => {
+    const ends = weekBars(weeks([420, 0, 0, 0, 0, 0, 0, 420]), 5);
+    expect(ends.target.label.anchor).toBe("end");
+    expect(ends.target.label.x).toBe(342);
+    // Tall left only: default spot stays free.
+    const left = weekBars(weeks([420, 0, 0, 0, 0, 0, 0, 0]), 5);
+    expect(left.target.label).toMatchObject({ x: 342, anchor: "end" });
+    expect(left.target.label.y).toBeCloseTo(left.target.y - 8, 1);
   });
 
   it("keeps the target at the same height for another target", () => {

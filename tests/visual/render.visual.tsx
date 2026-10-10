@@ -13,12 +13,26 @@ import { it } from "vitest";
 import AppError from "@/app/(app)/error";
 import { ActionButtons } from "@/components/ActionButtons";
 import { PathView } from "@/components/PathView";
+import { ProgressView } from "@/components/ProgressView";
+import { TargetForm } from "@/components/WeeklyHours";
+import { progressData } from "@/lib/progress";
 import { SheetContent } from "@/components/SheetContent";
 import { ScreenSkeleton } from "@/components/Skeleton";
 import { TodayView } from "@/components/TodayView";
 import { UndoToast } from "@/components/UndoToast";
 import type { CardData } from "@/lib/today";
-import { PHASES, PLAIN, READING_COUNTERWEIGHT, UP_NEXT, card } from "./fixtures";
+import {
+  PHASES,
+  PLAIN,
+  PROGRESS_ACTIVE,
+  PROGRESS_FINISHED,
+  PROGRESS_NONE,
+  PROGRESS_THIS_WEEK_HIGH,
+  PROGRESS_TODAY,
+  READING_COUNTERWEIGHT,
+  UP_NEXT,
+  card,
+} from "./fixtures";
 
 const ROOT = resolve(__dirname, "../..");
 const OUT = process.env.VISUAL_OUT ?? resolve(__dirname, "out");
@@ -96,4 +110,18 @@ it("renders fixture pages", () => {
   sheet("sheet-done", card({ status: "Done", layer: "2 · Leaders", priority: "Optional", answers: [] }));
   sheet("sheet-skipped", card({ status: "Skipped", layer: "3 · Species", priority: "Recommended" }));
   sheet("sheet-skip-confirm", card({ status: "To read" }), { confirmSkip: true });
+
+  const progress = (name: string, items: typeof PROGRESS_ACTIVE) =>
+    page(name, "Progress", <ProgressView data={progressData(items, PROGRESS_TODAY)} />);
+  progress("progress-active", PROGRESS_ACTIVE);
+  progress("progress-this-week-high", PROGRESS_THIS_WEEK_HIGH);
+  progress("progress-none", PROGRESS_NONE);
+  progress("progress-finished", PROGRESS_FINISHED);
+  progress("progress-empty", []);
+  page("progress-loading", "Progress", <ScreenSkeleton title="Progress" variant="stats" />);
+  page("progress-target-error", "Progress",
+    <section className="rr-section">
+      <div className="rr-section__head"><h2 className="rr-label">Hours per week</h2></div>
+      <TargetForm inputId="t" errorId="t-err" value="99" error="Enter a number from 0.5 to 40." />
+    </section>);
 });

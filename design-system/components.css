@@ -1082,3 +1082,141 @@
   align-items: flex-start;
   gap: var(--rr-space-3);
 }
+
+/* ---------- Progress screen ---------- */
+/* Number block with a helper line and an outlined bar under it
+   (Hours read hero, Core completion). Spacing from the Progress board. */
+.rr-meter {
+  display: flex;
+  flex-direction: column;
+}
+
+.rr-meter > .rr-stat__helper {
+  margin-top: 6px;
+}
+
+.rr-meter > .rr-progress {
+  margin-top: var(--rr-space-2);
+}
+
+/* The Streak / Projected finish strip under the hero */
+.rr-meter + .rr-stat-pair {
+  margin-top: var(--rr-space-4);
+}
+
+/* Two stats on one line, bottoms aligned: big number left, smaller right */
+.rr-stat-split {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+}
+
+.rr-stat-split > .rr-stat--end {
+  padding-bottom: var(--rr-space-1);
+}
+
+/* Number + italic note on one baseline ("4%  1.3 of 29.8 h") */
+.rr-stat__number--noted {
+  flex-wrap: wrap;
+  column-gap: 10px;
+  margin-top: var(--rr-space-1);
+}
+
+.rr-stat__note {
+  font-size: var(--rr-text-body-italic-size);
+  line-height: var(--rr-text-body-italic-lh);
+  font-weight: var(--rr-text-body-italic-weight);
+  font-style: italic;
+  letter-spacing: 0;
+  font-variation-settings: normal;
+  color: var(--rr-ink-2);
+}
+
+/* Quiet action at the right of a section head ("Edit target"):
+   16px italic link, 44px hit area that does not make the head taller */
+.rr-section__action {
+  gap: 6px;
+  margin: -12px 0;
+  padding: 0 2px;
+  font-size: var(--rr-text-meta-size);
+}
+
+.rr-section__head:has(> .rr-section__action) {
+  align-items: center;
+  min-height: var(--rr-text-label-lh);
+}
+
+/* Space between a section head and its chart */
+.rr-chart--week {
+  margin-top: var(--rr-space-2);
+}
+
+.rr-chart--layers {
+  margin-top: 10px;
+}
+
+/* Done by priority rows (.rr-tally) */
+.rr-tally-list {
+  margin-top: var(--rr-space-1);
+}
+
+/* ---------- Inline target form (not on the boards) ---------- */
+/* Opens in place of "Edit target": labelled field, Save, Cancel, error line */
+.rr-target-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--rr-space-2) var(--rr-space-3);
+  margin-top: var(--rr-space-3);
+}
+
+.rr-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-1);
+}
+
+.rr-field__label {
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: 600;
+  color: var(--rr-ink);
+}
+
+.rr-input {
+  width: 7.5em;
+  height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-3);
+  border: 1px solid var(--rr-ink-2);
+  border-radius: var(--rr-radius-md);
+  background-color: var(--rr-ground);
+  color: var(--rr-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-body-size); /* 18px: iOS does not zoom in */
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.rr-input:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+}
+
+/* Invalid: heavier ink border; the error text below says what is wrong */
+.rr-input[aria-invalid="true"] {
+  border: 1.5px solid var(--rr-ink);
+}
+
+.rr-field__error {
+  flex: 1 0 100%;
+  margin: 0;
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: 600;
+  font-style: italic;
+  color: var(--rr-ink);
+}
+
+/* Loading block the size of the weekly chart */
+.rr-skeleton--chart { height: 182px; }

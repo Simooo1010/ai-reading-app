@@ -33,3 +33,13 @@ export function ChevronIcon() {
     </svg>
   );
 }
+
+/** Pencil for "Edit target" (Progress board). */
+export function PencilIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+      <path d="M2 11l.6-2.6L8.9 2.1a1 1 0 011.4 0l.6.6a1 1 0 010 1.4L4.6 10.4 2 11z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M7.8 3.2l2 2" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}

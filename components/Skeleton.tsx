@@ -6,7 +6,7 @@ export function ScreenSkeleton({
   variant,
 }: {
   title: string;
-  variant: "card" | "list";
+  variant: "card" | "list" | "stats";
 }) {
   return (
     <>
@@ -25,6 +25,18 @@ export function ScreenSkeleton({
             <span className="rr-skeleton" />
             <span className="rr-skeleton rr-skeleton--short" />
             <span className="rr-skeleton rr-skeleton--button" />
+          </div>
+        ) : variant === "stats" ? (
+          <div className="rr-skeleton-group" aria-hidden="true">
+            <span className="rr-skeleton rr-skeleton--short" />
+            <span className="rr-skeleton rr-skeleton--title" />
+            <span className="rr-skeleton rr-skeleton--rule" />
+            <span className="rr-skeleton rr-skeleton--short" />
+            <span className="rr-skeleton rr-skeleton--rule" />
+            <span className="rr-skeleton rr-skeleton--chart" />
+            <span className="rr-skeleton rr-skeleton--rule" />
+            <span className="rr-skeleton" />
+            <span className="rr-skeleton" />
           </div>
         ) : (
           <div className="rr-skeleton-group" aria-hidden="true">
