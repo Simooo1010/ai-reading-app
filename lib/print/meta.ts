@@ -106,13 +106,22 @@ function score(types: string[]): number {
   return 1;
 }
 
+/** All <meta> elements of the document, in document order. */
+function metasOf(doc: Document): Element[] {
+  // getElementsByTagName is a plain tree walk. An attribute selector per key
+  // (querySelector('meta[name="x"]')) cost seconds on 2 MB arXiv pages.
+  return Array.from(doc.getElementsByTagName("meta"));
+}
+
 /** content of <meta property=..> or <meta name=..> (first non-empty). */
 export function metaContent(doc: Document, ...keys: string[]): string {
+  const metas = metasOf(doc);
+  if (metas.length === 0) return "";
   for (const k of keys) {
     const el =
-      doc.querySelector(`meta[property="${k}"]`) ??
-      doc.querySelector(`meta[name="${k}"]`) ??
-      doc.querySelector(`meta[itemprop="${k}"]`);
+      metas.find((m) => m.getAttribute("property") === k) ??
+      metas.find((m) => m.getAttribute("name") === k) ??
+      metas.find((m) => m.getAttribute("itemprop") === k);
     const v = el?.getAttribute("content")?.trim();
     if (v) return v;
   }
@@ -120,7 +129,8 @@ export function metaContent(doc: Document, ...keys: string[]): string {
 }
 
 export function metaAll(doc: Document, key: string): string[] {
-  return Array.from(doc.querySelectorAll(`meta[name="${key}"], meta[property="${key}"]`))
+  return metasOf(doc)
+    .filter((m) => m.getAttribute("name") === key || m.getAttribute("property") === key)
     .map((m) => (m.getAttribute("content") ?? "").trim())
     .filter(Boolean);
 }

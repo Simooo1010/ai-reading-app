@@ -92,6 +92,63 @@ export function stripBoilerplate(root: Element): RemovedPart[] {
     if (el.querySelector(KEEPS_CONTENT)) continue;
     drop(el);
   }
+  removed.push(...stripNamedBoilerplate(root));
+  // Hidden parts (collapsed sections, closed pop-ups) last, so hidden menus count as boilerplate.
+  const hidden = removeHidden(root);
+  if (hidden > 0) removed.push({ what: HIDDEN_PART, words: hidden });
+  return removed;
+}
+
+/**
+ * LessWrong, the Alignment Forum and the EA Forum run the same software
+ * (ForumMagnum). Around the post it prints vote counts, tag lists, the comment
+ * outline (a list of commenter names), "Mentioned in" and recommendations, with
+ * class names our generic patterns do not catch. The title, author and date of
+ * the post header are printed from the page metadata. The post itself is in
+ * .PostsPage-postContent and is never touched.
+ */
+const FORUM_MAGNUM_MARK = "PostsPage-postContent";
+const FORUM_MAGNUM_FURNITURE = [
+  ".LWPostsPageHeader-root",
+  ".PostsPageHeader-root",
+  ".MultiToCLayout-toc",
+  ".MultiToCLayout-tocFooter",
+  ".PostsBottomBar-root",
+  ".PostsPagePostFooter-footerTagList",
+  ".PostsPagePostFooter-footerSection",
+  ".CommentsListSection-root",
+  ".PingbacksList-root",
+  ".PostBottomRecommendations-root",
+  ".PostBottomRecommendations-section",
+].join(", ");
+
+/** Removes ForumMagnum page furniture from `root` IN PLACE (nothing on other sites). */
+function removeForumMagnumFurniture(root: Element): RemovedPart[] {
+  const removed: RemovedPart[] = [];
+  if (!isForumMagnum(root)) return removed;
+  for (const el of Array.from(root.querySelectorAll(FORUM_MAGNUM_FURNITURE))) {
+    if (el === root || !root.contains(el)) continue;
+    const words = countNodeWords(el);
+    if (words > 0) removed.push({ what: describe(el), words });
+    el.remove();
+  }
+  return removed;
+}
+
+function isForumMagnum(root: Element): boolean {
+  // getElementsByClassName: a plain tree walk (a selector query costs much more on big pages).
+  if (root.classList.contains(FORUM_MAGNUM_MARK) || root.getElementsByClassName(FORUM_MAGNUM_MARK).length > 0) return true;
+  return (root.ownerDocument?.getElementsByClassName(FORUM_MAGNUM_MARK).length ?? 0) > 0;
+}
+
+/**
+ * Only the class/id pass of stripBoilerplate(): blocks named like boilerplate
+ * (comments, newsletter, share...). Used on Readability's output too, because
+ * Readability sometimes appends a comment thread (LessWrong) that the page
+ * count (the coverage denominator) already leaves out. IN PLACE.
+ */
+export function stripNamedBoilerplate(root: Element, opts: { keepMajority?: boolean } = {}): RemovedPart[] {
+  const removed: RemovedPart[] = removeForumMagnumFurniture(root);
   const total = Math.max(1, countNodeWords(root));
   for (const el of Array.from(root.querySelectorAll("[class], [id]"))) {
     if (el === root || !root.contains(el)) continue;
@@ -99,18 +156,23 @@ export function stripBoilerplate(root: Element): RemovedPart[] {
     if (tag === "body" || tag === "html" || tag === "main" || tag === "article") continue;
     // Boilerplate is made of blocks; inline elements with such names are content
     // (e.g. LaTeXML "ltx_lst_comment" = a comment inside a code listing).
-    if (INLINE_NAMES.has(tag) || el.closest("pre, code")) continue;
+    if (INLINE_NAMES.has(tag)) continue;
     const names = classAndId(el);
     const strong = STRONG_BOILERPLATE.test(names);
     const weak = !strong && WEAK_BOILERPLATE.test(names);
     if (!strong && !weak) continue;
+    // Checked after the cheap name test: a selector call per element is slow on big pages.
+    if (el.closest("pre, code")) continue;
     if (el.querySelector(KEEPS_CONTENT)) continue;
-    if (weak && countNodeWords(el) > total * 0.25) continue;
-    drop(el);
+    const words = countNodeWords(el);
+    if (weak && words > total * 0.25) continue;
+    // Readability turns <h1> into <h2> and <article> into <div>, so the
+    // KEEPS_CONTENT test above cannot protect a content wrapper there
+    // (vitalik.eth.limo: <div class="markdown-body comment-enabled"> holds the whole post).
+    if (opts.keepMajority && words > total * 0.5) continue;
+    if (words > 0) removed.push({ what: describe(el), words });
+    el.remove();
   }
-  // Hidden parts (collapsed sections, closed pop-ups) last, so hidden menus count as boilerplate.
-  const hidden = removeHidden(root);
-  if (hidden > 0) removed.push({ what: HIDDEN_PART, words: hidden });
   return removed;
 }
 
@@ -136,6 +198,8 @@ export interface Candidate {
   linkDensity: number;
   /** Words in hidden parts left out of this candidate. */
   hiddenWords: number;
+  /** Readability only: words of whole paragraphs it left out (set by chooseContent). */
+  lostParagraphWords?: number;
 }
 
 function linkDensity(node: Element, words: number): number {
@@ -148,9 +212,9 @@ function linkDensity(node: Element, words: number): number {
   return linkWords / words;
 }
 
-function makeCandidate(kind: CandidateKind, node: Element, strip: boolean): Candidate {
+function makeCandidate(kind: CandidateKind, node: Element, strip: "all" | "named"): Candidate {
   const copy = node.cloneNode(true) as Element;
-  const removed = strip ? stripBoilerplate(copy) : [];
+  const removed = strip === "all" ? stripBoilerplate(copy) : stripNamedBoilerplate(copy, { keepMajority: true });
   // Measure what would really be printed: the same cleaning as the converter.
   const measure = copy.cloneNode(true) as Element;
   prepareContent(measure, emptyReport());
@@ -193,14 +257,14 @@ export function chooseContent(
   preference: CandidateKind[] = ["readability", "article", "main", "role-main", "body"],
 ): { chosen: Candidate; candidates: Candidate[] } {
   const cands: Candidate[] = [];
-  if (readabilityNode) cands.push(makeCandidate("readability", readabilityNode, false));
+  if (readabilityNode) cands.push(makeCandidate("readability", readabilityNode, "named"));
   const article = largest(doc, "article");
-  if (article) cands.push(makeCandidate("article", article, true));
+  if (article) cands.push(makeCandidate("article", article, "all"));
   const main = doc.querySelector("main");
-  if (main) cands.push(makeCandidate("main", main, true));
+  if (main) cands.push(makeCandidate("main", main, "all"));
   const roleMain = doc.querySelector("[role=main]");
-  if (roleMain && roleMain !== main) cands.push(makeCandidate("role-main", roleMain, true));
-  if (doc.body) cands.push(makeCandidate("body", doc.body, true));
+  if (roleMain && roleMain !== main) cands.push(makeCandidate("role-main", roleMain, "all"));
+  if (doc.body) cands.push(makeCandidate("body", doc.body, "all"));
 
   const usable = cands.filter((c) => c.words > 0 && c.linkDensity <= 0.5);
   const pool = usable.length ? usable : cands;
@@ -213,15 +277,58 @@ export function chooseContent(
   const close = pool.filter((c) => c.words >= best * (1 - PREFER_WITHIN));
   const maxImages = Math.max(...close.map((c) => c.images));
   const ordered = [...close].sort((a, b) => preference.indexOf(a.kind) - preference.indexOf(b.kind));
+  // Readability can drop a real paragraph (seen on LessWrong: a <p> with two
+  // links and a <br><br>). Being within 5 % of the best word count does not
+  // prove nothing was lost, so compare whole paragraphs with the biggest other candidate.
+  const readability = close.find((c) => c.kind === "readability");
+  const others = close.filter((c) => c.kind !== "readability");
+  if (readability && others.length) {
+    const ref = others.reduce((a, b) => (b.words > a.words ? b : a));
+    readability.lostParagraphWords = paragraphWordsMissing(readability.node, ref.node);
+  }
   const chosen =
-    ordered.find((c) => !(c.kind === "readability" && c.images < maxImages)) ?? ordered[0];
+    ordered.find(
+      (c) =>
+        !(c.kind === "readability" && (c.images < maxImages || (c.lostParagraphWords ?? 0) >= LOST_PARAGRAPH_WORDS)),
+    ) ?? ordered[0];
   return { chosen, candidates: cands };
+}
+
+/** A paragraph shorter than this is not checked (captions, bylines, "Share"). */
+export const LOST_PARAGRAPH_MIN_WORDS = 8;
+/** Readability is not used when it left out this many words of whole paragraphs. */
+export const LOST_PARAGRAPH_WORDS = 20;
+
+const normSpace = (s: string) => s.replace(/\s+/g, " ").trim();
+
+/**
+ * Words of the <p> paragraphs of `other` (at least LOST_PARAGRAPH_MIN_WORDS
+ * words each) whose text does not appear in `kept`. Whitespace is normalised,
+ * so a paragraph that Readability split at a <br><br> still counts as kept.
+ */
+export function paragraphWordsMissing(kept: Element, other: Element): number {
+  const keptParas = new Set<string>();
+  for (const p of Array.from(kept.getElementsByTagName("p"))) keptParas.add(normSpace(visibleText(p)));
+  let keptText: string | null = null;
+  let lost = 0;
+  for (const p of Array.from(other.getElementsByTagName("p"))) {
+    const t = normSpace(visibleText(p));
+    if (keptParas.has(t)) continue;
+    const words = countWords(t);
+    if (words < LOST_PARAGRAPH_MIN_WORDS) continue;
+    keptText ??= normSpace(visibleText(kept));
+    if (!keptText.includes(t)) lost += words;
+  }
+  return lost;
 }
 
 function runReadability(doc: Document): { node: Element | null; meta: ReadabilityMeta } {
   const meta: ReadabilityMeta = { title: "", byline: "", siteName: "", publishedTime: "" };
   try {
     const clone = doc.cloneNode(true) as Document;
+    // Readability rewrites <div>s into <p>s and loses their class names, so
+    // known furniture must go before it runs (it is left out of the page count too).
+    if (clone.body) removeForumMagnumFurniture(clone.body);
     const reader = new Readability<Node>(clone, {
       keepClasses: true,
       serializer: (n: Node) => n,
@@ -265,6 +372,23 @@ export function isArxivAbsUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+/**
+ * arXiv HTML pages have no date meta. Their corner note reads
+ * "arXiv:2401.05566v3 [cs.CR] 17 Jan 2024" (the date of that version).
+ * Returns YYYY-MM-DD or "".
+ */
+export function arxivWatermarkDate(doc: Document): string {
+  const t = (doc.getElementById("watermark-tr")?.textContent ?? "").replace(/\s+/g, " ").trim();
+  const m = /\] (\d{1,2}) ([A-Za-z]{3})[a-z]* (\d{4})$/.exec(t);
+  if (!m) return "";
+  const month = MONTHS.indexOf(m[2].toLowerCase()) + 1;
+  const day = Number(m[1]);
+  if (month < 1 || day < 1 || day > 31) return "";
+  return `${m[3]}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
 export interface GenericExtraction {
@@ -315,6 +439,8 @@ export function extractGeneric(
     details.push(
       `Content: ${chosen.kind} (${candidates.map((c) => `${c.kind} ${c.words} words, ${c.images} images`).join("; ")}).`,
     );
+    const lost = candidates.find((c) => c.kind === "readability")?.lostParagraphWords ?? 0;
+    if (lost > 0) details.push(`Readability left out ${lost} words of whole paragraphs${chosen.kind === "readability" ? "" : ", so it was not used"}.`);
   }
 
   const convert = convertContent(chosenNode, { baseUrl });
@@ -354,6 +480,7 @@ export function extractGeneric(
 
   const date = normalizeDate(
     ld?.datePublished ||
+      (opts.arxiv ? arxivWatermarkDate(doc) : "") ||
       metaContent(
         doc,
         "article:published_time",

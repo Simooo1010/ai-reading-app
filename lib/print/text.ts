@@ -43,8 +43,22 @@ const BLOCK_BOUNDARY = new Set<string>([
   "address", "article", "aside", "blockquote", "caption", "dd", "details", "dialog", "div", "dl", "dt",
   "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header",
   "hgroup", "hr", "li", "main", "nav", "ol", "p", "pre", "section", "summary", "table", "tbody", "td",
-  "tfoot", "th", "thead", "tr", "ul", "body", "html", "center", "menu", "mtd", "mtr", "mtable",
+  "tfoot", "th", "thead", "tr", "ul", "body", "html", "center", "menu", "mtd", "mtr", "mtable", "foreignobject",
 ]);
+
+/**
+ * The <foreignObject> parts of an <svg> (not nested in another one): HTML text
+ * placed in a drawing. arXiv HTML (LaTeXML "ltx_picture") puts whole boxed
+ * prompts and transcripts there, so this text is real content.
+ */
+export function foreignObjectsOf(svg: Element): Element[] {
+  return Array.from(svg.getElementsByTagName("foreignObject")).filter((fo) => {
+    for (let p = fo.parentElement; p && p !== svg; p = p.parentElement) {
+      if (p.localName.toLowerCase() === "foreignobject") return false;
+    }
+    return true;
+  });
+}
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -53,7 +67,8 @@ const CDATA_NODE = 4;
 /**
  * Visible text of a DOM subtree, with a separator at every block boundary and
  * <br> (a space by default; code blocks use "\n").
- * Skips script/style/svg/iframe/... (NON_TEXT_TAGS). Iterative (no recursion limit).
+ * Skips script/style/svg/iframe/... (NON_TEXT_TAGS), but reads the HTML inside an
+ * svg's <foreignObject>. Iterative (no recursion limit).
  * `skip` (optional) leaves out whole element subtrees (the print page uses it
  * for its header, footer and placeholder notes).
  */
@@ -84,6 +99,16 @@ export function visibleText(root: Node, boundary: " " | "\n" = " ", skip?: (el: 
     }
     if (type === ELEMENT_NODE) {
       const tag = (n as Element).localName.toLowerCase();
+      if (tag === "svg") {
+        // A drawing has no text of its own here, except HTML in <foreignObject>.
+        if (skip && skip(n as Element)) continue;
+        const fos = foreignObjectsOf(n as Element);
+        if (fos.length === 0) continue;
+        pushBoundary();
+        stack.push(null);
+        for (let i = fos.length - 1; i >= 0; i--) stack.push(fos[i]);
+        continue;
+      }
       if (SKIP_TEXT.has(tag)) continue;
       if (skip && skip(n as Element)) continue;
       if (tag === "br") {

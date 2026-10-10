@@ -10,6 +10,7 @@
 
 import { hasClass } from "./dom";
 import { type ConvertReport, countNodeWords, countWords, emptyReport, visibleText } from "./fidelity";
+import { foreignObjectsOf } from "./text";
 import {
   escapeHtml,
   INLINE_TAGS,
@@ -432,11 +433,23 @@ class Walker {
     if (el.matches(EQUATION_TABLE)) {
       for (const row of Array.from(el.querySelectorAll("tr"))) {
         const cells = Array.from(row.children).filter((c) => c.localName === "td" || c.localName === "th");
+        // A diagram typeset as an equation (LaTeXML "ltx_markedasmath" <object>,
+        // or an <img>) cannot go into the inline HTML: print it as an image after the line.
+        const graphics: Element[] = [];
+        for (const c of cells) {
+          for (const m of Array.from(c.querySelectorAll("img, object, embed"))) {
+            if (tagOf(m) === "img" || isImageObject(m)) {
+              graphics.push(m);
+              m.remove();
+            }
+          }
+        }
         const html = cells
           .map((c) => this.inline(c.innerHTML))
           .filter(Boolean)
           .join(" ");
         if (html) out.push({ type: "paragraph", html, from: "equation" });
+        for (const g of graphics) this.image(g, "", out);
       }
       return;
     }
@@ -602,6 +615,9 @@ class Walker {
   }
 
   svg(el: Element, out: PrintElement[]): void {
+    // HTML inside the drawing (arXiv "ltx_picture" boxes with prompts and
+    // transcripts): print it as normal content, in document order.
+    for (const fo of foreignObjectsOf(el)) this.walkChildren(fo, out);
     const textWords = Array.from(el.querySelectorAll("text")).reduce((n, t) => n + countWords(t.textContent ?? ""), 0);
     if (textWords > 0) {
       this.report.details.push(`A drawing (svg) with ${textWords} words of labels was not printed.`);
@@ -627,6 +643,8 @@ function insideMedia(el: Element, stop: Element | null = null): boolean {
   let p = el.parentElement;
   while (p && p !== stop) {
     const t = tagOf(p);
+    // HTML inside an svg <foreignObject> is printed (see Walker.svg), so it is not fallback content.
+    if (t === "foreignobject") return false;
     if (t === "video" || t === "audio" || t === "iframe" || t === "object" || t === "canvas" || t === "svg") return true;
     p = p.parentElement;
   }
@@ -781,6 +799,10 @@ export function prepareContent(root: Element, report: ConvertReport, widgetSelec
     const tag = tagOf(el);
     if (tag === "img") {
       if (insideMedia(el, root)) continue; // fallback content of a video/object: not shown
+      // Part of an embed card (e.g. the logo in a Substack "embedded post"): the
+      // whole embed prints as one visible placeholder with its link, so this
+      // image is not reported again as a missing image.
+      if (hasAncestor(el, EMBED_SELECTOR)) continue;
       if (isTrackingPixel(attrsOf(el))) report.imagesSkipped++;
       else report.imagesFound++;
     } else if (tag === "table") {

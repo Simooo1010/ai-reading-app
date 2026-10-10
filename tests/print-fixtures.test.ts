@@ -36,8 +36,14 @@ const FIXTURES: Fx[] = [
   { file: "151-lexfridman.com.html", url: "https://lexfridman.com/demis-hassabis-2-transcript", status: "warning", source: "web", paragraphs: true },
   { file: "189-swarmtraces.org.html", url: "https://swarmtraces.org/", status: "warning", source: "web", paragraphs: true },
   { file: "26-epoch.ai.html", url: "https://epoch.ai/publications/can-ai-scaling-continue-through-2030", status: "warning", source: "web", paragraphs: true },
+  // Step 6c (live run on all links): LessWrong page furniture + comments; Readability dropping a footnote paragraph.
+  { file: "186-www.lesswrong.com.html", url: "https://www.lesswrong.com/posts/q5ejXr4CRuPxkgzJD/claude-opus-4-5-achieves-50-time-horizon-of-around-4-hrs-49", status: "ok", source: "web", paragraphs: true },
+  { file: "175-www.interconnects.ai.html", url: "https://www.interconnects.ai/p/when-will-average-people-feel-ais", status: "warning", source: "substack", paragraphs: true },
+  { file: "60-www.anthropic.com.html", url: "https://www.anthropic.com/research/emergent-misalignment-reward-hacking", status: "ok", source: "web", paragraphs: true },
   // arXiv
   { file: "16-arxiv.org-html.html", url: "https://arxiv.org/html/1706.03762", status: "ok", source: "arxiv-html", paragraphs: true },
+  { file: "182-arxiv.org-html.html", url: "https://arxiv.org/html/2510.03215", status: "ok", source: "arxiv-html", paragraphs: true },
+  { file: "55-arxiv.org-html.html", url: "https://arxiv.org/html/2401.05566v3", status: "ok", source: "arxiv-html", paragraphs: true },
   { file: "16-arxiv.org.html", url: "https://arxiv.org/abs/1706.03762", status: "too-short", source: "web" },
   { file: "92-arxiv.org.html", url: "https://arxiv.org/abs/2005.04305", status: "too-short", source: "web" },
   // Blocked / thin / empty

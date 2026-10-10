@@ -52,6 +52,10 @@ export const MESSAGES = {
   paywalledPreview: "Only part of this post is public. The rest is for paid readers.",
   paywalledNone: "This page is for paid readers. Open the source instead.",
   tooShort: "We found very little text on this page. It may load its text with scripts or be only a summary.",
+  /** Scholarly landing page (abstract + PDF link). */
+  paperSummary: "This page has only the summary of a paper. Open the source to find the full text.",
+  /** Much less text than the Notion reading time (a landing page, a first chapter). */
+  partOnly: "This page has only a part of the piece. Open the source to read all of it.",
   arxivAbstract: "This is only the summary page of a paper. Print the full paper (HTML or PDF) instead.",
   failed: "We could not read this page. Open the source instead.",
   empty: "This page is empty. Open the source instead.",
@@ -85,6 +89,30 @@ function result(
   const r: PrintResult = { status, message, source, check, warnings };
   if (document) r.document = document;
   return r;
+}
+
+/**
+ * A paper's landing page (abstract + PDF link): a PDF link in the citation
+ * meta, or a citation title together with a venue, report or DOI. A citation
+ * title alone is not enough: LessWrong puts citation_title and
+ * citation_author on every post, including short ones.
+ */
+export function isScholarlyLanding(doc: Document): boolean {
+  if (metaContent(doc, "citation_pdf_url") !== "") return true;
+  if (metaContent(doc, "citation_title") === "") return false;
+  return (
+    metaContent(
+      doc,
+      "citation_journal_title",
+      "citation_conference_title",
+      "citation_technical_report_institution",
+      "citation_technical_report_number",
+      "citation_dissertation_institution",
+      "citation_doi",
+      "citation_publisher",
+      "citation_abstract_html_url",
+    ) !== ""
+  );
 }
 
 function isHttpUrl(url: string): boolean {
@@ -241,7 +269,7 @@ function run(
       check.wordsPrinted < minutes * MIN_WORDS_PER_EXPECTED_MINUTE;
     const scholarly =
       source === "web" &&
-      (metaContent(doc, "citation_pdf_url") !== "" || metaContent(doc, "citation_title") !== "") &&
+      isScholarlyLanding(doc) &&
       check.wordsPrinted < ABSTRACT_MAX_WORDS;
     if (shell || tiny || scholarly || partOnly) {
       if (scholarly) warnings.push({ code: "abstract-only", message: WARN.abstractOnly });
@@ -256,7 +284,9 @@ function run(
               ? `Scholarly landing page with ${check.wordsPrinted} words (citation meta present).`
               : `Only ${check.wordsPrinted} words for a ${minutes}-minute read (minimum ${MIN_WORDS_PER_EXPECTED_MINUTE} words per minute).`,
       );
-      return result("too-short", MESSAGES.tooShort, source, check, warnings, document);
+      // The headline message must fit the reason (874 words is not "very little text").
+      const message = shell || tiny ? MESSAGES.tooShort : scholarly ? MESSAGES.paperSummary : MESSAGES.partOnly;
+      return result("too-short", message, source, check, warnings, document);
     }
 
     // ── Warnings ──
