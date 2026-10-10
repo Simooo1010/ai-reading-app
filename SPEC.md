@@ -101,7 +101,7 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 
 **Goal.** From any source, give Marcus a clean A4 printout (or PDF) with all of its text and none of the clutter. Read-only: it never writes to Notion (§5 is unchanged).
 
-**Place in the build.** After the new design is applied to the app (it uses the new design, not the current screens). Build order: new design → Print → deploy checks. The extraction code in `lib/print/` has no UI and can be built before the design lands.
+**Place in the build.** Step 6 of the build order (see §12). It uses the new design. The extraction code in `lib/print/` has no UI.
 
 **Used sometimes, not always.** Print is a quiet, secondary feature:
 - It is a small option on each source, not a main button: a quiet text link "Print" (thin printer icon) under the actions on the Today card and in the Path detail sheet, and an icon-only link at the end of each Path row. For a direct PDF it reads "Open PDF" and opens the PDF in a new tab. It must never compete with Open source, Start, Done or Skip.
@@ -155,11 +155,11 @@ The controls look like the rest of this app. Pressroom's own styling is not copi
 **Fidelity rules ("no bugs, truthfully")**
 1. Nothing is dropped silently. Before printing, a check line shows words found on the page against words printed, and images, tables and code blocks kept against found.
 2. An element we cannot print becomes a visible placeholder with its link, for example "[Video not printed: <link>]".
-3. Paywall or login wall detected, or the extracted text is far too short for the page: no half-clean page. Show a clear message and an **Open source** button.
+3. Blocked by the site (bot challenge, 401/403), or nothing usable found: no print button. Show a clear message and an **Open source** button. Paywall detected, or the extracted text is far too short for the page (for example only an abstract): the screen says so, shows what was found behind an explicit notice, and the button reads **Print what we found**. The printout itself carries a visible "Partial printout" line in its header and footer, so a partial page can never pass for a complete one.
 4. Generic extraction can remove real content by mistake, so the check in rule 1 compares against the full page text, not against what the extractor kept.
 5. Every printout ends with title, author, date and the source URL.
 6. Content from outside is sanitized before it reaches the page (no scripts, no event handlers).
-7. Parsed articles are cached per URL (about 24 h). A failed parse is not cached.
+7. Parsed articles are cached per URL (about 24 h, at most 30 documents per server). Blocked, failed and too-short results are not cached.
 
 **Acceptance tests.** Saved real pages as test fixtures (fixtures in tests are allowed): at least 5 Substack posts (one with images, one with a table or code, one with a video embed, one paywalled), 5 non-Substack pages from the real list, 2 arXiv items (one with an HTML version, one without) and 2 PDF items. For each page fixture the printed word count is within 2 % of the source word count, or the check line says why not. Plus unit tests for URL rewriting, the paragraph-structure guarantee, the paywall and too-short detection, and the page-packing rules (heading stays with the next block, figure does not split).
 
@@ -186,3 +186,12 @@ Notes/summaries, quizzes, proposals inbox, multi-user, any login beyond the shar
 
 ## 11. Done when
 Deployed on Vercel; all three screens work on iPhone with the real Notion data; marking an item Done in the app updates `Status` and `Done on` in Notion.
+
+## 12. Build order
+1. Project scaffold and the Notion client (live schema checked against §4).
+2. Today screen with Start / Done / Skip (writes only `Status` and `Done on`).
+3. Reading Room design applied to all screens, and the Path screen.
+4. Progress screen (`lib/stats.ts` pure functions with unit tests, inline SVG charts).
+5. Password gate (`APP_PASSWORD`, signed httpOnly cookie, `proxy.ts`, login screen).
+6. Print source (§7.4): extraction pipeline, then the print page and the quiet Print option, then a test on all real links.
+7. Deploy to Vercel (environment variables: `NOTION_TOKEN`, `NOTION_DATABASE_ID`, `APP_PASSWORD`, for Production and Preview).
