@@ -121,6 +121,14 @@ describe("progressData", () => {
     });
   });
 
+  it("date projection with a very slow pace says minutes, not '0 h'", () => {
+    // 10 min done in the last 28 days → 2.5 min a week (0.04 h).
+    const items = [item("Done", { doneOn: "2026-10-08", readingTimeMin: 10 }), item("To read", { readingTimeMin: 30 })];
+    const d = progressData(items, TODAY);
+    expect(d.projection.kind).toBe("date");
+    if (d.projection.kind === "date") expect(d.projection.helper).toBe("at your pace of 3 min a week");
+  });
+
   it("finished: nothing left that is not Done or Skipped", () => {
     const d = progressData([item("Done", { doneOn: TODAY }), item("Skipped")], TODAY);
     expect(d.projection).toEqual({ kind: "finished" });
@@ -142,14 +150,27 @@ describe("small formatters", () => {
     expect(formatStreakDays(12)).toBe("12 days");
   });
 
-  it("formatWeeklyPace rounds half up from minutes", () => {
-    // 105 min in 28 days → 26.25 min a week → 0.4375 h → "0.4"
-    expect(formatWeeklyPace(105 / 60 / 4)).toBe("0.4");
-    // 630 min → 157.5 min a week = 2.625 h → "2.6"
-    expect(formatWeeklyPace(630 / 60 / 4)).toBe("2.6");
-    // 6 min a week exactly 0.1 h
-    expect(formatWeeklyPace(24 / 60 / 4)).toBe("0.1");
-    expect(formatWeeklyPace(0)).toBe("0");
+  it("formatWeeklyPace rounds half up from minutes, with the unit", () => {
+    // 105 min in 28 days → 26.25 min a week → 0.4375 h → "0.4 h"
+    expect(formatWeeklyPace(105 / 60 / 4)).toBe("0.4 h");
+    // 630 min → 157.5 min a week = 2.625 h → "2.6 h"
+    expect(formatWeeklyPace(630 / 60 / 4)).toBe("2.6 h");
+    // 2.55 h a week = 153 min → 25.5 tenths → half up → "2.6 h"
+    expect(formatWeeklyPace(2.55)).toBe("2.6 h");
+    // 6 min a week is exactly 0.1 h: still hours
+    expect(formatWeeklyPace(24 / 60 / 4)).toBe("0.1 h");
+    expect(formatWeeklyPace(0.1)).toBe("0.1 h");
+    expect(formatWeeklyPace(0)).toBe("0 min");
+  });
+
+  it("formatWeeklyPace shows minutes below 0.1 h (QA LOW-1: never '0 h')", () => {
+    // 10 min in 28 days → 2.5 min a week = 0.0417 h → "3 min"
+    expect(formatWeeklyPace(10 / 60 / 4)).toBe("3 min");
+    expect(formatWeeklyPace(0.0417)).toBe("3 min");
+    // 5.75 min a week → "6 min" (rounded), still below 0.1 h
+    expect(formatWeeklyPace(23 / 60 / 4)).toBe("6 min");
+    // A tiny pace never reads "0 min"
+    expect(formatWeeklyPace(1 / 60 / 4)).toBe("1 min");
   });
 });
 

@@ -66,6 +66,11 @@ function subscribe(listener: () => void): () => void {
 
 const serverTarget = () => DEFAULT_TARGET_HOURS;
 
+// true only after hydration: the stored target has been read (QA LOW-2).
+const noSubscribe = () => () => {};
+const onClient = () => true;
+const onServer = () => false;
+
 // ---------- Target form (presentational, controlled) ----------
 
 export function TargetForm({
@@ -138,6 +143,7 @@ export function TargetForm({
 /** "Hours per week" section: Edit target + WeekBars. */
 export function WeeklyHours({ weeks }: { weeks: WeekHours[] }) {
   const target = useSyncExternalStore(subscribe, readTarget, serverTarget);
+  const targetRead = useSyncExternalStore(noSubscribe, onClient, onServer);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -212,7 +218,17 @@ export function WeeklyHours({ weeks }: { weeks: WeekHours[] }) {
           onCancel={close}
         />
       )}
-      <WeekBars weeks={weeks} targetHours={target} />
+      {/* Until the saved target is read, the chart keeps its space but is not
+          shown: it never flashes the default 5 h. Without JavaScript the
+          <noscript> style shows it with the default. */}
+      <div className="rr-week-chart" data-target-pending={targetRead ? undefined : ""}>
+        <WeekBars weeks={weeks} targetHours={target} />
+      </div>
+      {!targetRead && (
+        <noscript>
+          <style>{".rr-week-chart[data-target-pending]{visibility:visible}"}</style>
+        </noscript>
+      )}
       <p className="rr-chart__caption">
         Weeks start on Monday. Solid bar: this week.
       </p>

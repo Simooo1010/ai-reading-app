@@ -36,19 +36,30 @@ function loginUrl(request: NextRequest): URL {
   return url;
 }
 
+/** Where a signed-in visitor of /login goes: the sanitized `next`, never /login itself. */
+function signedInTarget(request: NextRequest): URL {
+  let next = sanitizeNextPath(request.nextUrl.searchParams.get("next"));
+  const parsed = new URL(next, "http://same-origin.invalid");
+  if (parsed.pathname === "/login") next = DEFAULT_NEXT_PATH; // no redirect loop
+  const url = request.nextUrl.clone();
+  const target = new URL(next, "http://same-origin.invalid");
+  url.pathname = target.pathname;
+  url.search = target.search;
+  url.hash = "";
+  return url;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method.toUpperCase();
   const authed = await verifySessionToken(request.cookies.get(AUTH_COOKIE)?.value);
 
   if (pathname === "/login") {
-    // Signed in already: go to Today. Only for page loads; the login form
-    // POST still reaches its server action.
+    // Signed in already: go to `next` (sanitized: a same-origin relative
+    // path), else Today. Only for page loads; the login form POST still
+    // reaches its server action.
     if (authed && (method === "GET" || method === "HEAD")) {
-      const url = request.nextUrl.clone();
-      url.pathname = DEFAULT_NEXT_PATH;
-      url.search = "";
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(signedInTarget(request));
     }
     // Hand the sanitized `next` to the login action (see LOGIN_NEXT_HEADER).
     // The form posts to the same URL, so the action sees the same query.

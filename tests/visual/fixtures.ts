@@ -50,6 +50,20 @@ export const UP_NEXT = [4, 5, 6].map((order) => ({
   layer: "3 · Species" as const,
 }));
 
+/** Up next rows with a long author list and a long layer chip (overflow check at 360 px). */
+export const UP_NEXT_LONG = [
+  { order: 7, author: "Fixture Author One, Fixture Author Two, Fixture Author Three, Fixture Author Four", layer: "1 · Foundations" as const },
+  { order: 8, author: "Fixture Writer, Another Fixture Writer", layer: "5 · Counterweights" as const },
+  { order: 9, author: "Fixture Author", layer: "2 · Leaders" as const },
+].map(({ order, author, layer }) => ({
+  id: `00000000-0000-0000-0000-00000000000${order}`,
+  order,
+  title: `Fixture item ${order}`,
+  author,
+  readingTimeMin: 30,
+  layer,
+}));
+
 function row(order: number, status: Status, min = 15, title?: string): PathRowData {
   return {
     id: `00000000-0000-0000-0000-${String(order).padStart(12, "0")}`,

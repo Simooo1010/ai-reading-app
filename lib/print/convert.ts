@@ -729,6 +729,58 @@ export function isContentForm(form: Element): boolean {
  * (counted), emoji images turned into their text, lazy images from <noscript>
  * recovered. Returns the counts it made.
  */
+/**
+ * The whole text of a page control that is not part of the article. Exact,
+ * case-insensitive matches only: real prose is never touched.
+ */
+export const CONTROL_LABELS = new Set([
+  "copy citation",
+  "download citation",
+  "cite",
+  "share",
+  "print this page",
+  "save",
+  "bookmark",
+  "email",
+]);
+
+const CONTROL_CANDIDATES = "a, button, [role=button], div, span, p, label, summary";
+/** Never touched: a heading, a table cell, a caption or code with that text is content. */
+const KEEP_INSIDE = "h1, h2, h3, h4, h5, h6, td, th, caption, figcaption, pre, blockquote";
+const INLINE_CONTROLS = new Set(["a", "span", "label"]);
+
+/**
+ * Removes standalone controls whose whole visible text is one of
+ * CONTROL_LABELS (QA LOW-4: nber.org printed "Copy Citation" and "Download
+ * Citation"). Counted as removed widgets. Returns how many were removed.
+ */
+export function removeControlLabels(root: Element, report: ConvertReport): number {
+  let removed = 0;
+  for (const el of Array.from(root.querySelectorAll(CONTROL_CANDIDATES))) {
+    if (!root.contains(el)) continue; // an ancestor was removed already
+    // Hidden parts are already gone here; textContent also reads button labels.
+    const shown = normalizeSpace(el.textContent ?? "");
+    const text = shown.toLowerCase();
+    if (!CONTROL_LABELS.has(text)) continue;
+    const keep = el.closest(KEEP_INSIDE);
+    if (keep && root.contains(keep)) continue;
+    // An inline word inside a sentence ("Click Share to…") is prose: only a
+    // link/span that is the whole text of its parent is a standalone control.
+    const parent = el.parentElement;
+    if (INLINE_CONTROLS.has(tagOf(el)) && parent && parent !== root) {
+      if (normalizeSpace(parent.textContent ?? "").toLowerCase() !== text) continue;
+    }
+    if (el.querySelector(`img, picture, svg, math, table, iframe, video, ${KEEP_INSIDE}`)) continue;
+    const words = countWords(text);
+    report.widgetsRemoved++;
+    report.widgetWords += words;
+    report.details.push(`Removed on purpose: a "${shown}" control (${words} words).`);
+    el.remove();
+    removed++;
+  }
+  return removed;
+}
+
 export function prepareContent(root: Element, report: ConvertReport, widgetSelectors: string[] = []): void {
   // One pass: lazy images recovered from <noscript>, then noscript and invisible parts removed.
   let noscriptWords = 0;
@@ -783,6 +835,9 @@ export function prepareContent(root: Element, report: ConvertReport, widgetSelec
     }
     el.remove();
   }
+
+  // Lone page controls ("Copy Citation", "Share" …) outside the text blocks.
+  removeControlLabels(root, report);
 
   // Emoji images print as their text.
   for (const img of Array.from(root.querySelectorAll("img.emoji, img.wp-smiley, img[data-emoji]"))) {

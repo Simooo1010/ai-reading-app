@@ -114,6 +114,28 @@ describe("proxy: signed in", () => {
     expect(res.status).toBe(307);
     expect(new URL(res.headers.get("location")!).pathname).toBe("/today");
   });
+
+  // QA LOW-6: /login?next=/progress while signed in went to /today.
+  it("GET /login?next=… goes to the sanitized next (same origin only)", async () => {
+    const token = (await createSessionToken())!;
+    const go = async (path: string) => {
+      const res = await proxy(req(path, { cookie: token }));
+      expect(res.status).toBe(307);
+      const loc = new URL(res.headers.get("location")!);
+      expect(loc.origin).toBe(new URL(req("/").url).origin);
+      return loc.pathname + loc.search;
+    };
+    expect(await go("/login?next=%2Fprogress")).toBe("/progress");
+    expect(await go("/login?next=/path")).toBe("/path");
+    expect(await go("/login?next=%2Fprint%2Fabc%3Ffrom%3Dpath")).toBe("/print/abc?from=path");
+    // Open-redirect tricks and loops fall back to /today.
+    expect(await go("/login?next=%2F%2Fevil.com")).toBe("/today");
+    expect(await go("/login?next=https%3A%2F%2Fevil.com%2Fx")).toBe("/today");
+    expect(await go("/login?next=%2F%5Cevil.com")).toBe("/today");
+    expect(await go("/login?next=%2F%252F%252Fevil.com")).toBe("/today");
+    expect(await go("/login?next=%2Flogin%3Fnext%3D%252Fpath")).toBe("/today");
+    expect(await go("/login?next=")).toBe("/today");
+  });
 });
 
 describe("matcher and isPublicPath", () => {

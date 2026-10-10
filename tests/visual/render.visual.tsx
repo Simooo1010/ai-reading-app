@@ -31,6 +31,7 @@ import {
   PROGRESS_TODAY,
   READING_COUNTERWEIGHT,
   UP_NEXT,
+  UP_NEXT_LONG,
   card,
 } from "./fixtures";
 
@@ -99,6 +100,9 @@ it("renders fixture pages", () => {
   page("today-undo-error", "Today",
     <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} upNext={UP_NEXT} />,
     <UndoToast message="Could not save. Please try again." pending={false} showClose />);
+  // Long author lists must wrap, never make the page wider than the phone.
+  page("today-long-authors", "Today",
+    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} upNext={UP_NEXT_LONG} />);
   page("today-empty", "Today", <TodayView context="All done" card={null} actions={null} upNext={[]} />);
   page("today-loading", "Today", <ScreenSkeleton title="Today" variant="card" />);
   page("path-loading", "Path", <ScreenSkeleton title="Path" variant="list" />);

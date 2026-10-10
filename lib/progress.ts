@@ -73,12 +73,20 @@ export function formatStreakDays(days: number): string {
 }
 
 /**
- * Average weekly hours of the projection as "2.5" (1 decimal, half up).
- * weeklyAverage = window minutes / 60 / 4, so × 240 gives the window minutes
- * back (rounded to undo float error) and / 4 the weekly minutes.
+ * Average weekly pace of the projection, with its unit: "2.6 h" (1 decimal,
+ * half up), or "3 min" below 0.1 h a week (QA LOW-1: "0 h a week" for a pace
+ * of 2.5 minutes). weeklyAverage = window minutes / 60 / 4, so × 240 gives
+ * the window minutes back (rounded to undo float error) and / 4 the weekly
+ * minutes.
  */
 export function formatWeeklyPace(weeklyAverage: number): string {
-  return formatHours(Math.round(weeklyAverage * 240) / 4);
+  const weeklyMinutes = Math.round(weeklyAverage * 240) / 4;
+  if (weeklyMinutes < 6) {
+    // A pace above 0 never shows as "0 min".
+    const min = weeklyMinutes > 0 ? Math.max(1, Math.round(weeklyMinutes)) : 0;
+    return `${min} min`;
+  }
+  return `${formatHours(weeklyMinutes)} h`;
 }
 
 export function progressData(
@@ -95,7 +103,7 @@ export function progressData(
     projection = {
       kind: "date",
       dateText: formatDateLong(p.date),
-      helper: `at your pace of ${formatWeeklyPace(p.weeklyAverage)} h a week`,
+      helper: `at your pace of ${formatWeeklyPace(p.weeklyAverage)} a week`,
     };
   } else {
     projection = { kind: p.kind };

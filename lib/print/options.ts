@@ -93,3 +93,16 @@ export function applyOptions(doc: Pick<PrintDocument, "elements"> | null | undef
   }
   return out;
 }
+
+/**
+ * Printed images that will show "Image could not be loaded" instead of the
+ * picture: the browser failed to load them, or the address is not usable.
+ * Counted once per image element in `elements` (the elements that print).
+ */
+export function countImagesNotLoaded(elements: readonly PrintElement[], failed: ReadonlySet<string>): number {
+  let n = 0;
+  for (const el of elements) {
+    if (el.type === "image" && (!isPrintableImageSrc(el.src) || failed.has(el.src))) n++;
+  }
+  return n;
+}

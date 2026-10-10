@@ -463,9 +463,17 @@
 
 .rr-row__line {
   display: flex;
+  flex-wrap: wrap; /* a long author list never makes the row wider than the screen */
   align-items: center;
   justify-content: space-between;
-  gap: var(--rr-space-2);
+  gap: var(--rr-space-1) var(--rr-space-2);
+}
+
+/* The chip stays on the right, also when it wraps under a long meta line */
+.rr-row__line > .rr-chip,
+.rr-row__line > .rr-status {
+  flex: none;
+  margin-left: auto;
 }
 
 .rr-row__meta {
@@ -475,7 +483,10 @@
   font-style: italic;
   color: var(--rr-ink-2);
   font-variant-numeric: lining-nums tabular-nums;
-  white-space: nowrap;
+  /* Short meta ("30 min") stays on one line; a long author list wraps */
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Dotted leader between meta and chip (Path) */
@@ -783,6 +794,11 @@
   overflow: visible;
   font-family: inherit;
   font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Weekly chart: hidden (space kept) until the saved target is read; see WeeklyHours */
+.rr-week-chart[data-target-pending] {
+  visibility: hidden;
 }
 
 .rr-chart__caption {

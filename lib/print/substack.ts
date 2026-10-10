@@ -13,6 +13,7 @@ import {
   metaContent,
   normalizeDate,
   readJsonLd,
+  subtitleUnlessRepeated,
   textOf,
   type LdArticle,
 } from "./meta";
@@ -185,7 +186,15 @@ export function extractSubstack(doc: Document, url: string, baseUrl: string): Su
     heroImage = undefined;
   }
 
-  const document: PrintDocument = { url, title, subtitle, author, publication, date, elements: convert.elements };
+  const document: PrintDocument = {
+    url,
+    title,
+    subtitle: subtitleUnlessRepeated(subtitle, convert.elements, doc),
+    author,
+    publication,
+    date,
+    elements: convert.elements,
+  };
   if (heroImage) document.heroImage = heroImage;
   if (paywall.paywalled) details.push(`Paywall markers: ${paywall.markers.join(", ")}.`);
   return { document, contentNode: node, convert, paywall, details };

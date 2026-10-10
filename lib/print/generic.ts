@@ -9,11 +9,13 @@ import { countNodeWords, countWords, emptyReport, visibleText } from "./fidelity
 import {
   cleanAuthor,
   hostLabel,
+  htmlText,
   joinAuthors,
   metaAll,
   metaContent,
   normalizeDate,
   readJsonLd,
+  sameText,
   textOf,
   type LdArticle,
 } from "./meta";
@@ -402,6 +404,100 @@ export interface GenericExtraction {
   details: string[];
 }
 
+// ─── arXiv (LaTeXML) front matter ────────────────────────────────────
+
+/**
+ * LaTeXML front matter, cleaned so the printout reads well (QA MEDIUM-1):
+ * - the document title (h1.ltx_title_document) is removed when it equals the
+ *   title in the printed header (it would print twice);
+ * - in the author block, footnote marks ("footnotemark: 1"), the "†thanks:"
+ *   labels and the "Affiliation:" / "Email:" labels are removed; each author
+ *   becomes "Name (affiliation; email)" and the "thanks" notes (real text:
+ *   "Equal contribution. …") follow as their own paragraphs.
+ * Returns the words removed on purpose (counted as removed widgets, never as loss).
+ */
+export function cleanLatexmlFrontMatter(root: Element, title: string): { words: number; details: string[] } {
+  const details: string[] = [];
+  let words = 0;
+
+  const h1 = root.querySelector("h1.ltx_title_document");
+  if (h1 && sameText(textOf(h1), title)) {
+    const w = countNodeWords(h1);
+    words += w;
+    h1.remove();
+    details.push(`Removed on purpose: the paper title above the authors (${w} words; it is in the printed header).`);
+  }
+
+  for (const block of Array.from(root.querySelectorAll(".ltx_authors"))) {
+    const before = countNodeWords(block);
+    // Pure footnote marks: only a symbol and the word "footnotemark".
+    for (const el of Array.from(block.querySelectorAll(".ltx_note.ltx_role_footnotemark"))) el.remove();
+    // "thanks" notes: keep their text, drop the marks and the "thanks:" label.
+    const notes: string[] = [];
+    for (const note of Array.from(block.querySelectorAll(".ltx_note"))) {
+      if (!block.contains(note)) continue;
+      for (const el of Array.from(note.querySelectorAll(".ltx_note_mark, .ltx_note_type"))) el.remove();
+      const content = note.querySelector(".ltx_note_content") ?? note;
+      if (countNodeWords(content) > 0) notes.push(content.innerHTML.trim());
+      note.remove();
+    }
+    // One paragraph per author with an affiliation or email; authors without
+    // one in a row share a paragraph ("A, B, C").
+    const parts: string[] = [];
+    let plain: string[] = [];
+    const flushPlain = () => {
+      if (plain.length) parts.push(plain.join(", "));
+      plain = [];
+    };
+    for (const creator of Array.from(block.querySelectorAll(".ltx_creator"))) {
+      const contacts: string[] = [];
+      for (const c of Array.from(creator.querySelectorAll(".ltx_contact"))) {
+        for (const label of Array.from(c.querySelectorAll(".ltx_contact_name"))) label.remove();
+        if (countNodeWords(c) > 0) contacts.push(c.innerHTML.trim());
+      }
+      const name = creator.querySelector(".ltx_personname");
+      for (const n of Array.from(creator.querySelectorAll(".ltx_author_notes"))) n.remove();
+      const nameHtml = (name ?? creator).innerHTML.trim();
+      if (!nameHtml && contacts.length === 0) continue;
+      if (contacts.length === 0) {
+        plain.push(nameHtml);
+        continue;
+      }
+      flushPlain();
+      parts.push(`${nameHtml} (${contacts.join("; ")})`);
+    }
+    flushPlain();
+    if (parts.length === 0) continue; // unknown layout: leave it as it is
+    // Anything else in the block (e.g. a shared affiliation line) stays, after the authors.
+    for (const el of Array.from(block.querySelectorAll(".ltx_creator, .ltx_author_before"))) el.remove();
+    const rest = block.innerHTML.trim();
+    block.innerHTML =
+      parts.map((h) => `<p>${h}</p>`).join("") +
+      (countNodeWords(block) > 0 ? `<div>${rest}</div>` : "") +
+      notes.map((h) => `<p>${h}</p>`).join("");
+    const removed = Math.max(0, before - countNodeWords(block));
+    if (removed > 0) {
+      words += removed;
+      details.push(`Removed on purpose: footnote marks and "thanks" / "Affiliation" / "Email" labels in the author block (${removed} words).`);
+    }
+  }
+  return { words, details };
+}
+
+/**
+ * A first block that only repeats the document title (it is already in the
+ * printed header) is removed. Only the FIRST element, only a heading, only
+ * when its text equals the title. Returns the words removed (0 if none).
+ */
+export function dropRepeatedTitle(elements: PrintDocument["elements"], title: string, doc: Document): number {
+  const first = elements[0];
+  if (!first || first.type !== "heading") return 0;
+  const text = htmlText(first.html, doc);
+  if (!sameText(text, title)) return 0;
+  elements.shift();
+  return countWords(text);
+}
+
 export function extractGeneric(
   doc: Document,
   url: string,
@@ -415,6 +511,8 @@ export function extractGeneric(
   let chosenNode: Element;
   let kind: CandidateKind;
   let hiddenWords = 0;
+  let frontWords = 0;
+  let frontDetails: string[] = [];
   let rmeta: ReadabilityMeta = { title: "", byline: "", siteName: "", publishedTime: "" };
   const ltx = opts.arxiv ? doc.querySelector("article.ltx_document") : null;
   if (ltx) {
@@ -425,6 +523,9 @@ export function extractGeneric(
       if (chosenNode.contains(el)) el.remove();
     }
     hiddenWords = removeHidden(chosenNode);
+    const front = cleanLatexmlFrontMatter(chosenNode, textOf(doc.querySelector(".ltx_title_document")));
+    frontWords = front.words;
+    frontDetails = front.details;
     kind = "article";
     details.push("Content: arXiv HTML article (LaTeXML).");
   } else {
@@ -445,6 +546,12 @@ export function extractGeneric(
 
   const convert = convertContent(chosenNode, { baseUrl });
   convert.report.hiddenWords += hiddenWords;
+  if (frontWords > 0) {
+    // Removed before conversion: on purpose, never loss.
+    convert.report.widgetsRemoved++;
+    convert.report.widgetWords += frontWords;
+    convert.report.details.push(...frontDetails);
+  }
 
   // ── Metadata ──
   const h1 = textOf(doc.querySelector("h1"));
@@ -503,6 +610,15 @@ export function extractGeneric(
     if (u && (u.protocol === "https:" || u.protocol === "http:")) heroImage = u.href.replace(/^http:/, "https:");
   } catch {
     heroImage = undefined;
+  }
+
+  const repeated = dropRepeatedTitle(convert.elements, title, doc);
+  if (repeated > 0) {
+    // It was counted as found: move it from "found" to "removed on purpose".
+    convert.wordsFound -= repeated;
+    convert.report.widgetsRemoved++;
+    convert.report.widgetWords += repeated;
+    convert.report.details.push(`Removed on purpose: a first heading that repeats the title (${repeated} words).`);
   }
 
   const document: PrintDocument = {

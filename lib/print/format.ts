@@ -3,7 +3,7 @@
 // imports this file directly. lib/print/fidelity.ts re-exports the check-line
 // helpers so server code and old imports keep working.
 
-import type { FidelityCheck, PrintDocument } from "./types";
+import type { FidelityCheck, PrintDocument, PrintStatus, PrintWarning, PrintWarningCode } from "./types";
 
 export const TOLERANCE = 0.02;
 /** Hidden words below this are not mentioned in the check line (tiny tooltips, labels). */
@@ -25,10 +25,12 @@ export function formatNumber(n: number): string {
  * The check line for the UI, in simple English. It never says the check
  * passed when `withinTolerance` is false.
  */
-export function formatCheckLine(check: FidelityCheck): string {
+export function formatCheckLine(check: FidelityCheck, opts: { imagesNotLoaded?: number } = {}): string {
+  // Images the browser could not load print as a web address, not as a picture.
+  const notLoaded = Math.min(Math.max(0, Math.floor(opts.imagesNotLoaded ?? 0)), check.imagesKept);
   const parts: string[] = [];
   parts.push(`Words: ${formatNumber(check.wordsFound)} found, ${formatNumber(check.wordsPrinted)} printed.`);
-  parts.push(`Images: ${check.imagesKept} of ${check.imagesFound}.`);
+  parts.push(`Images: ${check.imagesKept - notLoaded} of ${check.imagesFound}.`);
   parts.push(`Tables: ${check.tablesKept} of ${check.tablesFound}.`);
   if (check.codeFound > 0 || check.codeKept > 0) parts.push(`Code blocks: ${check.codeKept} of ${check.codeFound}.`);
   if (check.embedsPlaceholdered > 0) {
@@ -41,6 +43,10 @@ export function formatCheckLine(check: FidelityCheck): string {
       `${check.skippedUnsupported} part${check.skippedUnsupported === 1 ? "" : "s"} of the page could not be printed and ${check.skippedUnsupported === 1 ? "is" : "are"} marked in the text.`,
     );
   }
+  const notLoadedLine =
+    notLoaded > 0
+      ? `${notLoaded === 1 ? "1 image" : `${notLoaded} images`} could not be loaded: the printout shows ${notLoaded === 1 ? "its web address" : "their web addresses"} instead.`
+      : "";
   if (!check.withinTolerance) {
     const diff = Math.round(Math.abs(1 - check.ratio) * 100);
     if (check.wordsFound === 0) {
@@ -50,6 +56,9 @@ export function formatCheckLine(check: FidelityCheck): string {
     } else {
       parts.push(`Check failed: the printout has about ${diff}% more words than we found.`);
     }
+    if (notLoadedLine) parts.push(notLoadedLine);
+  } else if (notLoaded > 0) {
+    parts.push(`Check: all words are here, but ${notLoadedLine}`);
   } else if (check.imagesKept < check.imagesFound || check.tablesKept < check.tablesFound || check.codeKept < check.codeFound) {
     parts.push("Check: all words are here, but some images, tables or code blocks are missing.");
   } else {
@@ -78,6 +87,8 @@ export interface PageCheckInput {
   excludedWords: number;
   /** Words counted in the packed page DOM, or null while the pages are not ready. */
   wordsOnPages: number | null;
+  /** Printed images the browser could not load (shown as their web address). */
+  imagesNotLoaded?: number;
 }
 
 export interface PageCheck {
@@ -91,6 +102,8 @@ export interface PageCheck {
   expectedWords: number;
   /** True when the pages differ from the expected words by more than 2 %. */
   mismatch: boolean;
+  /** Images that could not be loaded (0 when all loaded). The check line says so; it never says "Check passed" then. */
+  imagesNotLoaded: number;
 }
 
 function plural(n: number, one: string, many: string): string {
@@ -99,6 +112,7 @@ function plural(n: number, one: string, many: string): string {
 
 export function pageCheck(input: PageCheckInput): PageCheck {
   const { check, excludedEmbeds, removedImages, excludedWords, wordsOnPages } = input;
+  const imagesNotLoaded = Math.min(Math.max(0, Math.floor(input.imagesNotLoaded ?? 0)), check.imagesKept);
   const left: string[] = [];
   if (excludedEmbeds > 0) left.push(plural(excludedEmbeds, "embed", "embeds"));
   if (removedImages > 0) left.push(plural(removedImages, "image", "images"));
@@ -109,12 +123,36 @@ export function pageCheck(input: PageCheckInput): PageCheck {
     mismatch = expectedWords === 0 ? wordsOnPages !== 0 : diff / expectedWords > TOLERANCE;
   }
   return {
-    checkLine: formatCheckLine(check),
+    checkLine: formatCheckLine(check, { imagesNotLoaded }),
     leftOut: left.length ? `Left out by you: ${left.join(", ")}.` : null,
     onPages: wordsOnPages === null ? null : `On the pages: ${formatNumber(wordsOnPages)} words.`,
     expectedWords,
     mismatch,
+    imagesNotLoaded,
   };
+}
+
+// ─── Notice on the print screen ───────────────────────────────────────
+
+/** Warnings that only repeat the headline message of a partial result (QA LOW-3). */
+const COVERED_BY_MESSAGE: Partial<Record<PrintStatus, readonly PrintWarningCode[]>> = {
+  "too-short": ["too-short", "abstract-only"],
+  paywalled: ["paywall"],
+};
+
+/**
+ * The bullet list under the notice: each message once, without the warnings
+ * the headline message already says (too short, summary only, paywall).
+ */
+export function noticeWarnings(status: PrintStatus, warnings: readonly PrintWarning[]): string[] {
+  const covered = COVERED_BY_MESSAGE[status] ?? [];
+  const out: string[] = [];
+  for (const w of warnings) {
+    if (covered.includes(w.code)) continue;
+    const m = w.message.trim();
+    if (m && !out.includes(m)) out.push(m);
+  }
+  return out;
 }
 
 // ─── Dates and names ──────────────────────────────────────────────────

@@ -9,8 +9,8 @@
 
 import "@/design-system/print.css";
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
-import { pageCheck, pdfTitle } from "@/lib/print/format";
-import { applyOptions } from "@/lib/print/options";
+import { noticeWarnings, pageCheck, pdfTitle } from "@/lib/print/format";
+import { applyOptions, countImagesNotLoaded } from "@/lib/print/options";
 import { elementTraits } from "@/lib/print/pages";
 import type { PrintSettings } from "@/lib/print/settings";
 import type { PrintResult } from "@/lib/print/types";
@@ -56,10 +56,6 @@ function OpenSource({ link, primary }: { link: string; primary: boolean }) {
       <span className="rr-sr-only"> (opens in a new tab)</span>
     </a>
   );
-}
-
-function uniqueMessages(list: string[]): string[] {
-  return Array.from(new Set(list.filter((s) => s && s.trim())));
 }
 
 export default function PrintClient({
@@ -181,6 +177,8 @@ export default function PrintClient({
     excludedWords: options.excludedWords,
     // A report for other blocks (an image was just removed) is not used.
     wordsOnPages: report && report.blocksKey === blocksKey ? report.wordsOnPages : null,
+    // Images that print as "Image could not be loaded": never a clean "Check passed".
+    imagesNotLoaded: countImagesNotLoaded(options.elements, failed),
   });
 
   // ── Print: a good PDF file name, then restore the tab title ──
@@ -205,7 +203,8 @@ export default function PrintClient({
 
   const ready = report !== null && report.blocksKey === blocksKey;
   const hasEmbeds = !!doc && doc.elements.some((e) => e.type === "embed");
-  const warnings = uniqueMessages(result.warnings.map((w) => w.message));
+  // Not the warnings the headline message already says (no reason twice).
+  const warnings = noticeWarnings(result.status, result.warnings);
   const title = item.title || doc?.title || "Untitled";
 
   return (
@@ -249,7 +248,9 @@ export default function PrintClient({
         ) : (
           <>
             {result.status === "ok" ? (
-              <p className="rr-body-italic rr-print__ready">{result.message}</p>
+              <p className="rr-body-italic rr-print__ready">
+                {check.imagesNotLoaded > 0 ? "You can print, but some images could not be loaded." : result.message}
+              </p>
             ) : (
               <section className="rr-section rr-print-notice" aria-labelledby="rr-print-notice-h">
                 <h2 className="rr-label rr-label--ink" id="rr-print-notice-h">
@@ -285,6 +286,11 @@ export default function PrintClient({
               <p className="rr-print-check__line" aria-live="polite">
                 {check.onPages ?? "Counting the words on the pages…"}
               </p>
+              {check.imagesNotLoaded > 0 ? (
+                <p className="rr-print-check__fail" role="status">
+                  {check.imagesNotLoaded === 1 ? "1 image" : `${check.imagesNotLoaded} images`} could not be loaded. Look at the preview before you print.
+                </p>
+              ) : null}
               {check.mismatch ? (
                 <p className="rr-print-check__fail" role="alert">
                   Check failed: the pages do not match the text. Do not rely on this printout.

@@ -1,6 +1,8 @@
 // Page metadata: JSON-LD, Open Graph / Twitter meta, citation meta.
 // Pure helpers over a parsed Document.
 
+import type { PrintDocument } from "./types";
+
 export interface LdArticle {
   headline: string;
   description: string;
@@ -184,4 +186,28 @@ export function joinAuthors(names: string[]): string {
   const uniq = Array.from(new Set(names.map(cleanAuthor).filter(Boolean)));
   if (uniq.length <= 2) return uniq.join(" and ");
   return `${uniq.slice(0, -1).join(", ")} and ${uniq[uniq.length - 1]}`;
+}
+
+/** Same text after collapsing white space, ignoring case ("" never matches). */
+export function sameText(a: string, b: string): boolean {
+  const n = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+  return n(a) !== "" && n(a) === n(b);
+}
+
+/** Plain text of a sanitized HTML fragment (for comparisons only). */
+export function htmlText(html: string, doc: Document): string {
+  const box = doc.createElement("div");
+  box.innerHTML = html;
+  return textOf(box);
+}
+
+/**
+ * The subtitle to print: "" when it only repeats the text of the first
+ * printed block (QA LOW-5: Substack #81 printed "Disclaimers:" twice). The
+ * block itself always stays, so the word counts do not change.
+ */
+export function subtitleUnlessRepeated(subtitle: string, elements: PrintDocument["elements"], doc: Document): string {
+  const first = elements[0];
+  if (!subtitle || !first || (first.type !== "paragraph" && first.type !== "heading")) return subtitle;
+  return sameText(htmlText(first.html, doc), subtitle) ? "" : subtitle;
 }
