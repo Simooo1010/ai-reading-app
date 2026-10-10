@@ -34,6 +34,15 @@ export function ChevronIcon() {
   );
 }
 
+/** Printer for the quiet "Print" / "Open PDF" entry points (SPEC §7.4). */
+export function PrinterIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M4.5 6V2.5h7V6M4.5 11.5h-2V6h11v5.5h-2M4.5 9.5h7v4h-7z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** Pencil for "Edit target" (Progress board). */
 export function PencilIcon() {
   return (

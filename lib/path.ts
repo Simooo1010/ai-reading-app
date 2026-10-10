@@ -4,6 +4,7 @@
 // divide once and round to 1 decimal (no floating-point drift from adding
 // many small decimal hours).
 
+import { withPdfLink } from "@/lib/print/classify";
 import { pickNext } from "@/lib/today";
 import type { Item, Phase } from "@/lib/types";
 
@@ -122,7 +123,10 @@ export function formatOrder(order: number): string {
 export type PathRowData = Pick<
   Item,
   "id" | "order" | "title" | "readingTimeMin" | "status"
->;
+> & {
+  /** Only when the source is already a PDF: the link the Print icon opens. Left out otherwise (saves bytes on 189 rows). */
+  pdfLink?: string;
+};
 
 /** Everything a PhaseBlock shows, ready to render. */
 export type PhaseView = {
@@ -154,7 +158,7 @@ export function pathPhases(items: readonly Item[]): PhaseView[] {
       hoursDone: formatHours(stats.minutesDone),
       hoursTotal: formatHours(stats.minutesTotal),
       percent: stats.percent,
-      rows: group.items.map((i) => ({
+      rows: group.items.map((i) => withPdfLink(i.link, {
         id: i.id,
         order: i.order,
         title: i.title,

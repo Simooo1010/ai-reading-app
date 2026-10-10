@@ -1,3 +1,4 @@
+import { PrintLink } from "@/components/PrintLink";
 import { StatusChip } from "@/components/StatusChip";
 import { formatOrder, type PathRowData } from "@/lib/path";
 import { formatMinutes } from "@/lib/today";
@@ -5,11 +6,12 @@ import { formatMinutes } from "@/lib/today";
 /**
  * One Path row (board): order, title, minutes, dotted leader, status chip.
  * A button: PathSheetHost opens the detail sheet for `data-item-id`.
+ * The quiet Print icon is a sibling link (a link cannot sit inside a button).
  */
 export function PathRow({ row }: { row: PathRowData }) {
   const skipped = row.status === "Skipped";
   return (
-    <li>
+    <li className="rr-row-item">
       <button
         type="button"
         className={`rr-row rr-row--button${skipped ? " rr-row--skipped" : ""}`}
@@ -28,6 +30,7 @@ export function PathRow({ row }: { row: PathRowData }) {
           </span>
         </span>
       </button>
+      <PrintLink id={row.id} title={row.title} pdfLink={row.pdfLink} from="path" variant="icon" />
     </li>
   );
 }

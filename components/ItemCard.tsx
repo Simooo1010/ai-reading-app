@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ArrowUpRightIcon } from "@/components/Icons";
+import { PrintLink } from "@/components/PrintLink";
 import { StatusChip } from "@/components/StatusChip";
 import { formatMinutes, type CardData } from "@/lib/today";
 
@@ -13,6 +14,8 @@ type Props = {
   showStatus: boolean;
   /** Action rows (Start / Done / Skip …), shown under "Open source". */
   actions: ReactNode;
+  /** Screen the quiet Print link returns to. */
+  printFrom: "today" | "path";
 };
 
 /**
@@ -20,7 +23,7 @@ type Props = {
  * this (+ reading scope and "This answers" as italic lines), Open source and
  * the actions. Presentational: plain props, no data fetching.
  */
-export function ItemCard({ card, size, titleId, showStatus, actions }: Props) {
+export function ItemCard({ card, size, titleId, showStatus, actions, printFrom }: Props) {
   const time = formatMinutes(card.readingTimeMin);
   const meta = [card.type, time, card.difficulty, card.phase].filter(
     (part): part is string => Boolean(part),
@@ -86,6 +89,11 @@ export function ItemCard({ card, size, titleId, showStatus, actions }: Props) {
         </a>
         {actions}
       </div>
+
+      {/* Quiet, secondary (SPEC §7.4): under the actions, never among them. */}
+      <p className="rr-item__print">
+        <PrintLink id={card.id} title={card.title} pdfLink={card.pdfLink} from={printFrom} variant="text" />
+      </p>
     </article>
   );
 }

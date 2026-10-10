@@ -104,7 +104,7 @@ A small mobile-first web app that tells Marcus what to read next in his AI readi
 **Place in the build.** After the new design is applied to the app (it uses the new design, not the current screens). Build order: new design → Print → deploy checks. The extraction code in `lib/print/` has no UI and can be built before the design lands.
 
 **Used sometimes, not always.** Print is a quiet, secondary feature:
-- It is a small option on each source, not a main button: a small icon or "⋯" menu entry on the Today card, on Path rows and in the Path detail sheet. It must never compete with Open source, Start, Done or Skip.
+- It is a small option on each source, not a main button: a quiet text link "Print" (thin printer icon) under the actions on the Today card and in the Path detail sheet, and an icon-only link at the end of each Path row. For a direct PDF it reads "Open PDF" and opens the PDF in a new tab. It must never compete with Open source, Start, Done or Skip.
 - It costs nothing until used: no background fetching, no extra Notion calls, no effect on how fast Today loads. Its code loads only on the print page.
 - It remembers the last customization in `localStorage` (try/catch, per §7.3), so a rare use is still quick.
 

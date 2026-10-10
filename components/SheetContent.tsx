@@ -30,6 +30,7 @@ export function SheetContent({
         titleId={SHEET_TITLE_ID}
         showStatus
         actions={actions}
+        printFrom="path"
       />
     </div>
   );

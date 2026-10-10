@@ -28,6 +28,7 @@ export function TodayView({ context, card, actions, upNext }: Props) {
               titleId="today-title"
               showStatus={card.status === "Reading"}
               actions={actions}
+              printFrom="today"
             />
             <UpNext rows={upNext} />
           </>

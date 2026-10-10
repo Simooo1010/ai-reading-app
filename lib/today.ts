@@ -1,5 +1,6 @@
 // Pure logic for the Today screen (SPEC §7.1). No Notion access here.
 
+import { withPdfLink } from "@/lib/print/classify";
 import type { Item, Status } from "@/lib/types";
 
 /** An item that is still "in the path" (Status Reading or To read). */
@@ -79,10 +80,12 @@ export type CardData = Pick<
   scope: string | null;
   /** "This answers" titles (only for 5 · Counterweights items). */
   answers: string[];
+  /** Only when the source is already a PDF: the link "Open PDF" opens. Left out otherwise. */
+  pdfLink?: string;
 };
 
 export function toCardData(item: Item, all: readonly Item[]): CardData {
-  return {
+  return withPdfLink(item.link, {
     id: item.id,
     order: item.order,
     title: item.title,
@@ -99,7 +102,7 @@ export function toCardData(item: Item, all: readonly Item[]): CardData {
     scope: readScope(item.notes),
     answers:
       item.layer === "5 · Counterweights" ? pairedTitles(item, all) : [],
-  };
+  });
 }
 
 /** Today's date in Europe/Rome as YYYY-MM-DD. */

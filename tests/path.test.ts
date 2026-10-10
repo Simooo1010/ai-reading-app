@@ -241,6 +241,10 @@ describe("pathPhases", () => {
     expect(Object.keys(phases[1].rows[0]).sort()).toEqual(
       ["id", "order", "readingTimeMin", "status", "title"],
     );
+    // pdfLink is set only when the source is already a PDF (Print icon).
+    expect(phases[1].rows[0].pdfLink).toBeUndefined();
+    const pdf = { ...item(5, "To read", "Phase 2", 10), link: "https://example.com/fixture.pdf" };
+    expect(pathPhases([pdf])[0].rows[0].pdfLink).toBe("https://example.com/fixture.pdf");
   });
 
   it("has no Now phase when all is done", () => {
