@@ -347,6 +347,7 @@
 .rr-btn--link {
   height: auto;
   min-height: var(--rr-tap-min);
+  min-width: var(--rr-tap-min); /* short words ("Skip") keep a 44px hit area */
   padding: 0 var(--rr-space-1);
   border: 0;
   color: var(--rr-ink-2);
@@ -462,9 +463,17 @@
 
 .rr-row__line {
   display: flex;
+  flex-wrap: wrap; /* a long author list never makes the row wider than the screen */
   align-items: center;
   justify-content: space-between;
-  gap: var(--rr-space-2);
+  gap: var(--rr-space-1) var(--rr-space-2);
+}
+
+/* The chip stays on the right, also when it wraps under a long meta line */
+.rr-row__line > .rr-chip,
+.rr-row__line > .rr-status {
+  flex: none;
+  margin-left: auto;
 }
 
 .rr-row__meta {
@@ -474,7 +483,10 @@
   font-style: italic;
   color: var(--rr-ink-2);
   font-variant-numeric: lining-nums tabular-nums;
-  white-space: nowrap;
+  /* Short meta ("30 min") stays on one line; a long author list wraps */
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Dotted leader between meta and chip (Path) */
@@ -495,6 +507,20 @@
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
   text-decoration-color: var(--rr-ink-2);
+}
+
+/* Row that opens something (Path row -> detail sheet): a <button> with row looks */
+.rr-row--button {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--rr-rule);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Unknown / loading row */
@@ -596,8 +622,11 @@
   color: var(--rr-ink-2);
 }
 
+/* Path board: 6px bar with a thin ink-2 outline drawn inside (keeps radius-sm) */
 .rr-phase__toggle .rr-progress {
   margin-top: 2px;
+  outline: 1px solid var(--rr-ink-2);
+  outline-offset: -1px;
 }
 
 /* ---------- ProgressBar ---------- */
@@ -767,6 +796,11 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
+/* Weekly chart: hidden (space kept) until the saved target is read; see WeeklyHours */
+.rr-week-chart[data-target-pending] {
+  visibility: hidden;
+}
+
 .rr-chart__caption {
   margin: 6px 0 0;
   font-size: var(--rr-text-meta-italic-size);
@@ -853,4 +887,499 @@
 
 .rr-tabbar__tab[aria-current="page"]::before {
   background-color: var(--rr-ink);
+}
+
+/* ===================================================================
+ * Components added for screens and states that are not on the boards.
+ * Each one follows the "Adding a component" checklist in README.md.
+ * =================================================================== */
+
+/* ---------- Utilities ---------- */
+/* Text for screen readers only */
+.rr-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Content under the header (18px gap on the Today and Path boards) */
+.rr-screen__body {
+  display: flex;
+  flex-direction: column;
+  padding-top: 18px;
+}
+
+/* ---------- ItemCard (Today card, detail sheet) ---------- */
+/* chips row, title, "by Author", meta line, Why read this, actions.
+   Spacing from the Today board. */
+.rr-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.rr-item__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rr-space-2) var(--rr-space-3);
+}
+
+.rr-item__title {
+  margin: 14px 0 0;
+}
+
+.rr-item__author {
+  margin-top: 6px;
+}
+
+.rr-item__meta {
+  margin-top: var(--rr-space-2);
+}
+
+/* "Why read this" body, then optional italic notes (reading scope, This answers) */
+.rr-item__why > .rr-body {
+  margin-top: 6px;
+}
+
+.rr-item__note {
+  margin-top: var(--rr-space-2);
+}
+
+.rr-item__actions {
+  margin-top: 18px;
+}
+
+/* ---------- Sheet (detail sheet, native <dialog>) ---------- */
+/* Bottom sheet: ground, ink rule on top, no shadow, no box. Same width as the
+   screen column. Open with showModal(); the page under it cannot scroll. */
+.rr-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - var(--rr-page-top));
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--rr-ink);
+  border-radius: 0;
+  background-color: var(--rr-ground);
+  color: var(--rr-ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* The page behind fades into the ground colour (no new tint, no shadow) */
+.rr-sheet::backdrop {
+  background-color: var(--rr-ground);
+  opacity: 0.85;
+}
+
+:root:has(.rr-sheet[open]) {
+  overflow: hidden;
+}
+
+.rr-sheet__inner {
+  padding:
+    var(--rr-space-1)
+    calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px))
+    max(var(--rr-space-5), env(safe-area-inset-bottom, 0px))
+    calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
+}
+
+/* Label left, "Close" right, hairline under (like .rr-header) */
+.rr-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+  margin-bottom: var(--rr-space-4);
+  border-bottom: 1px solid var(--rr-rule);
+}
+
+/* ---------- Toast (Undo) ---------- */
+/* Ink bar above the tab bar. Tab bar height = 48px tab + 1px rule + bottom space. */
+.rr-toast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(49px + max(var(--rr-tabbar-bottom), env(safe-area-inset-bottom, 0px)) + var(--rr-space-2));
+  z-index: 20;
+  width: calc(100% - 2 * var(--rr-page-gutter));
+  max-width: calc(480px - 2 * var(--rr-page-gutter));
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+.rr-toast__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+  min-height: 52px;
+  padding: var(--rr-space-1) var(--rr-space-1) var(--rr-space-1) var(--rr-space-4);
+  border-radius: var(--rr-radius-md);
+  background-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+  pointer-events: auto;
+}
+
+.rr-toast__text {
+  margin: 0;
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: var(--rr-text-meta-weight);
+}
+
+.rr-toast__actions {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.rr-toast__action {
+  min-width: var(--rr-tap-min);
+  height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-3);
+  border: 0;
+  border-radius: var(--rr-radius-md);
+  background: transparent;
+  color: var(--rr-on-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-button-size);
+  font-weight: var(--rr-text-button-weight);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-toast__action:focus-visible {
+  outline-color: var(--rr-on-ink);
+  outline-offset: -4px;
+}
+
+.rr-toast__action:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------- Skeleton (loading) ---------- */
+/* Neutral wash blocks, no text, no motion. Wrap in .rr-skeleton-group. */
+.rr-skeleton-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rr-space-3);
+}
+
+.rr-skeleton {
+  display: block;
+  width: 100%;
+  height: var(--rr-space-4);
+  border-radius: var(--rr-radius-sm);
+  background-color: var(--rr-wash);
+}
+
+.rr-skeleton--chip { width: 128px; height: 26px; border-radius: var(--rr-radius-md); }
+.rr-skeleton--title { width: 85%; height: 48px; }
+.rr-skeleton--short { width: 55%; }
+.rr-skeleton--button { width: 152px; height: var(--rr-tap-min); border-radius: var(--rr-radius-md); }
+.rr-skeleton--rule { height: 0; border-top: 1px solid var(--rr-rule); border-radius: 0; background: none; }
+
+/* ---------- State (empty, error, coming soon) ---------- */
+.rr-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rr-space-3);
+}
+
+/* ---------- Progress screen ---------- */
+/* Number block with a helper line and an outlined bar under it
+   (Hours read hero, Core completion). Spacing from the Progress board. */
+.rr-meter {
+  display: flex;
+  flex-direction: column;
+}
+
+.rr-meter > .rr-stat__helper {
+  margin-top: 6px;
+}
+
+.rr-meter > .rr-progress {
+  margin-top: var(--rr-space-2);
+}
+
+/* The Streak / Projected finish strip under the hero */
+.rr-meter + .rr-stat-pair {
+  margin-top: var(--rr-space-4);
+}
+
+/* Two stats on one line, bottoms aligned: big number left, smaller right */
+.rr-stat-split {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--rr-space-3);
+}
+
+.rr-stat-split > .rr-stat--end {
+  padding-bottom: var(--rr-space-1);
+}
+
+/* Number + italic note on one baseline ("4%  1.3 of 29.8 h") */
+.rr-stat__number--noted {
+  flex-wrap: wrap;
+  column-gap: 10px;
+  margin-top: var(--rr-space-1);
+}
+
+.rr-stat__note {
+  font-size: var(--rr-text-body-italic-size);
+  line-height: var(--rr-text-body-italic-lh);
+  font-weight: var(--rr-text-body-italic-weight);
+  font-style: italic;
+  letter-spacing: 0;
+  font-variation-settings: normal;
+  color: var(--rr-ink-2);
+}
+
+/* Quiet action at the right of a section head ("Edit target"):
+   16px italic link, 44px hit area that does not make the head taller */
+.rr-section__action {
+  gap: 6px;
+  margin: -12px 0;
+  padding: 0 2px;
+  font-size: var(--rr-text-meta-size);
+}
+
+.rr-section__head:has(> .rr-section__action) {
+  align-items: center;
+  min-height: var(--rr-text-label-lh);
+}
+
+/* Space between a section head and its chart */
+.rr-chart--week {
+  margin-top: var(--rr-space-2);
+}
+
+.rr-chart--layers {
+  margin-top: 10px;
+}
+
+/* Done by priority rows (.rr-tally) */
+.rr-tally-list {
+  margin-top: var(--rr-space-1);
+}
+
+/* ---------- Inline target form (not on the boards) ---------- */
+/* Opens in place of "Edit target": labelled field, Save, Cancel, error line */
+.rr-target-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--rr-space-2) var(--rr-space-3);
+  margin-top: var(--rr-space-3);
+}
+
+.rr-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-1);
+}
+
+.rr-field__label {
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: 600;
+  color: var(--rr-ink);
+}
+
+.rr-input {
+  width: 7.5em;
+  height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-3);
+  border: 1px solid var(--rr-ink-2);
+  border-radius: var(--rr-radius-md);
+  background-color: var(--rr-ground);
+  color: var(--rr-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-body-size); /* 18px: iOS does not zoom in */
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.rr-input:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+}
+
+/* Invalid: heavier ink border; the error text below says what is wrong */
+.rr-input[aria-invalid="true"] {
+  border: 1.5px solid var(--rr-ink);
+}
+
+.rr-field__error {
+  flex: 1 0 100%;
+  margin: 0;
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: 600;
+  font-style: italic;
+  color: var(--rr-ink);
+}
+
+/* Loading block the size of the weekly chart */
+.rr-skeleton--chart { height: 182px; }
+
+/* ---------- Sign in (login form, text field) ---------- */
+/* Not in the boards: built from the checklist. Tokens only, serif, hairline
+   under the field instead of a box, 44px+ tap targets. Shares .rr-field and
+   .rr-field__error with the Progress target form; login-only rules are
+   scoped under .rr-login. */
+.rr-login {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-5);
+  max-width: 100%;
+}
+
+.rr-login__actions {
+  display: flex;
+}
+
+.rr-login .rr-field {
+  gap: var(--rr-space-2);
+}
+
+.rr-login .rr-field__label {
+  font-size: var(--rr-text-label-size);
+  line-height: var(--rr-text-label-lh);
+  font-weight: var(--rr-text-label-weight);
+  letter-spacing: var(--rr-text-label-tracking);
+  text-transform: uppercase;
+  font-style: italic;
+  color: var(--rr-ink);
+}
+
+/* Text field: ground fill, ink hairline under, 48px tall (>= tap-min). */
+.rr-field__input {
+  display: block;
+  width: 100%;
+  min-height: calc(var(--rr-tap-min) + var(--rr-space-1));
+  margin: 0;
+  padding: var(--rr-space-2) var(--rr-space-1);
+  border: 0;
+  border-bottom: 1px solid var(--rr-ink-2);
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--rr-ink);
+  font-family: inherit;
+  font-size: var(--rr-text-body-size); /* >= 16px: no zoom on iPhone */
+  line-height: var(--rr-text-body-lh);
+  font-weight: var(--rr-text-body-weight);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.rr-field__input:focus {
+  outline: none;
+}
+
+.rr-field__input:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 2px;
+  border-radius: var(--rr-radius-sm);
+}
+
+.rr-field__input[aria-invalid="true"] {
+  border-bottom-color: var(--rr-ink);
+  border-bottom-width: 2px;
+}
+
+/* ---------- Print entry points (not on the boards) ---------- */
+/* Quiet, secondary (SPEC §7.4): ink-2, italic, no underline, no box.
+   Text form on the Today card and in the detail sheet, icon form on Path
+   rows. 44px hit areas; the visible mark stays small. */
+.rr-print-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--rr-tap-min);
+  min-width: var(--rr-tap-min);
+  padding: 0 var(--rr-space-1);
+  color: var(--rr-ink-2);
+  font-size: var(--rr-text-meta-italic-size);
+  line-height: var(--rr-text-meta-italic-lh);
+  font-weight: var(--rr-text-meta-italic-weight);
+  font-style: italic;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-print-link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--rr-rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* Under the card actions, left aligned with them (the link's own 4px
+   padding is pulled back so the icon lines up with "Open source"). */
+.rr-item__print {
+  margin: var(--rr-space-1) 0 0 calc(-1 * var(--rr-space-1));
+}
+
+/* Path row = row button + Print icon side by side. The hairline moves from
+   the button to the <li> so it runs under both. */
+.rr-row-item {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--rr-rule);
+}
+
+.rr-row-item > .rr-row {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-bottom: 0;
+}
+
+/* Icon-only link (one short class: it repeats on 189 rows): 44 x 44 hit
+   area at the bottom (status-chip line), pulled 10px into the page gutter so
+   the row keeps most of its width. The icon is drawn with a mask (no SVG in
+   each row), in currentColor (ink-2). */
+.rr-print-icon {
+  display: flex;
+  flex: none;
+  align-self: flex-end;
+  align-items: center;
+  justify-content: center;
+  width: var(--rr-tap-min);
+  height: var(--rr-tap-min);
+  margin: 0 -10px 0 0;
+  color: var(--rr-ink-2);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rr-print-icon::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  /* Same drawing as PrinterIcon. The colour in a mask only sets opacity. */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4.5 6V2.5h7V6M4.5 11.5h-2V6h11v5.5h-2M4.5 9.5h7v4h-7z' stroke='black' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px 16px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4.5 6V2.5h7V6M4.5 11.5h-2V6h11v5.5h-2M4.5 9.5h7v4h-7z' stroke='black' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px 16px no-repeat;
+}
+
+/* ---------- Print page states (open PDF, error, not found, loading) ---------- */
+.rr-print-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rr-space-2) var(--rr-space-3);
 }

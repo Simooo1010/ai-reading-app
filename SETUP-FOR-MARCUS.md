@@ -17,7 +17,7 @@ You will code in Claude Code on the web (claude.ai/code or the Claude app). The 
 2. Project → Settings → Environment Variables → add, for **Production and Preview**:
    - `NOTION_TOKEN` = your token
    - `NOTION_DATABASE_ID` = `0c79d5a9ee16479881deb5a23142ebb5`
-   - `APP_PASSWORD` = a password you choose
+   - `APP_PASSWORD` = a long random password you choose (20 or more characters; the app slows down guessing but a long password is the real protection)
 3. From now on, every push gets a preview link. Merging to `main` updates the real app.
 
 ## 4. Claude Code cloud environment
