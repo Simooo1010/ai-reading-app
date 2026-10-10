@@ -94,7 +94,7 @@ export type Item = {
   /** `Verified` (checkbox) */
   verified: boolean;
   /** `Added in` (select) */
-  addedIn: AddedIn;
+  addedIn: string;
   /** `Notes` (rich_text); "" when empty */
   notes: string;
   /** `Done on` (date), "YYYY-MM-DD" start date; null when empty */

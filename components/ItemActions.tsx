@@ -44,7 +44,17 @@ export function ItemActions({ id, status, allowReset, onSkipped }: Props) {
     setFocusSkip(false);
     setBusy(kind);
     startTransition(async () => {
-      const result = await RUN[kind](id);
+      let result: Awaited<ReturnType<(typeof RUN)[ActionKind]>>;
+      try {
+        result = await RUN[kind](id);
+      } catch {
+        // No network, or the request was cut off: show a short message here
+        // instead of the full-screen error page.
+        setBusy(null);
+        setError("Could not save. Please try again.");
+        setConfirmSkip(false);
+        return;
+      }
       setBusy(null);
       if (!result.ok) {
         setError(result.error);

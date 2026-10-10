@@ -33,7 +33,7 @@ describe("PrintLink", () => {
     const out = html({ id: ID, title: "Fixture", pdfLink: null, from: "today", variant: "text" });
     expect(out).toContain(`href="/print/${ID}?from=today"`);
     expect(out).toContain(">Print</a>");
-    expect(out).toContain('class="rr-print"');
+    expect(out).toContain('class="rr-print-link"');
     expect(out).toContain('aria-hidden="true"'); // icon is decoration
     expect(out).not.toContain("target=");
     expect(out).not.toMatch(/prefetch/i);

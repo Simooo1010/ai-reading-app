@@ -15,8 +15,6 @@ import {
   verifySessionToken,
 } from "@/lib/auth";
 
-const STATIC_FILE = /\.(?:css|js|map|ico|png|jpe?g|gif|svg|webp|avif|woff2?|ttf|txt|xml|webmanifest)$/i;
-
 /** Paths that never need the cookie (the login screen and static assets). */
 export function isPublicPath(pathname: string): boolean {
   return (
@@ -25,8 +23,7 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith("/_next/image") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
-    pathname === "/sitemap.xml" ||
-    STATIC_FILE.test(pathname)
+    pathname === "/sitemap.xml"
   );
 }
 

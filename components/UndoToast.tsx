@@ -29,8 +29,13 @@ export function UndoToast({
           className="rr-toast__bar"
           onFocus={() => onHold?.(true)}
           onBlur={() => onHold?.(false)}
-          onPointerEnter={() => onHold?.(true)}
-          onPointerLeave={() => onHold?.(false)}
+          onPointerEnter={(e) => {
+            // Touch screens often never send pointerleave: only a mouse holds the toast.
+            if (e.pointerType === "mouse") onHold?.(true);
+          }}
+          onPointerLeave={(e) => {
+            if (e.pointerType === "mouse") onHold?.(false);
+          }}
         >
           <p className="rr-toast__text">{message}</p>
           <div className="rr-toast__actions">

@@ -292,6 +292,29 @@ describe("attemptLogin", () => {
     expect(await attemptLogin(PW, d)).toEqual({ ok: false, reason: "locked" });
   });
 
+  it("parallel wrong guesses count as separate tries (no burst past the limit)", async () => {
+    const { d } = deps();
+    // 12 guesses fired at the same moment, before any of them finishes.
+    const results = await Promise.all(
+      Array.from({ length: 12 }, (_, i) => attemptLogin(`guess-${i}`, d)),
+    );
+    const checked = results.filter((r) => !r.ok && r.reason === "wrong").length;
+    const locked = results.filter((r) => !r.ok && r.reason === "locked").length;
+    expect(checked).toBe(5);
+    expect(locked).toBe(7);
+  });
+
+  it("a right password clears the tries it reserved", async () => {
+    const { d } = deps();
+    for (let i = 0; i < 4; i++) await attemptLogin("nope", d);
+    expect((await attemptLogin(PW, d)).ok).toBe(true);
+    // Counter was reset: five more wrong tries are needed to lock again.
+    for (let i = 0; i < 5; i++) {
+      expect(await attemptLogin("nope", d)).toEqual({ ok: false, reason: "wrong" });
+    }
+    expect(await attemptLogin("nope", d)).toEqual({ ok: false, reason: "locked" });
+  });
+
   it("fails closed when APP_PASSWORD is unset", async () => {
     vi.stubEnv("APP_PASSWORD", undefined);
     const { d } = deps();

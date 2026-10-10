@@ -16,7 +16,6 @@ import {
 } from "@notionhq/client";
 import { cacheLife, cacheTag } from "next/cache";
 import {
-  ADDED_IN,
   DIFFICULTIES,
   ITEM_TYPES,
   LAYERS,
@@ -309,6 +308,15 @@ function readRichText(page: NotionPageLike, name: string): string {
 }
 
 /** Select whose value must be one of `labels`. Empty → error. */
+/**
+ * For properties the app never shows (`Added in`): the property must still
+ * exist and be a select, but a new option label (e.g. "Chat 10") or an empty
+ * value must not make every screen fail. Empty → "".
+ */
+function readSelectLoose(page: NotionPageLike, name: string): string {
+  return getProp(page, name, "select").select?.name ?? "";
+}
+
 function readSelect<L extends string>(
   page: NotionPageLike,
   name: string,
@@ -391,7 +399,7 @@ export function mapPage(page: NotionPageLike): Item {
     phase: readSelect(page, PROP.phase, PHASES),
     order,
     verified: getProp(page, PROP.verified, "checkbox").checkbox,
-    addedIn: readSelect(page, PROP.addedIn, ADDED_IN),
+    addedIn: readSelectLoose(page, PROP.addedIn),
     notes: readRichText(page, PROP.notes),
     doneOn: readDate(page, PROP.doneOn),
   };

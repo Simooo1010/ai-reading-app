@@ -33,7 +33,7 @@ export function PrintLink({ id, title, pdfLink, from, variant }: Props) {
     );
   }
   return (
-    <a className="rr-print" href={href} {...newTab}>
+    <a className="rr-print-link" href={href} {...newTab}>
       <PrinterIcon />
       {word}
       {pdf && <span className="rr-sr-only"> (opens in a new tab)</span>}

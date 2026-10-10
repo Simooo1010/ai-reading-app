@@ -1290,7 +1290,7 @@
 /* Quiet, secondary (SPEC §7.4): ink-2, italic, no underline, no box.
    Text form on the Today card and in the detail sheet, icon form on Path
    rows. 44px hit areas; the visible mark stays small. */
-.rr-print {
+.rr-print-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1306,7 +1306,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.rr-print:hover {
+.rr-print-link:hover {
   text-decoration: underline;
   text-decoration-color: var(--rr-rule);
   text-decoration-thickness: 1px;

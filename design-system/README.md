@@ -142,7 +142,7 @@ Loaded only by `components/print/PrintClient.tsx` (the print page), never by Tod
 
 | Class | Use |
 |---|---|
-| `.rr-print` + `__chrome`, `__nav`, `__back`, `__intro`, `__title`, `__ready`, `__preview` | Page shell: chrome in the 480 column, preview up to A4 width (never a horizontal scroll) |
+| `.rr-print-link` + `__chrome`, `__nav`, `__back`, `__intro`, `__title`, `__ready`, `__preview` | Page shell: chrome in the 480 column, preview up to A4 width (never a horizontal scroll) |
 | `.rr-print-notice` (+ `__list`, `__actions`) | Status notice: `.rr-section` with an ink label (paywalled, too short, blocked, warnings) |
 | `.rr-print-check__line`, `.rr-print-check__fail` | Check line; a failed page check is bold ink with an ink bar on the left (not colour only) |
 | `.rr-print-controls`, `.rr-print-field` (`__label`, `__unit`, `__row`), `.rr-print-range`, `.rr-print-number`, `.rr-print-select`, `.rr-print-seg` (`__options`, `__option`), `.rr-print-checkbox` (`__note`) | Print options: 44px range, field, select, segmented radio group (chosen = ink fill + check mark), checkbox row |

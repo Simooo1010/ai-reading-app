@@ -120,6 +120,16 @@ describe("mapPage", () => {
     expect(() => mapPage(page)).toThrow(/"Layer" has unknown option/);
   });
 
+  it("does not fail on a new or empty 'Added in' option (the app never shows it)", () => {
+    const newOption = withProp("Added in", { id: "ai", type: "select", select: select("Chat 10") });
+    expect(mapPage(newOption).addedIn).toBe("Chat 10");
+    const empty = withProp("Added in", { id: "ai", type: "select", select: null });
+    expect(mapPage(empty).addedIn).toBe("");
+    // The property itself must still be a select: wrong type still stops and reports.
+    const wrongType = withProp("Added in", { id: "ai", type: "checkbox", checkbox: true });
+    expect(() => mapPage(wrongType)).toThrow(/"Added in"/);
+  });
+
   it("throws when Status has the wrong Notion type", () => {
     const page = withProp("Status", {
       id: "s",

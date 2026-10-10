@@ -56,9 +56,13 @@ export function UndoProvider({ children }: { children: ReactNode }) {
     if (!skipped) return;
     const { id, previous } = skipped;
     startTransition(async () => {
-      const result = await undoSkip(id, previous);
-      if (result.ok) close();
-      else setError(result.error);
+      try {
+        const result = await undoSkip(id, previous);
+        if (result.ok) close();
+        else setError(result.error);
+      } catch {
+        setError("Could not save. Please try again.");
+      }
     });
   }
 

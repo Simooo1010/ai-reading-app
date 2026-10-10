@@ -131,5 +131,10 @@ describe("matcher and isPublicPath", () => {
     expect(isPublicPath("/today")).toBe(false);
     expect(isPublicPath("/login/x")).toBe(false);
     expect(isPublicPath("/loginx")).toBe(false);
+    // No bypass by file extension: pages and actions ending in .js/.txt/.css stay protected.
+    for (const p of ["/print/x.js", "/a.txt", "/today.css", "/path/x.png", "/progress.map"]) {
+      expect(isPublicPath(p)).toBe(false);
+    }
+    expect(isPublicPath("/favicon.ico")).toBe(true);
   });
 });

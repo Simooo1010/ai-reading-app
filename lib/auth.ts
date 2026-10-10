@@ -340,8 +340,13 @@ export async function attemptLogin(password: unknown, deps: LoginDeps = {}): Pro
 
   if (throttle.isLocked(started)) return fail("locked");
 
+  // Reserve the attempt BEFORE the first await. Parallel requests all pass
+  // through this synchronous step one after the other, so N requests sent at
+  // the same time count as N tries and cannot all slip under the limit.
+  // A correct password clears the reservations again (reset below).
+  throttle.recordFailure(started);
+
   if (!(await checkPassword(password))) {
-    throttle.recordFailure(started);
     return fail("wrong");
   }
   const token = await createSessionToken(now());
