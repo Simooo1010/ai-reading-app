@@ -3,8 +3,8 @@ import { AppIconMark } from "@/components/AppIconMark";
 import { APP_ICONS } from "@/lib/app-icons";
 
 // App icons for the web app manifest (app/manifest.ts) and <link rel="icon">.
-// One file, three PNGs: /icon/192, /icon/512 and /icon/maskable (512, with
-// the book inside the maskable safe zone). Generated at build time.
+// One file, three PNGs: /icon/192, /icon/512 and /icon/maskable (512, brain
+// inside the maskable safe zone). Generated at build time.
 // These URLs are public in proxy.ts (iOS and browsers fetch them without
 // the sign-in cookie).
 
