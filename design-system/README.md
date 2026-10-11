@@ -136,6 +136,10 @@ One pattern id per page: if two charts need hatching, give each its own id and s
 - [ ] UI copy in simple English (B1), short labels.
 - [ ] Add the class to `components.css` with the `rr-` prefix and a row to the table above.
 
+## Home screen app files (manifest, icons, theme colour)
+
+The web app manifest (`app/manifest.ts`), the generated icons (`app/icon.tsx`, `app/apple-icon.tsx`, drawing in `components/AppIconMark.tsx`) and the `theme-color` meta tag (`app/layout.tsx`) cannot read CSS variables, so they need the colours as hex. **This is the second documented exception to "no hex literals":** the two values live once in `lib/app-colors.ts` (`APP_GROUND` = `--rr-ground`, `APP_INK` = `--rr-ink`) and `tests/app-colors.test.ts` fails if they ever differ from `tokens.css`. No other colour may be added there. The icon is an open book in ink strokes on the ground (no fill, no third colour).
+
 ## Print screen (`print.css`)
 
 Loaded only by `components/print/PrintClient.tsx` (the print page), never by Today, Path or Progress. Its fonts (Inter, Lora, JetBrains Mono, from `components/print/fonts.ts`) load only there too.

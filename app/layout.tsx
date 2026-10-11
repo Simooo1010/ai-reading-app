@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader } from "next/font/google";
+import { APP_GROUND } from "@/lib/app-colors";
 import "@/design-system/tokens.css"; // 1. tokens + base
 import "@/design-system/components.css"; // 2. rr- classes
 
@@ -14,6 +15,19 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "AI Reading",
   description: "What to read next in your AI reading path.",
+  // iPhone home screen web app: full screen, own title, status bar on the
+  // cream page ("default" = dark text on a light bar). The manifest link and
+  // the icon links come from app/manifest.ts, app/icon.tsx, app/apple-icon.tsx.
+  appleWebApp: {
+    capable: true,
+    title: "AI Reading",
+    statusBarStyle: "default",
+  },
+  // Next.js writes only the standard "mobile-web-app-capable"; older iOS
+  // versions still read the apple- name.
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
@@ -21,6 +35,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   colorScheme: "light",
+  themeColor: APP_GROUND, // = --rr-ground
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
