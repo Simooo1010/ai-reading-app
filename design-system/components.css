@@ -129,6 +129,9 @@
   min-height: 100dvh;
   margin: 0 auto;
   background-color: var(--rr-ground);
+  /* Clips the tab bar underlay (.rr-tabbar::after) so it adds no scroll
+     height. clip (not hidden) makes no scroll container: sticky still works. */
+  overflow-y: clip;
 }
 
 .rr-screen__main {
@@ -858,6 +861,19 @@
   background-color: var(--rr-ground); /* same as page: hides scrolled content, not a panel */
 }
 
+/* Underlay: ground colour below the bar, full screen width, so no page
+   content shows between the bar and a browser toolbar under it. */
+.rr-tabbar::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: calc(-1 * (var(--rr-page-gutter) + env(safe-area-inset-right, 0px)));
+  left: calc(-1 * (var(--rr-page-gutter) + env(safe-area-inset-left, 0px)));
+  height: 240px;
+  background-color: var(--rr-ground);
+  pointer-events: none;
+}
+
 .rr-tabbar__tab {
   display: flex;
   flex-direction: column;
@@ -1578,6 +1594,11 @@
     padding-bottom: 0;
     border-top: 0;
     border-bottom: 1px solid var(--rr-rule);
+  }
+
+  /* Top bar: no underlay */
+  .rr-tabbar::after {
+    content: none;
   }
 
   .rr-tabbar__tab {
