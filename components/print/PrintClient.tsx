@@ -16,6 +16,7 @@ import { noticeWarnings, pageCheck, pdfTitle } from "@/lib/print/format";
 import { applyOptions, countImagesNotLoaded } from "@/lib/print/options";
 import { elementTraits } from "@/lib/print/pages";
 import type { PrintSettings } from "@/lib/print/settings";
+import { PRINT_PAGE_RULE } from "@/lib/print/screen";
 import type { PrintResult } from "@/lib/print/types";
 import { printFontVariables } from "./fonts";
 import type { BlockSpec, ImageActions } from "./PrintBlocks";
@@ -233,6 +234,8 @@ export default function PrintClient({
 
   return (
     <div className={`rr-print ${printFontVariables}`}>
+      {/* A4, no margin: only while this screen is mounted (see PRINT_PAGE_RULE). */}
+      <style>{PRINT_PAGE_RULE}</style>
       {/* Sticky: there is no browser Back button in the home screen app. */}
       <nav className="rr-print__nav" aria-label="Back">
         <div className="rr-print__nav-inner">

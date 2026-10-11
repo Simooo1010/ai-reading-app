@@ -932,16 +932,19 @@
 
 /* ===================================================================
  * Print: only the pages, at real A4 size, one sheet per page.
+ *
+ * Every rule here applies ONLY while the print screen is on the page
+ * (:has(.rr-print), or a .rr-print selector). After a client-side Back
+ * (next/link) this file stays loaded, and Today / Path / Progress must
+ * still print normally. The A4 / zero-margin @page rule cannot be scoped
+ * by a selector, so it is not in this file: PrintClient renders it in its
+ * own <style> element (PRINT_PAGE_RULE in lib/print/screen.ts), which
+ * leaves with the print screen.
  * =================================================================== */
 
-@page {
-  size: A4;
-  margin: 0;
-}
-
 @media print {
-  html,
-  body {
+  html:has(.rr-print),
+  body:has(.rr-print) {
     margin: 0 !important;
     padding: 0 !important;
     background: none !important;
@@ -960,7 +963,7 @@
   }
 
   body :has(.rr-print) > :not(:has(.rr-print)):not(.rr-print),
-  body > :not(:has(.rr-print)):not(.rr-print) {
+  body:has(.rr-print) > :not(:has(.rr-print)):not(.rr-print) {
     display: none !important;
   }
 

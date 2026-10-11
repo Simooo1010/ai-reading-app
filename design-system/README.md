@@ -142,7 +142,7 @@ The web app manifest (`app/manifest.ts`), the generated icons (`app/icon.tsx`, `
 
 ## Print screen (`print.css`)
 
-Loaded only by `components/print/PrintClient.tsx` (the print page), never by Today, Path or Progress. Its fonts (Inter, Lora, JetBrains Mono, from `components/print/fonts.ts`) load only there too.
+Loaded only by `components/print/PrintClient.tsx` (the print page), never by Today, Path or Progress. After a client-side Back it stays loaded, so every `@media print` rule in it is scoped to the print screen (`:has(.rr-print)` or a `.rr-print` selector), and the A4 / zero-margin `@page` rule (which a selector cannot scope) is rendered by `PrintClient` in its own `<style>` (`PRINT_PAGE_RULE`, `lib/print/screen.ts`); `tests/print-css-scope.test.ts` checks both. Its fonts (Inter, Lora, JetBrains Mono, from `components/print/fonts.ts`) load only there too.
 
 | Class | Use |
 |---|---|
