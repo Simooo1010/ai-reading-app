@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | Font | `font-serif` (Newsreader). Class `.rr-num` = `lining-nums tabular-nums` for data |
 | Type | `text-<name>-size/-lh/-weight/-tracking` for display 48, stat-xl 64, stat-lg 40, stat-md 34, stat-sm 28, stat-note 21, phase 28, author 20, row-title 19, body 18, body-italic 18, meta 16, meta-italic 15, label 14, chip 14 (hero 15), button 17, tab 14, axis 13 |
 | Space | `space-1..5` = 4 · 8 · 12 · 16 · 24 |
-| Layout | `page-gutter` 24 · `page-top` 48 · `tabbar-bottom` 34 · `tap-min` 44 |
+| Layout | `page-gutter` 24 · `page-top` 48 · `tabbar-bottom` 34 · `tap-min` 44 · `tabbar-tab-h` 48 · `tabbar-pad-bottom` (= max(34px, home indicator area)) · `tabbar-h` (whole tab bar height; the Undo toast sits on it) |
 | Radius | `radius-sm` 3 (bar ends) · `radius-md` 6 (default) · `radius-track` 1 (chart tracks) |
 
 ## Components (`components.css`)
