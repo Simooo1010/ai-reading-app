@@ -37,14 +37,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | Font | `font-serif` (Newsreader). Class `.rr-num` = `lining-nums tabular-nums` for data |
 | Type | `text-<name>-size/-lh/-weight/-tracking` for display 48, stat-xl 64, stat-lg 40, stat-md 34, stat-sm 28, stat-note 21, phase 28, author 20, row-title 19, body 18, body-italic 18, meta 16, meta-italic 15, label 14, chip 14 (hero 15), button 17, tab 14, axis 13 |
 | Space | `space-1..5` = 4 · 8 · 12 · 16 · 24 |
-| Layout | `page-gutter` 24 · `page-top` 48 · `tabbar-bottom` 34 · `tap-min` 44 · `tabbar-tab-h` 48 · `tabbar-pad-bottom` (= max(34px, home indicator area)) · `tabbar-h` (whole tab bar height; the Undo toast sits on it) |
+| Layout | `page-max` 480 (md 1040, lg 1280) widest content column · `page-gutter` 24 (md 32, lg 48) · `page-top` 48 · `tabbar-bottom` 34 · `tap-min` 44 · `tabbar-tab-h` 48 · `tabbar-pad-bottom` (= max(34px, home indicator area)) · `tabbar-h` (whole tab bar height; the Undo toast sits on it; 0 at lg) · `topbar-h` (top bar height at lg, else 0; sticky blocks sit under it) |
 | Radius | `radius-sm` 3 (bar ends) · `radius-md` 6 (default) · `radius-track` 1 (chart tracks) |
+
+## Screen sizes (breakpoints)
+
+The boards are phone only. Wider screens get an adaptive layout built from the checklist below; the phone layout does not change. CSS variables cannot be used in `@media`, so the numbers are written in each query (listed once in `tokens.css`).
+
+| Size | Width | Layout |
+|---|---|---|
+| base | < 720px | Phone: one 480px column, tab bar at the bottom. Exactly the boards. |
+| md | >= 720px | Tablet / small laptop: column up to 1040px, gutter 32. Today in two columns, Path phases in two columns, Progress in a 2-column grid. |
+| lg | >= 1100px | Desktop: column up to 1280px, gutter 48. Tab bar at the top, Progress in a 6-column grid, Path detail as a side panel, Undo toast bottom right, Print controls beside the A4 preview. |
+
+Rules: every wide-screen change goes inside `@media (min-width: 720px)` or `(min-width: 1100px)` (in `print.css`: `screen and`, so the paper never changes). Layout wrappers are `display: contents` on a phone, so they add no box there. Tap targets stay 44px (desktops can have touch screens too).
 
 ## Components (`components.css`)
 
 | Class | Use | Example |
 |---|---|---|
-| `.rr-screen` + `__main` | 390 first, fluid, max 480 centred, safe-area aware | `<div class="rr-screen"><main class="rr-screen__main">…</main><nav class="rr-tabbar">…</nav></div>` |
+| `.rr-screen` + `__main` | 390 first, fluid up to `--rr-page-max` (480 on a phone, wider at md / lg), centred, safe-area aware. `--narrow` keeps the phone column on every width (Sign in, print states) | `<div class="rr-screen"><main class="rr-screen__main">…</main><nav class="rr-tabbar">…</nav></div>` |
 | `.rr-header` | screen name + italic context, hairline under | `<header class="rr-header"><span class="rr-label">Today</span><span class="rr-header__context">Phase 1 · item 1 of 189</span></header>` |
 | `.rr-label` (`--ink`) | tracked uppercase eyebrow / section title | `<h2 class="rr-label">Why read this</h2>` |
 | `.rr-chip` (`--hero`, `--dashed`) | layer chip; dashed = unknown | `<span class="rr-chip">3 · Species</span>` |
@@ -56,12 +68,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | `.rr-phase` | collapsible PhaseBlock, chevron turns via `aria-expanded` | see below |
 | `.rr-progress` `--sm/--md/--lg` (`--outlined`) | 6 / 8 / 10px bar; outlined on Progress | `<div class="rr-progress rr-progress--md rr-progress--outlined" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="100" aria-label="2% read"><div class="rr-progress__fill" style="width:2%"></div></div>` |
 | `.rr-stat` (`--end`), `.rr-stat-pair`, `.rr-tally` | label, number `__number--xl/lg/md/sm` (+`__unit`), `__empty`, `__helper` (`--lg`) | `<div class="rr-stat"><h2 class="rr-label">Streak</h2><p class="rr-stat__number rr-stat__number--sm">2 days</p><p class="rr-stat__helper">since Fri 9 Oct</p></div>` |
-| `.rr-tabbar` + `__tab` | hairline top, rule over active (`aria-current="page"`) | `<nav class="rr-tabbar" aria-label="Main"><a class="rr-tabbar__tab" href="/today" aria-current="page">Today</a>…</nav>` |
+| `.rr-tabbar` + `__tab` | hairline top, rule over active (`aria-current="page"`). At lg it moves to the top by CSS only (`order`): sticky, hairline under, tabs left at content width, ink line under the active tab | `<nav class="rr-tabbar" aria-label="Main"><a class="rr-tabbar__tab" href="/today" aria-current="page">Today</a>…</nav>` |
 | `.rr-mark` | Not on the boards. The brain mark (`design-system/brand/README.md`) on the sign-in screen: 96px wide, centred, no background so it needs no box | `<BrandMark />` (`components/BrandMark.tsx`) |
 | `.rr-row--button` | ListRow as a `<button>` (Path row that opens the detail sheet) | `<button class="rr-row rr-row--button" data-item-id="…" aria-haspopup="dialog">…</button>` |
 | `.rr-item` + `__chips/__title/__author/__meta/__why/__note/__actions` | ItemCard (Today card, detail sheet): spacing from the Today board | `<article class="rr-item"><div class="rr-item__chips">…</div><h2 class="rr-item__title rr-display">…</h2>…</article>` |
-| `.rr-sheet` + `__inner`, `__head` | Detail sheet: native `<dialog>` + `showModal()`, ground, ink rule on top, column width, safe-area padding; the page under it fades to ground and cannot scroll | `<dialog class="rr-sheet" aria-labelledby="t"><div class="rr-sheet__inner"><div class="rr-sheet__head"><span class="rr-label">Phase 1 · item 3</span><button class="rr-btn rr-btn--link">Close</button></div>…</div></dialog>` |
-| `.rr-toast` + `__bar`, `__text`, `__actions`, `__action` | Undo toast: ink bar above the tab bar, on-ink text, 44px actions; `.rr-toast` is the always-present `role="status"` region | `<div class="rr-toast" role="status"><div class="rr-toast__bar"><p class="rr-toast__text">Skipped.</p><div class="rr-toast__actions"><button class="rr-toast__action">Undo</button></div></div></div>` |
+| `.rr-sheet` + `__inner`, `__head` | Detail sheet: native `<dialog>` + `showModal()`, ground, ink rule on top, column width (max 640 at md), safe-area padding; the page under it fades to ground and cannot scroll. At lg a full-height side panel on the right (ink rule on its left), same dialog behaviour | `<dialog class="rr-sheet" aria-labelledby="t"><div class="rr-sheet__inner"><div class="rr-sheet__head"><span class="rr-label">Phase 1 · item 3</span><button class="rr-btn rr-btn--link">Close</button></div>…</div></dialog>` |
+| `.rr-toast` + `__bar`, `__text`, `__actions`, `__action` | Undo toast: ink bar above the tab bar (bottom right at lg, max 420), on-ink text, 44px actions; `.rr-toast` is the always-present `role="status"` region | `<div class="rr-toast" role="status"><div class="rr-toast__bar"><p class="rr-toast__text">Skipped.</p><div class="rr-toast__actions"><button class="rr-toast__action">Undo</button></div></div></div>` |
 | `.rr-skeleton` (`--chip/--title/--short/--button/--rule/--chart`), `.rr-skeleton-group` | Loading: wash blocks, no text, no motion | `<div class="rr-skeleton-group" aria-hidden="true"><span class="rr-skeleton rr-skeleton--title"></span></div>` |
 | `.rr-state` | Empty / error / coming-soon block | `<section class="rr-state"><h2 class="rr-display">All done. Nice work.</h2><p class="rr-body-italic">…</p></section>` |
 | `.rr-screen__body` | Content under the header (18px gap) | `<header class="rr-header">…</header><div class="rr-screen__body">…</div>` |
@@ -76,6 +88,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | `.rr-print`, `.rr-item__print` | Not on the boards. Quiet Print entry point (SPEC §7.4): ink-2 italic 15px text link with the thin `PrinterIcon`, no underline (hairline underline on hover), 44px hit area; on the Today card and in the detail sheet it sits on its own line under the actions, icon aligned with Open source | `<p class="rr-item__print"><a class="rr-print" href="/print/…?from=today"><svg …/>Print</a></p>` |
 | `.rr-row-item`, `.rr-print-icon` | Not on the boards. Path row with a Print icon: the `<li>` holds the row `<button>` and an icon-only link side by side (a link cannot sit in a button); the hairline moves to the `<li>`. Icon link 44 x 44, ink-2, 16px printer drawn with a CSS mask (no SVG per row), pulled 10px into the gutter, on the status-chip line | `<li class="rr-row-item"><button class="rr-row rr-row--button" …>…</button><a class="rr-print-icon" href="/print/…?from=path" aria-label="Print The Bitter Lesson"></a></li>` |
 | `.rr-print-state__actions` | Not on the boards. Print page states (open PDF, error, not found): primary button + quiet back link on one wrapping line, inside `.rr-state` | `<div class="rr-print-state__actions"><a class="rr-btn rr-btn--primary" href="…" target="_blank">Open PDF</a><a class="rr-btn rr-btn--link" href="/path">Back to Path</a></div>` |
+| `.rr-today` | Not on the boards. Today wrapper: no box on a phone; from md a grid, card left (3/5) and Up next right (2/5, sticky) with a hairline between. Card text max 62ch | `<div class="rr-today"><article class="rr-item">…</article><section class="rr-section">…Up next…</section></div>` |
+| `.rr-path` | Not on the boards. Path wrapper: no box on a phone; from md the phases in two columns (`align-items: start`, each opens on its own) | `<div class="rr-path"><section class="rr-phase">…</section>…</div>` |
+| `.rr-progress-grid` + `__hours/__pair/__week/__layers/__core/__priority` | Not on the boards. Progress wrapper: no box on a phone; md 2 columns (hours · pair / week · layers / core · priority); lg 6 columns (hours 4 + pair 2, stacked; week 4 + layers 2; core 3 + priority 3). Charts max 640 wide from md | `<div class="rr-progress-grid"><section class="rr-meter rr-progress-grid__hours">…</section>…</div>` |
+| `.rr-skeleton-grid` (`--stats`), `.rr-skeleton-cell`, `.rr-skeleton-aside` | Not on the boards. Loading blocks in the same grids from md (cells are `display: contents` on a phone, so the phone skeleton is unchanged); `-aside` = the Up next column, hidden on a phone | `<div class="rr-skeleton-group rr-skeleton-grid"><div class="rr-skeleton-cell"><span class="rr-skeleton rr-skeleton--rule"></span>…</div>…</div>` |
 | `.rr-sr-only` | Text for screen readers only | `<span class="rr-sr-only"> (opens in a new tab)</span>` |
 | Type | `.rr-display .rr-author .rr-body .rr-body-italic .rr-meta (+.rr-meta-line, .rr-sep) .rr-meta-italic .rr-row-title .rr-phase-title .rr-axis` | `<h1 class="rr-display">The Bitter Lesson</h1>` |
 
@@ -147,7 +163,7 @@ Loaded only by `components/print/PrintClient.tsx` (the print page), never by Tod
 
 | Class | Use |
 |---|---|
-| `.rr-print` + `__chrome`, `__nav` (+ `__nav-inner`), `__back`, `__intro`, `__title`, `__ready`, `__preview` | Page shell: chrome in the 480 column, preview up to A4 width (never a horizontal scroll). `__nav` is sticky at the top (ground behind it, safe-area top), because the home screen app has no browser Back button |
+| `.rr-print` + `__chrome`, `__nav` (+ `__nav-inner`), `__back`, `__intro`, `__title`, `__ready`, `__preview` | Page shell: chrome in the 480 column (max 720 at md), preview up to A4 width (never a horizontal scroll). At lg the chrome is a sticky 400px column on the left (scrolls on its own) and the preview sits on the right. `__nav` is sticky at the top (ground behind it, safe-area top), because the home screen app has no browser Back button |
 | `.rr-print-notice` (+ `__list`, `__actions`) | Status notice: `.rr-section` with an ink label (paywalled, too short, blocked, warnings) |
 | `.rr-print-check__line`, `.rr-print-check__fail` | Check line; a failed page check is bold ink with an ink bar on the left (not colour only) |
 | `.rr-print-controls`, `.rr-print-field` (`__label`, `__unit`, `__row`), `.rr-print-range`, `.rr-print-number`, `.rr-print-select`, `.rr-print-seg` (`__options`, `__option`), `.rr-print-checkbox` (`__note`) | Print options: 44px range, field, select, segmented radio group (chosen = ink fill + check mark), checkbox row |

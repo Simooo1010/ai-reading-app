@@ -19,7 +19,10 @@ function TabLabel({ label }: { label: string }) {
   return <span data-pending={pending ? "" : undefined}>{label}</span>;
 }
 
-/** Text-only tab bar at the bottom (.rr-tabbar): rule above the active tab. */
+/**
+ * Text-only tab bar (.rr-tabbar): at the bottom with a rule above the active
+ * tab; from 1100px up the CSS moves it to the top (ink line under the tab).
+ */
 export function TabBar() {
   const pathname = usePathname();
   return (

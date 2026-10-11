@@ -21,7 +21,7 @@ export function TodayView({ context, card, actions, upNext }: Props) {
       <ScreenHeader title="Today" context={context} />
       <div className="rr-screen__body">
         {card ? (
-          <>
+          <div className="rr-today">
             <ItemCard
               card={card}
               size="hero"
@@ -31,7 +31,7 @@ export function TodayView({ context, card, actions, upNext }: Props) {
               printFrom="today"
             />
             <UpNext rows={upNext} />
-          </>
+          </div>
         ) : (
           <section className="rr-state">
             <h2 className="rr-display">All done. Nice work.</h2>

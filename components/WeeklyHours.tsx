@@ -141,7 +141,14 @@ export function TargetForm({
 // ---------- Section ----------
 
 /** "Hours per week" section: Edit target + WeekBars. */
-export function WeeklyHours({ weeks }: { weeks: WeekHours[] }) {
+export function WeeklyHours({
+  weeks,
+  className,
+}: {
+  weeks: WeekHours[];
+  /** Extra class for the section (grid area on wide screens). */
+  className?: string;
+}) {
   const target = useSyncExternalStore(subscribe, readTarget, serverTarget);
   const targetRead = useSyncExternalStore(noSubscribe, onClient, onServer);
   const [editing, setEditing] = useState(false);
@@ -186,7 +193,10 @@ export function WeeklyHours({ weeks }: { weeks: WeekHours[] }) {
   };
 
   return (
-    <section className="rr-section" aria-labelledby="week-title">
+    <section
+      className={className ? `rr-section ${className}` : "rr-section"}
+      aria-labelledby="week-title"
+    >
       <div className="rr-section__head">
         <h2 id="week-title" className="rr-label">
           Hours per week

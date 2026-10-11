@@ -1,7 +1,7 @@
 # CLAUDE.md — working rules for this repo
 
 ## What this is
-AI Reading App: a mobile-first Next.js front end on top of the Notion database `AI Reading List`. Full product spec: `SPEC.md`. Read both files before any work.
+AI Reading App: a mobile-first, adaptive (phone, tablet, desktop) Next.js front end on top of the Notion database `AI Reading List`. Full product spec: `SPEC.md`. Read both files before any work.
 
 ## Stack
 - Next.js (App Router) + TypeScript (strict), deployed on Vercel.
@@ -45,6 +45,7 @@ vercel.json        # framework preset (the Vercel project preset was "Other")
 ## Design system
 - All UI follows `design-system/` ("Reading Room"). Read `design-system/README.md` before any UI work.
 - Use only `--rr-` tokens and `rr-` classes. No hex literals, no new colours, no sans fonts.
+- Layout is adaptive: phone (< 720px) = the boards, unchanged; md (>= 720px) and lg (>= 1100px) changes go only inside `@media (min-width: …)` blocks (breakpoints in `design-system/README.md`).
 - New components not in the designs must follow the "Adding a component" checklist in the README.
 - UI copy in simple English (B1).
 
