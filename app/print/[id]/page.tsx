@@ -4,7 +4,7 @@ import PrintClient from "@/components/print/PrintClient";
 import { PrintMessage, PrintSkeleton } from "@/components/PrintStates";
 import { requireAuthOrRedirect } from "@/lib/auth";
 import { getItemsCached, isPageId } from "@/lib/notion";
-import { loadPrintable } from "@/lib/print/load";
+import { loadPrintableSafe } from "@/lib/print/safe-load";
 import { backLink, findItem, printFrom } from "@/lib/print/screen";
 
 // Print page (SPEC §7.4). Outside the (app) group: no tab bar.
@@ -51,7 +51,9 @@ async function PrintContent({
   if (!item) return notFound;
 
   const context = `${item.phase} · item ${item.order}`;
-  const load = await loadPrintable({
+  // Never throws: a loader that cannot load or run gives the error message
+  // below (Open source + Back), not an endless loading screen.
+  const load = await loadPrintableSafe({
     id: item.id,
     title: item.title,
     author: item.author,

@@ -317,6 +317,7 @@
   white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* no double-tap zoom delay on iPhone */
 }
 
 .rr-btn:disabled,
@@ -521,6 +522,7 @@
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* Unknown / loading row */
@@ -551,6 +553,7 @@
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .rr-phase__toggle[aria-expanded="true"] {
@@ -849,7 +852,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin: 0 calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) 0 calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
-  padding-bottom: max(var(--rr-tabbar-bottom), env(safe-area-inset-bottom, 0px));
+  padding-bottom: var(--rr-tabbar-pad-bottom);
   border-top: 1px solid var(--rr-rule);
   background-color: var(--rr-ground); /* same as page: hides scrolled content, not a panel */
 }
@@ -860,7 +863,7 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-height: 48px;
+  min-height: var(--rr-tabbar-tab-h);
   color: var(--rr-ink-2);
   font-size: var(--rr-text-tab-size);
   line-height: var(--rr-text-tab-lh);
@@ -869,6 +872,10 @@
   text-transform: uppercase;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none; /* no link preview on a long press */
+  touch-action: manipulation; /* no double-tap zoom delay */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Short rule above the label; visible only on the active tab */
@@ -887,6 +894,26 @@
 
 .rr-tabbar__tab[aria-current="page"]::before {
   background-color: var(--rr-ink);
+}
+
+/* A tapped tab that is still loading (TabBar: data-pending from
+   useLinkStatus) looks active at once; the old tab lets go. */
+.rr-tabbar__tab:has([data-pending]) {
+  color: var(--rr-ink);
+  font-weight: var(--rr-text-tab-weight-active);
+}
+
+.rr-tabbar__tab:has([data-pending])::before {
+  background-color: var(--rr-ink);
+}
+
+.rr-tabbar:has([data-pending]) .rr-tabbar__tab[aria-current="page"]:not(:has([data-pending])) {
+  color: var(--rr-ink-2);
+  font-weight: var(--rr-text-tab-weight);
+}
+
+.rr-tabbar:has([data-pending]) .rr-tabbar__tab[aria-current="page"]:not(:has([data-pending]))::before {
+  background-color: transparent;
 }
 
 /* ===================================================================
@@ -961,7 +988,8 @@
 .rr-sheet {
   width: 100%;
   max-width: 480px;
-  max-height: calc(100dvh - var(--rr-page-top));
+  /* Never under the status bar / notch in the home screen app */
+  max-height: calc(100dvh - var(--rr-page-top) - env(safe-area-inset-top, 0px));
   margin: auto auto 0;
   padding: 0;
   border: 0;
@@ -981,6 +1009,7 @@
 
 :root:has(.rr-sheet[open]) {
   overflow: hidden;
+  overscroll-behavior: none; /* the page under the sheet does not bounce */
 }
 
 .rr-sheet__inner {
@@ -1002,14 +1031,14 @@
 }
 
 /* ---------- Toast (Undo) ---------- */
-/* Ink bar above the tab bar. Tab bar height = 48px tab + 1px rule + bottom space. */
+/* Ink bar above the tab bar (--rr-tabbar-h, tokens.css). Inside the page
+   gutters and the left/right safe areas (iPhone held sideways). */
 .rr-toast {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(49px + max(var(--rr-tabbar-bottom), env(safe-area-inset-bottom, 0px)) + var(--rr-space-2));
+  left: calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
+  right: calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px));
+  bottom: calc(var(--rr-tabbar-h) + var(--rr-space-2));
   z-index: 20;
-  width: calc(100% - 2 * var(--rr-page-gutter));
   max-width: calc(480px - 2 * var(--rr-page-gutter));
   margin: 0 auto;
   pointer-events: none;
@@ -1056,6 +1085,7 @@
   text-underline-offset: 4px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .rr-toast__action:focus-visible {
@@ -1320,6 +1350,7 @@
   font-style: italic;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .rr-print-link:hover {
@@ -1364,6 +1395,7 @@
   margin: 0 -10px 0 0;
   color: var(--rr-ink-2);
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .rr-print-icon::before {

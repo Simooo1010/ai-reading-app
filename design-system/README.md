@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | Font | `font-serif` (Newsreader). Class `.rr-num` = `lining-nums tabular-nums` for data |
 | Type | `text-<name>-size/-lh/-weight/-tracking` for display 48, stat-xl 64, stat-lg 40, stat-md 34, stat-sm 28, stat-note 21, phase 28, author 20, row-title 19, body 18, body-italic 18, meta 16, meta-italic 15, label 14, chip 14 (hero 15), button 17, tab 14, axis 13 |
 | Space | `space-1..5` = 4 · 8 · 12 · 16 · 24 |
-| Layout | `page-gutter` 24 · `page-top` 48 · `tabbar-bottom` 34 · `tap-min` 44 |
+| Layout | `page-gutter` 24 · `page-top` 48 · `tabbar-bottom` 34 · `tap-min` 44 · `tabbar-tab-h` 48 · `tabbar-pad-bottom` (= max(34px, home indicator area)) · `tabbar-h` (whole tab bar height; the Undo toast sits on it) |
 | Radius | `radius-sm` 3 (bar ends) · `radius-md` 6 (default) · `radius-track` 1 (chart tracks) |
 
 ## Components (`components.css`)
@@ -136,13 +136,17 @@ One pattern id per page: if two charts need hatching, give each its own id and s
 - [ ] UI copy in simple English (B1), short labels.
 - [ ] Add the class to `components.css` with the `rr-` prefix and a row to the table above.
 
+## Home screen app files (manifest, icons, theme colour)
+
+The web app manifest (`app/manifest.ts`), the generated icons (`app/icon.tsx`, `app/apple-icon.tsx`, drawing in `components/AppIconMark.tsx`) and the `theme-color` meta tag (`app/layout.tsx`) cannot read CSS variables, so they need the colours as hex. **This is the second documented exception to "no hex literals":** the two values live once in `lib/app-colors.ts` (`APP_GROUND` = `--rr-ground`, `APP_INK` = `--rr-ink`) and `tests/app-colors.test.ts` fails if they ever differ from `tokens.css`. No other colour may be added there. The icon is an open book in ink strokes on the ground (no fill, no third colour).
+
 ## Print screen (`print.css`)
 
-Loaded only by `components/print/PrintClient.tsx` (the print page), never by Today, Path or Progress. Its fonts (Inter, Lora, JetBrains Mono, from `components/print/fonts.ts`) load only there too.
+Loaded only by `components/print/PrintClient.tsx` (the print page), never by Today, Path or Progress. After a client-side Back it stays loaded, so every `@media print` rule in it is scoped to the print screen (`:has(.rr-print)` or a `.rr-print` selector), and the A4 / zero-margin `@page` rule (which a selector cannot scope) is rendered by `PrintClient` in its own `<style>` (`PRINT_PAGE_RULE`, `lib/print/screen.ts`); `tests/print-css-scope.test.ts` checks both. Its fonts (Inter, Lora, JetBrains Mono, from `components/print/fonts.ts`) load only there too.
 
 | Class | Use |
 |---|---|
-| `.rr-print-link` + `__chrome`, `__nav`, `__back`, `__intro`, `__title`, `__ready`, `__preview` | Page shell: chrome in the 480 column, preview up to A4 width (never a horizontal scroll) |
+| `.rr-print` + `__chrome`, `__nav` (+ `__nav-inner`), `__back`, `__intro`, `__title`, `__ready`, `__preview` | Page shell: chrome in the 480 column, preview up to A4 width (never a horizontal scroll). `__nav` is sticky at the top (ground behind it, safe-area top), because the home screen app has no browser Back button |
 | `.rr-print-notice` (+ `__list`, `__actions`) | Status notice: `.rr-section` with an ink label (paywalled, too short, blocked, warnings) |
 | `.rr-print-check__line`, `.rr-print-check__fail` | Check line; a failed page check is bold ink with an ink bar on the left (not colour only) |
 | `.rr-print-controls`, `.rr-print-field` (`__label`, `__unit`, `__row`), `.rr-print-range`, `.rr-print-number`, `.rr-print-select`, `.rr-print-seg` (`__options`, `__option`), `.rr-print-checkbox` (`__note`) | Print options: 44px range, field, select, segmented radio group (chosen = ink fill + check mark), checkbox row |

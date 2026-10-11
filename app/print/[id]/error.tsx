@@ -1,5 +1,6 @@
 "use client"; // Error boundaries must be Client Components
 
+import Link from "next/link";
 import { ScreenHeader } from "@/components/ScreenHeader";
 
 // Friendly error screen (e.g. Notion is down). Never shows the error message.
@@ -16,9 +17,9 @@ export default function PrintError({ retry }: { error: Error; retry: () => void 
               <button type="button" className="rr-btn rr-btn--primary" onClick={() => retry()}>
                 Try again
               </button>
-              <a className="rr-btn rr-btn--link" href="/today">
+              <Link className="rr-btn rr-btn--link" href="/today" prefetch={false}>
                 Back to Today
-              </a>
+              </Link>
             </div>
           </section>
         </div>

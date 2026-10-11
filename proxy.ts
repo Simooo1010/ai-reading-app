@@ -15,7 +15,18 @@ import {
   verifySessionToken,
 } from "@/lib/auth";
 
-/** Paths that never need the cookie (the login screen and static assets). */
+/**
+ * App icons: /apple-icon and /icon/<id> (app/apple-icon.tsx, app/icon.tsx),
+ * each optionally with a generated suffix. Exact shapes only: /iconx or
+ * /icon/a/b stay protected.
+ */
+const ICON_PATH = /^\/(?:apple-icon|icon)(?:\/[A-Za-z0-9_-]+)?$/;
+
+/**
+ * Paths that never need the cookie: the login screen, static assets and the
+ * home screen files (manifest + icons). iOS fetches the manifest and icons
+ * without cookies when Marcus adds the app to the home screen.
+ */
 export function isPublicPath(pathname: string): boolean {
   return (
     pathname === "/login" ||
@@ -23,7 +34,9 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith("/_next/image") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
-    pathname === "/sitemap.xml"
+    pathname === "/sitemap.xml" ||
+    pathname === "/manifest.webmanifest" ||
+    ICON_PATH.test(pathname)
   );
 }
 
@@ -98,8 +111,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Everything except Next.js static files, image optimisation and
-    // common metadata files. Other static files are let through by
+    // common metadata files, plus the exact home screen files (manifest,
+    // /apple-icon, /icon/<id>; anchored with $ so look-alikes such as
+    // /iconx still run the proxy). Other static files are let through by
     // isPublicPath() above.
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest\\.webmanifest$|(?:apple-)?icon(?:/[A-Za-z0-9_-]+)?$).*)",
   ],
 };

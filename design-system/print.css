@@ -29,14 +29,30 @@
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  padding: calc(var(--rr-space-3) + env(safe-area-inset-top, 0px))
-    calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) 0
+  padding: 0 calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) 0
     calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
 }
 
+/* Back link: stays at the top while the long page scrolls (the home screen
+   app has no browser Back button). Full width, ground behind it (hides what
+   scrolls under it, not a panel), clear of the status bar / notch. */
 .rr-print__nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-top: calc(var(--rr-space-3) + env(safe-area-inset-top, 0px));
+  background-color: var(--rr-ground);
+}
+
+/* Same column as the chrome; the link's own 4px padding is pulled back so
+   the arrow lines up with the text below. */
+.rr-print__nav-inner {
   display: flex;
-  margin: 0 0 var(--rr-space-2) calc(-1 * var(--rr-space-1));
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) var(--rr-space-2)
+    calc(var(--rr-page-gutter) - var(--rr-space-1) + env(safe-area-inset-left, 0px));
 }
 
 .rr-print__back {
@@ -916,16 +932,19 @@
 
 /* ===================================================================
  * Print: only the pages, at real A4 size, one sheet per page.
+ *
+ * Every rule here applies ONLY while the print screen is on the page
+ * (:has(.rr-print), or a .rr-print selector). After a client-side Back
+ * (next/link) this file stays loaded, and Today / Path / Progress must
+ * still print normally. The A4 / zero-margin @page rule cannot be scoped
+ * by a selector, so it is not in this file: PrintClient renders it in its
+ * own <style> element (PRINT_PAGE_RULE in lib/print/screen.ts), which
+ * leaves with the print screen.
  * =================================================================== */
 
-@page {
-  size: A4;
-  margin: 0;
-}
-
 @media print {
-  html,
-  body {
+  html:has(.rr-print),
+  body:has(.rr-print) {
     margin: 0 !important;
     padding: 0 !important;
     background: none !important;
@@ -944,7 +963,7 @@
   }
 
   body :has(.rr-print) > :not(:has(.rr-print)):not(.rr-print),
-  body > :not(:has(.rr-print)):not(.rr-print) {
+  body:has(.rr-print) > :not(:has(.rr-print)):not(.rr-print) {
     display: none !important;
   }
 
@@ -954,6 +973,7 @@
     background: none;
   }
 
+  .rr-print__nav,
   .rr-print__chrome,
   .rr-print-preview__status,
   .rr-print-page__caption,

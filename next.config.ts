@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // "/" goes straight to Today in one hop (redirects run before proxy.ts).
+  // Not permanent, so browsers never cache it. app/page.tsx stays as a fallback.
+  async redirects() {
+    return [{ source: "/", destination: "/today", permanent: false }];
+  },
   async headers() {
     return [
       {

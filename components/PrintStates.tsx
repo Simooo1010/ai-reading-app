@@ -1,6 +1,9 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowUpRightIcon } from "@/components/Icons";
+import { PrintBackLink } from "@/components/PrintBackLink";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { safeHttpUrl } from "@/lib/links";
 
 // Server-rendered screens of the print route that are not the print view
 // itself: loading, open PDF, error, not found. No tab bar (the print page
@@ -17,7 +20,7 @@ export function PrintShell({ context, children }: { context?: string; children: 
   );
 }
 
-/** Loading: wash blocks + one honest line. No fake data. */
+/** Loading: wash blocks + one honest line + a way back. No fake data. */
 export function PrintSkeleton() {
   return (
     <PrintShell>
@@ -25,6 +28,10 @@ export function PrintSkeleton() {
         <p className="rr-body-italic" role="status">
           Getting the page…
         </p>
+        {/* Loading can take up to ~15 s; the home screen app has no browser Back. */}
+        <div className="rr-print-state__actions">
+          <PrintBackLink />
+        </div>
         <div className="rr-skeleton-group" aria-hidden="true">
           <span className="rr-skeleton rr-skeleton--title" />
           <span className="rr-skeleton rr-skeleton--short" />
@@ -57,6 +64,8 @@ export function PrintMessage({
   back: Action;
   alert?: boolean;
 }) {
+  // The primary action opens an outside page: http(s) only, else no button.
+  const primaryHref = primary ? safeHttpUrl(primary.href) : null;
   return (
     <PrintShell context={context}>
       <section className="rr-state">
@@ -65,16 +74,16 @@ export function PrintMessage({
           {message}
         </p>
         <div className="rr-print-state__actions">
-          {primary && (
-            <a className="rr-btn rr-btn--primary" href={primary.href} target="_blank" rel="noopener noreferrer">
+          {primary && primaryHref && (
+            <a className="rr-btn rr-btn--primary" href={primaryHref} target="_blank" rel="noopener noreferrer">
               {primary.label}
               <span className="rr-sr-only"> (opens in a new tab)</span>
               <ArrowUpRightIcon />
             </a>
           )}
-          <a className="rr-btn rr-btn--link" href={back.href}>
+          <Link className="rr-btn rr-btn--link" href={back.href} prefetch={false}>
             {back.label}
-          </a>
+          </Link>
         </div>
       </section>
     </PrintShell>

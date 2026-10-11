@@ -19,6 +19,15 @@ export function backLink(from: PrintFrom): { href: string; label: string } {
   return BACK[from];
 }
 
+/**
+ * Paper for the printout: A4, no margin (the sheets carry their own margins).
+ * An @page rule cannot be limited to one screen by a selector, so it is not
+ * in design-system/print.css (which stays loaded after a client-side Back):
+ * PrintClient renders it in a <style> element, and it leaves with the print
+ * screen. Today / Path / Progress then print with the browser defaults.
+ */
+export const PRINT_PAGE_RULE = "@page { size: A4; margin: 0; }";
+
 /** URL of the print page for an item (what the quiet "Print" links point to). */
 export function printHref(id: string, from: PrintFrom): string {
   return `/print/${encodeURIComponent(id)}?from=${from}`;

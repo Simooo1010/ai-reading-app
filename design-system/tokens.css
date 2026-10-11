@@ -113,6 +113,11 @@
   --rr-page-top: 48px;
   --rr-tabbar-bottom: 34px; /* safe-area space under the tab bar */
   --rr-tap-min: 44px;
+  /* Tab bar: 48px tab + 1px hairline + bottom space (board 34px, or the
+     home indicator area if larger). The Undo toast sits on top of it. */
+  --rr-tabbar-tab-h: 48px;
+  --rr-tabbar-pad-bottom: max(var(--rr-tabbar-bottom), env(safe-area-inset-bottom, 0px));
+  --rr-tabbar-h: calc(var(--rr-tabbar-tab-h) + 1px + var(--rr-tabbar-pad-bottom));
 
   /* Radius */
   --rr-radius-sm: 3px;    /* progress bar ends */
@@ -127,7 +132,10 @@
   box-sizing: border-box;
 }
 
+/* Ground on html too: no white flash between screens, behind the iOS
+   status bar, or when the page bounces past its ends. */
 html {
+  background-color: var(--rr-ground);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
