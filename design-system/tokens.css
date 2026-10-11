@@ -137,6 +137,16 @@
  *   lg   >= 1100px  desktop: widest column, tab bar becomes a top bar,
  *                   Path detail opens as a side panel
  */
+/* In a browser tab the browser's own toolbar covers the home indicator area,
+   so the tab bar keeps only a small gap (the bottom inset still wins if it is
+   larger). The home-screen app (standalone) keeps the 34px of the boards.
+   --rr-tabbar-pad-bottom and --rr-tabbar-h follow; lg still sets 0 below. */
+@media (display-mode: browser) {
+  :root {
+    --rr-tabbar-bottom: 12px;
+  }
+}
+
 @media (min-width: 720px) {
   :root {
     --rr-page-max: 1040px;
