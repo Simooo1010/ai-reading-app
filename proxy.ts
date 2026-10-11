@@ -15,13 +15,26 @@ import {
   verifySessionToken,
 } from "@/lib/auth";
 
+/**
+ * App icon files and the web app manifest. A browser or an iPhone fetches
+ * them without the cookie (tab icon, "Add to Home Screen"), so they must be
+ * public. Exact names only: no bypass by file extension.
+ */
+const ICON_PATHS = new Set([
+  "/favicon.ico",
+  "/icon.svg",
+  "/apple-icon.png",
+  "/manifest.webmanifest",
+]);
+
 /** Paths that never need the cookie (the login screen and static assets). */
 export function isPublicPath(pathname: string): boolean {
   return (
     pathname === "/login" ||
     pathname.startsWith("/_next/static/") ||
     pathname.startsWith("/_next/image") ||
-    pathname === "/favicon.ico" ||
+    pathname.startsWith("/icons/") ||
+    ICON_PATHS.has(pathname) ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml"
   );

@@ -159,4 +159,19 @@ describe("matcher and isPublicPath", () => {
     }
     expect(isPublicPath("/favicon.ico")).toBe(true);
   });
+  it("app icons and the manifest are public (fetched without the cookie)", () => {
+    for (const p of [
+      "/icon.svg",
+      "/apple-icon.png",
+      "/manifest.webmanifest",
+      "/icons/mark.svg",
+      "/icons/icon-192.png",
+    ]) {
+      expect(isPublicPath(p)).toBe(true);
+    }
+    // Look-alikes stay protected.
+    for (const p of ["/icon.svg/x", "/apple-icon.png.map", "/manifest.json", "/iconsx/a.png", "/icons"]) {
+      expect(isPublicPath(p)).toBe(false);
+    }
+  });
 });

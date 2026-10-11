@@ -21,6 +21,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   colorScheme: "light",
+  themeColor: "#FCF3DC", // design-system ground; meta tags cannot read CSS variables
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
