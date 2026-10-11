@@ -1,7 +1,7 @@
 # AI Reading App — Product Spec (v1)
 
 ## 1. Purpose
-A small mobile-first web app that tells Marcus what to read next in his AI reading path and shows his progress and pace. It is a front end on top of one Notion database. **Notion is the only source of truth. The app has no database of its own.**
+A small mobile-first, adaptive (phone, tablet, desktop) web app that tells Marcus what to read next in his AI reading path and shows his progress and pace. It is a front end on top of one Notion database. **Notion is the only source of truth. The app has no database of its own.**
 
 ## 2. User
 - Marcus, 19, non-native English (B1), reads 3–7 hours/week, mostly on iPhone.
@@ -175,8 +175,8 @@ The controls look like the rest of this app. Pressroom's own styling is not copi
 - Login screen: label "Sign in", line "Enter the password to open your reading list.", field "Password", button "Enter". Wrong password: "That password is not right. Try again." After 5 wrong tries in 15 minutes: "Too many tries. Wait a few minutes." (best effort: the count is per server instance and resets on a cold start). A wrong try always takes at least 0.4 s.
 
 ## 9. Design
-- Visual model: the Reading Room design system (`design-system/`). Mobile-first (iPhone width first): one centred column, fluid up to 480 px, the same column on all widths (no separate desktop layout).
-- Bottom tab bar with text-only tabs: Today · Path · Progress.
+- Visual model: the Reading Room design system (`design-system/`). Mobile-first (iPhone width first), adaptive: phone, tablet, desktop. Phone (< 720 px): one centred column, fluid up to 480 px, exactly the boards. Tablet (>= 720 px): wider column, two-column Today / Path / Progress. Desktop (>= 1100 px): tab bar at the top, Progress grid, Path detail as a side panel, Print controls beside the preview. Breakpoints: `design-system/README.md`.
+- Text-only tabs: Today · Path · Progress (bottom tab bar on phone and tablet, top bar on desktop).
 - Light theme only for now (a dark theme is not designed yet). Large tap targets (≥44 px). No clutter.
 - English UI, simple words (B1). Short labels.
 - Fast: server-side fetch with short caching (e.g. revalidate 60 s) and revalidate immediately after any write.

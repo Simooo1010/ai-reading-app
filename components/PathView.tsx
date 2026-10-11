@@ -16,23 +16,25 @@ export function PathView({
     <>
       <ScreenHeader title="Path" context={summary} />
       <div className="rr-screen__body">
-        {phases.map((p) => (
-          <PhaseBlock
-            key={p.phase}
-            listId={`phase-${p.number}`}
-            title={p.phase}
-            isNow={p.isNow}
-            countText={p.countText}
-            hoursDone={p.hoursDone}
-            hoursTotal={p.hoursTotal}
-            percent={p.percent}
-            initiallyOpen={p.isNow}
-          >
-            {p.rows.map((row) => (
-              <PathRow key={row.id} row={row} />
-            ))}
-          </PhaseBlock>
-        ))}
+        <div className="rr-path">
+          {phases.map((p) => (
+            <PhaseBlock
+              key={p.phase}
+              listId={`phase-${p.number}`}
+              title={p.phase}
+              isNow={p.isNow}
+              countText={p.countText}
+              hoursDone={p.hoursDone}
+              hoursTotal={p.hoursTotal}
+              percent={p.percent}
+              initiallyOpen={p.isNow}
+            >
+              {p.rows.map((row) => (
+                <PathRow key={row.id} row={row} />
+              ))}
+            </PhaseBlock>
+          ))}
+        </div>
       </div>
     </>
   );

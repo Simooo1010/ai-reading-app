@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Sign in · AI Reading" };
 // action through proxy.ts), so it is static and works without JavaScript.
 export default function LoginPage() {
   return (
-    <div className="rr-screen">
+    <div className="rr-screen rr-screen--narrow">
       <main className="rr-screen__main">
         <ScreenHeader title="Sign in" />
         <div className="rr-screen__body">

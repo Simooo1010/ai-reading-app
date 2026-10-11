@@ -24,10 +24,11 @@
   padding-bottom: max(var(--rr-space-5), env(safe-area-inset-bottom, 0px));
 }
 
-/* Same centred column as .rr-screen: 390 first, max 480 */
+/* Same centred column as .rr-screen on a phone: 390 first, max 480
+   (--rr-page-max). Wider screens: see "Wide screens" below. */
 .rr-print__chrome {
   width: 100%;
-  max-width: 480px;
+  max-width: var(--rr-page-max);
   margin: 0 auto;
   padding: 0 calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) 0
     calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
@@ -49,7 +50,7 @@
 .rr-print__nav-inner {
   display: flex;
   width: 100%;
-  max-width: 480px;
+  max-width: var(--rr-page-max);
   margin: 0 auto;
   padding: 0 calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px)) var(--rr-space-2)
     calc(var(--rr-page-gutter) - var(--rr-space-1) + env(safe-area-inset-left, 0px));
@@ -928,6 +929,63 @@
 
 .rr-print-doc[data-format="monospace"] .rr-print-sheet .rr-print-pullquote {
   font-size: 1em;
+}
+
+/* ===================================================================
+ * Wide screens (screen only: these never touch the paper output).
+ * md >= 720px: the chrome stays a readable column (not the page width).
+ * lg >= 1100px: controls on the left (sticky, scroll on their own), the
+ * A4 preview on the right. Breakpoints: tokens.css.
+ * =================================================================== */
+
+@media screen and (min-width: 720px) {
+  .rr-print__chrome,
+  .rr-print__nav-inner {
+    max-width: 720px;
+  }
+}
+
+@media screen and (min-width: 1100px) {
+  .rr-print:has(> .rr-print__preview) {
+    /* Height of the sticky Back bar: top space + 44px link + space under */
+    --rr-print-nav-h: calc(var(--rr-space-3) + var(--rr-tap-min) + var(--rr-space-2) + env(safe-area-inset-top, 0px));
+    display: grid;
+    grid-template-columns: minmax(0, 400px) minmax(0, calc(210mm + 2 * var(--rr-space-4)));
+    justify-content: center;
+    align-items: start;
+    column-gap: var(--rr-page-gutter);
+    padding-right: calc(var(--rr-page-gutter) + env(safe-area-inset-right, 0px));
+    padding-left: calc(var(--rr-page-gutter) + env(safe-area-inset-left, 0px));
+  }
+
+  .rr-print:has(> .rr-print__preview) > .rr-print__nav {
+    grid-column: 1 / -1;
+  }
+
+  /* Back link lines up with the controls column */
+  .rr-print:has(> .rr-print__preview) .rr-print__nav-inner {
+    max-width: none;
+    margin-left: calc(-1 * var(--rr-space-1));
+    padding: 0 0 var(--rr-space-2);
+  }
+
+  /* 4px inside padding (pulled back by the margin) keeps focus rings visible */
+  .rr-print:has(> .rr-print__preview) > .rr-print__chrome {
+    position: sticky;
+    top: var(--rr-print-nav-h);
+    max-width: none;
+    max-height: calc(100dvh - var(--rr-print-nav-h));
+    margin: 0 calc(-1 * var(--rr-space-1));
+    padding: 0 var(--rr-space-1) var(--rr-space-5);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .rr-print:has(> .rr-print__preview) > .rr-print__preview {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 /* ===================================================================

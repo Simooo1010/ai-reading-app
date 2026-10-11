@@ -118,11 +118,40 @@
   --rr-tabbar-tab-h: 48px;
   --rr-tabbar-pad-bottom: max(var(--rr-tabbar-bottom), env(safe-area-inset-bottom, 0px));
   --rr-tabbar-h: calc(var(--rr-tabbar-tab-h) + 1px + var(--rr-tabbar-pad-bottom));
+  /* Widest content column. Phone: 480px (fluid below). Grows at md / lg. */
+  --rr-page-max: 480px;
+  /* Height of the top bar (lg only); sticky blocks sit under it. 0 below lg. */
+  --rr-topbar-h: 0px;
 
   /* Radius */
   --rr-radius-sm: 3px;    /* progress bar ends */
   --rr-radius-md: 6px;    /* buttons, chips: the default */
   --rr-radius-track: 1px; /* thin chart tracks */
+}
+
+/*
+ * Breakpoints (CSS variables cannot be used inside @media, so the numbers
+ * are written out in each query; keep them in step with this list):
+ *   base  < 720px   phone: the layout above, one 480px column (unchanged)
+ *   md   >= 720px   tablet / small laptop: wider column, 2-column grids
+ *   lg   >= 1100px  desktop: widest column, tab bar becomes a top bar,
+ *                   Path detail opens as a side panel
+ */
+@media (min-width: 720px) {
+  :root {
+    --rr-page-max: 1040px;
+    --rr-page-gutter: 32px;
+  }
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --rr-page-max: 1280px;
+    --rr-page-gutter: 48px;
+    /* The tab bar is at the top: nothing at the bottom for the toast to clear */
+    --rr-tabbar-h: 0px;
+    --rr-topbar-h: calc(var(--rr-tabbar-tab-h) + 1px + env(safe-area-inset-top, 0px));
+  }
 }
 
 /* Base layer */

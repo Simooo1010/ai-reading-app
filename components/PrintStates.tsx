@@ -7,11 +7,11 @@ import { safeHttpUrl } from "@/lib/links";
 
 // Server-rendered screens of the print route that are not the print view
 // itself: loading, open PDF, error, not found. No tab bar (the print page
-// lives outside the (app) group), same column as the rest of the app.
+// lives outside the (app) group), the narrow phone column on every width.
 
 export function PrintShell({ context, children }: { context?: string; children: ReactNode }) {
   return (
-    <div className="rr-screen">
+    <div className="rr-screen rr-screen--narrow">
       <main className="rr-screen__main">
         <ScreenHeader title="Print" context={context} />
         <div className="rr-screen__body">{children}</div>
