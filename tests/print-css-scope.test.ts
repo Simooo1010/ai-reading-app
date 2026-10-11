@@ -14,8 +14,7 @@ const css = readFileSync(resolve(ROOT, "design-system/print.css"), "utf8").repla
 function printBlocks(text: string): string[] {
   const out: string[] = [];
   const re = /@media\s+print\s*\{/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text))) {
+  while (re.exec(text)) {
     let depth = 1;
     let i = re.lastIndex;
     for (; i < text.length && depth > 0; i++) {
