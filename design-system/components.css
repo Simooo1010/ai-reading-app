@@ -942,6 +942,16 @@
   padding-top: 18px;
 }
 
+/* ---------- Brand mark (sign-in screen) ---------- */
+/* Not on the boards. The brain mark has no background, so it sits on the page
+   without a box. Centred, 96px wide, above the form. */
+.rr-mark {
+  display: block;
+  width: 96px;
+  height: auto;
+  margin: var(--rr-space-3) auto var(--rr-space-5);
+}
+
 /* ---------- ItemCard (Today card, detail sheet) ---------- */
 /* chips row, title, "by Author", meta line, Why read this, actions.
    Spacing from the Today board. */
