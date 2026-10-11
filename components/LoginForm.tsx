@@ -15,6 +15,19 @@ export function LoginForm() {
   return (
     <form action={formAction} className="rr-login">
       <p className="rr-body-italic">Enter the password to open your reading list.</p>
+      {/* Hidden user name so iPhone Passwords can save and fill the password
+          (it needs a user name field). Not shown, not focusable, not read
+          out; the login action reads only "password". */}
+      <input
+        type="text"
+        name="username"
+        autoComplete="username"
+        defaultValue="AI Reading"
+        className="rr-sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
+        readOnly
+      />
       <div className="rr-field">
         <label htmlFor="password" className="rr-field__label">
           Password
