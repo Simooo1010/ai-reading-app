@@ -9,6 +9,7 @@
 // in node:dns / node:http through fetch.ts). No `server-only` package, as in
 // lib/notion.ts (no new dependencies).
 
+import { safeHttpUrl } from "../links";
 import { createPrintCache, type PrintCache } from "./cache";
 import { isPrintFetchError } from "./errors";
 import { extractPrintable, type ExtractOptions } from "./extract";
@@ -83,17 +84,7 @@ export interface LoadDeps {
 
 /** http(s) URL from the Notion `Link`, or null. */
 export function validLink(link: unknown): string | null {
-  if (typeof link !== "string") return null;
-  const trimmed = link.trim();
-  if (!trimmed) return null;
-  try {
-    const u = new URL(trimmed);
-    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
-    if (u.username || u.password) return null;
-    return u.href;
-  } catch {
-    return null;
-  }
+  return safeHttpUrl(link);
 }
 
 function hostOf(url: string): string {

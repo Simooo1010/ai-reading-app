@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowUpRightIcon } from "@/components/Icons";
 import { PrintLink } from "@/components/PrintLink";
+import { safeHttpUrl } from "@/lib/links";
 import { StatusChip } from "@/components/StatusChip";
 import { formatMinutes, type CardData } from "@/lib/today";
 
@@ -29,6 +30,7 @@ export function ItemCard({ card, size, titleId, showStatus, actions, printFrom }
     (part): part is string => Boolean(part),
   );
   const hasNotes = Boolean(card.whyRead || card.scope || card.answers.length);
+  const sourceHref = safeHttpUrl(card.link);
 
   return (
     <article className="rr-item" aria-labelledby={titleId}>
@@ -77,16 +79,23 @@ export function ItemCard({ card, size, titleId, showStatus, actions, printFrom }
       )}
 
       <div className="rr-actions rr-item__actions">
-        <a
-          className="rr-btn rr-btn--primary"
-          href={card.link}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open source
-          <span className="rr-sr-only"> (opens in a new tab)</span>
-          <ArrowUpRightIcon />
-        </a>
+        {sourceHref ? (
+          <a
+            className="rr-btn rr-btn--primary"
+            href={sourceHref}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open source
+            <span className="rr-sr-only"> (opens in a new tab)</span>
+            <ArrowUpRightIcon />
+          </a>
+        ) : (
+          // Not a web link (empty or another scheme): never an href.
+          <span className="rr-btn rr-btn--primary" aria-disabled="true">
+            No link to open
+          </span>
+        )}
         {actions}
       </div>
 
