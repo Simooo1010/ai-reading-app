@@ -154,14 +154,19 @@ export const ITEMS_TAG = "items";
  * - expire 120 s (< 5 min): Next.js treats this as a short-lived cache, so it
  *   is never baked into the build output. The data is always read at request
  *   time (a "dynamic hole"), and a Notion error can never break `next build`.
- * - stale 30 s: how long the browser router may reuse the data without
- *   asking the server again (30 s is the minimum Next.js allows here).
- * - Every write (server actions) calls updateTag(ITEMS_TAG). That expires the
- *   entry at once, and the page re-render in the same response reads fresh.
+ * - stale 300 s: how long the browser router may reuse a screen it already
+ *   has without asking the server again. Switching tabs back and forth then
+ *   shows the screen at once, with no loading blocks. A change made directly
+ *   in Notion shows within 5 minutes (or at once after reopening the app).
+ * - Every write (server actions in app/(app)/actions.ts) calls
+ *   updateTag(ITEMS_TAG). That expires the server entry at once, the page
+ *   re-render in the same response reads fresh, and (Next.js cacheLife docs,
+ *   "Client cache behavior") it clears the whole browser router cache, so
+ *   Done / Skip / Undo never show old data on any tab.
  */
 export async function getItemsCached(): Promise<Item[]> {
   "use cache";
-  cacheLife({ stale: 30, revalidate: 60, expire: 120 });
+  cacheLife({ stale: 300, revalidate: 60, expire: 120 });
   cacheTag(ITEMS_TAG);
   return getAllItems();
 }

@@ -22,7 +22,6 @@ app/
   login/page.tsx, login/actions.ts
   print/[id]/page.tsx         # Print source (loading.tsx, error.tsx beside it); outside (app): no tab bar
 proxy.ts                      # Next 16 name for middleware: redirects to /login without a valid rr_auth cookie (icons + manifest are public)
-app/icon.svg, favicon.ico, apple-icon.png, manifest.ts   # app icon files; public/icons/ holds the master mark + manifest PNGs; see design-system/brand/README.md
 lib/
   notion.ts        # client, paginated query, typed mapping, the only place that touches Notion
   types.ts         # Item type + Layer/Status/Priority/Phase unions with exact Notion labels

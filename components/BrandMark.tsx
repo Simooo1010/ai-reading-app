@@ -1,16 +1,19 @@
 import Image from "next/image";
+import { BRAIN_ASPECT, brainMarkDataUri } from "@/lib/brain-mark";
 
-// The app mark (design-system/brand/README.md). The file already has the
-// ground colour behind the brain, so it sits on the page without a box.
+// The app mark on the sign-in screen (design-system/brand/README.md). The
+// drawing has no background, so it sits on the cream page without a box.
 // Decorative: the screen title next to it names the app.
+const WIDTH = 96;
+
 export function BrandMark() {
   return (
     <Image
       className="rr-mark"
-      src="/icons/mark.svg"
+      src={brainMarkDataUri()}
       alt=""
-      width={160}
-      height={160}
+      width={WIDTH}
+      height={Math.round(WIDTH / BRAIN_ASPECT)}
       unoptimized
       priority
     />

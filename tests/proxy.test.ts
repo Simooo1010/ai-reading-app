@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 import { AUTH_COOKIE, LOGIN_NEXT_HEADER, createSessionToken } from "@/lib/auth";
 import { config, isPublicPath, proxy } from "@/proxy";
 
@@ -159,19 +160,51 @@ describe("matcher and isPublicPath", () => {
     }
     expect(isPublicPath("/favicon.ico")).toBe(true);
   });
-  it("app icons and the manifest are public (fetched without the cookie)", () => {
-    for (const p of [
-      "/icon.svg",
-      "/apple-icon.png",
-      "/manifest.webmanifest",
-      "/icons/mark.svg",
-      "/icons/icon-192.png",
-    ]) {
-      expect(isPublicPath(p)).toBe(true);
+
+  // Home screen web app: iOS fetches the manifest and icons without cookies.
+  const HOME_SCREEN = ["/manifest.webmanifest", "/apple-icon", "/icon/192", "/icon/512", "/icon/maskable"];
+  const LOOK_ALIKES = [
+    "/iconx-secret",
+    "/icon/192/x",
+    "/icons",
+    "/apple-iconx",
+    "/apple-icon/a/b",
+    "/manifest.webmanifestx",
+    "/manifest.webmanifest/x",
+    "/manifestxwebmanifest",
+    "/today/icon",
+    "/print/icon",
+  ];
+
+  it("isPublicPath: home screen files are public, look-alikes are not", () => {
+    for (const p of HOME_SCREEN) expect(isPublicPath(p), p).toBe(true);
+    for (const p of LOOK_ALIKES) expect(isPublicPath(p), p).toBe(false);
+  });
+
+  it("matcher (Next's own matching): skips home screen files, still runs on look-alikes", () => {
+    const runs = (url: string) => unstable_doesMiddlewareMatch({ config, url });
+    for (const p of HOME_SCREEN) expect(runs(p), p).toBe(false);
+    for (const p of [...LOOK_ALIKES, "/", "/today", "/path", "/progress", "/login", "/print/abc"]) {
+      expect(runs(p), p).toBe(true);
     }
-    // Look-alikes stay protected.
-    for (const p of ["/icon.svg/x", "/apple-icon.png.map", "/manifest.json", "/iconsx/a.png", "/icons"]) {
-      expect(isPublicPath(p)).toBe(false);
+  });
+
+  it("proxy: home screen files pass without a cookie, look-alikes go to /login", async () => {
+    for (const p of [...HOME_SCREEN, "/icon/192?9af301eaf3ea54de", "/apple-icon?ad1c746f51a4c26f"]) {
+      expect(isPass(await proxy(req(p))), p).toBe(true);
     }
+    for (const p of [...LOOK_ALIKES, "/today"]) {
+      const res = await proxy(req(p));
+      expect(res.status, p).toBe(307);
+      expect(new URL(res.headers.get("location")!).pathname).toBe("/login");
+    }
+  });
+});
+
+describe("next.config: / goes to Today in one hop", () => {
+  it("redirects / to /today (temporary), before the proxy runs", async () => {
+    const { default: nextConfig } = await import("@/next.config");
+    const rules = await nextConfig.redirects!();
+    expect(rules).toContainEqual({ source: "/", destination: "/today", permanent: false });
   });
 });

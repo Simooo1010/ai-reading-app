@@ -1,4 +1,5 @@
 import { PrinterIcon } from "@/components/Icons";
+import { safeHttpUrl } from "@/lib/links";
 import { printHref, type PrintFrom } from "@/lib/print/screen";
 
 type Props = {
@@ -17,10 +18,12 @@ type Props = {
  * A PDF source opens straight away ("Open PDF"), in a new tab.
  */
 export function PrintLink({ id, title, pdfLink, from, variant }: Props) {
-  const pdf = typeof pdfLink === "string";
+  // An outside PDF link is http(s) only; anything else falls back to the print page.
+  const pdfHref = safeHttpUrl(pdfLink);
+  const pdf = pdfHref !== null;
   const word = pdf ? "Open PDF" : "Print";
   const newTab = pdf ? { target: "_blank", rel: "noopener noreferrer" } : {};
-  const href = pdf ? pdfLink : printHref(id, from);
+  const href = pdfHref ?? printHref(id, from);
 
   if (variant === "icon") {
     return (

@@ -8,11 +8,15 @@
 // pages, settings, text (no jsdom, no sanitize-html, no Node modules).
 
 import "@/design-system/print.css";
-import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState, type JSX, type MouseEvent } from "react";
+import { useStandalone } from "@/components/useStandalone";
+import { safeHttpUrl } from "@/lib/links";
 import { noticeWarnings, pageCheck, pdfTitle } from "@/lib/print/format";
 import { applyOptions, countImagesNotLoaded } from "@/lib/print/options";
 import { elementTraits } from "@/lib/print/pages";
 import type { PrintSettings } from "@/lib/print/settings";
+import { PRINT_PAGE_RULE } from "@/lib/print/screen";
 import type { PrintResult } from "@/lib/print/types";
 import { printFontVariables } from "./fonts";
 import type { BlockSpec, ImageActions } from "./PrintBlocks";
@@ -48,9 +52,10 @@ function ArrowUpRightIcon() {
 }
 
 function OpenSource({ link, primary }: { link: string; primary: boolean }) {
-  if (!link) return null;
+  const href = safeHttpUrl(link); // http(s) only, never another scheme
+  if (!href) return null;
   return (
-    <a className={`rr-btn ${primary ? "rr-btn--primary" : "rr-btn--secondary"}`} href={link} target="_blank" rel="noopener noreferrer">
+    <a className={`rr-btn ${primary ? "rr-btn--primary" : "rr-btn--secondary"}`} href={href} target="_blank" rel="noopener noreferrer">
       Open source
       <ArrowUpRightIcon />
       <span className="rr-sr-only"> (opens in a new tab)</span>
@@ -73,6 +78,8 @@ export default function PrintClient({
   const [removed, setRemoved] = useState<ReadonlySet<string>>(() => new Set());
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
   const [report, setReport] = useState<PagesReport | null>(null);
+  const [printFailed, setPrintFailed] = useState(false);
+  const standalone = useStandalone();
 
   const doc = result.document;
   const printable =
@@ -198,8 +205,26 @@ export default function PrintClient({
     document.title = pdfTitle(item.title, doc);
     window.addEventListener("afterprint", restore);
     timer = setTimeout(restore, TITLE_RESTORE_MS);
-    window.print();
+    try {
+      window.print();
+      setPrintFailed(false);
+    } catch {
+      // Some web views (e.g. a home screen app) may not allow print().
+      restore();
+      setPrintFailed(true);
+    }
   }, [item.title, doc]);
+
+  // Links inside the preview come from the source page. Open web links in a
+  // new tab, so in the home screen app they never replace this page.
+  const onPreviewClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    const target = e.target instanceof Element ? e.target.closest("a[href]") : null;
+    if (!(target instanceof HTMLAnchorElement)) return;
+    const href = safeHttpUrl(target.href);
+    if (!href) return;
+    e.preventDefault();
+    window.open(href, "_blank", "noopener,noreferrer");
+  }, []);
 
   const ready = report !== null && report.blocksKey === blocksKey;
   const hasEmbeds = !!doc && doc.elements.some((e) => e.type === "embed");
@@ -209,13 +234,18 @@ export default function PrintClient({
 
   return (
     <div className={`rr-print ${printFontVariables}`}>
-      <div className="rr-print__chrome">
-        <nav className="rr-print__nav" aria-label="Back">
-          <a className="rr-btn rr-btn--link rr-print__back" href={backHref}>
+      {/* A4, no margin: only while this screen is mounted (see PRINT_PAGE_RULE). */}
+      <style>{PRINT_PAGE_RULE}</style>
+      {/* Sticky: there is no browser Back button in the home screen app. */}
+      <nav className="rr-print__nav" aria-label="Back">
+        <div className="rr-print__nav-inner">
+          <Link className="rr-btn rr-btn--link rr-print__back" href={backHref} prefetch={false}>
             <ArrowLeftIcon />
             Back
-          </a>
-        </nav>
+          </Link>
+        </div>
+      </nav>
+      <div className="rr-print__chrome">
         <header className="rr-header">
           <span className="rr-label">Print</span>
           <span className="rr-header__context">{SOURCE_LABEL[result.source] ?? "Web page"}</span>
@@ -240,9 +270,9 @@ export default function PrintClient({
             ) : null}
             <div className="rr-actions rr-print-notice__actions">
               <OpenSource link={item.link} primary />
-              <a className="rr-btn rr-btn--link" href={backHref}>
+              <Link className="rr-btn rr-btn--link" href={backHref} prefetch={false}>
                 Back
-              </a>
+              </Link>
             </div>
           </section>
         ) : (
@@ -309,7 +339,15 @@ export default function PrintClient({
               <button type="button" className="rr-btn rr-btn--primary" onClick={onPrint} disabled={!ready}>
                 {partial ? "Print what we found" : "Print / Save as PDF"}
               </button>
-              <p className="rr-meta-italic">Set margins to &quot;None&quot; in the print dialog for best results.</p>
+              {printFailed ? (
+                <p className="rr-meta-italic" role="alert">
+                  The print screen did not open. Tap Share, then Print, to save it as a PDF.
+                </p>
+              ) : standalone ? (
+                <p className="rr-meta-italic">If the print screen does not open, tap Share, then Print, to save it as a PDF.</p>
+              ) : (
+                <p className="rr-meta-italic">Set margins to &quot;None&quot; in the print dialog for best results.</p>
+              )}
               {report && report.sheets !== report.pages ? (
                 <p className="rr-meta-italic">
                   {report.pages} pages in the preview; some are longer than one page, so the printout has about {report.sheets} sheets.
@@ -321,7 +359,7 @@ export default function PrintClient({
       </div>
 
       {printable ? (
-        <div className="rr-print__preview" aria-label="Preview of the printed pages">
+        <div className="rr-print__preview" aria-label="Preview of the printed pages" onClick={onPreviewClick}>
           <PrintPages blocks={blocks} settings={applied} actions={actions} onReport={setReport} />
         </div>
       ) : null}
