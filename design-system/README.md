@@ -2,11 +2,11 @@
 
 The single visual model for the AI Reading App. Bookish and quiet: one serif (Newsreader), hairline rules instead of boxes, no shadows, no gradients, no emoji, no icons in the tab bar.
 
-**Two-colour rule.** Only ground `#FCF3DC` and ink `#500101`. Every other colour is a tint of these two (`ink-2`, `wash`, `rule`). No third hue, ever. Charts use ink, ink opacity, hatching, outlines and direct labels.
+**Two-colour rule.** Only cream `#FCF3DC` and maroon `#500101`. In the light theme cream is the ground and maroon is the ink; in the dark theme they swap (maroon ground, cream ink). Every other colour is a tint of these two (`ink-2`, `wash`, `rule`). No third hue, ever. Charts use ink, ink opacity, hatching, outlines and direct labels.
 
 Visual source of truth: the Design System artifact https://claude.ai/artifact/ADzKSrembPx1X6ZEur54AX and the screens board https://claude.ai/artifact/SmmXSGmcU3JAgy8sBzGSLA. If code and boards disagree, the boards win.
 
-Open items: dark theme is not designed yet (light only, do not invent one). `wash` and `rule` were derived against an older ground and need a review against `#FCF3DC`.
+Open items: `wash` and `rule` were derived against an older ground and need a review against `#FCF3DC` (light). The dark values were checked for contrast (see "Dark theme"). The browser tab icon (`app/favicon.ico`), the manifest and the generated app icons are one fixed light image each and do not change in dark.
 
 ## Import
 
@@ -33,12 +33,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 | Group | Tokens |
 |---|---|
-| Colour | `ground` page · `on-ink` text on ink · `ink` text, fills, strong rules · `ink-2` secondary text, track outlines · `wash` tracks, Done button · `rule` hairlines only (never text) · `hatch-opacity` .55 |
+| Colour (light values here; dark in "Dark theme") | `ground` page · `on-ink` text on ink · `ink` text, fills, strong rules · `ink-2` secondary text, track outlines · `wash` tracks, Done button · `rule` hairlines only (never text) · `hatch-opacity` .55 (dark .6) |
 | Font | `font-serif` (Newsreader). Class `.rr-num` = `lining-nums tabular-nums` for data |
 | Type | `text-<name>-size/-lh/-weight/-tracking` for display 48, stat-xl 64, stat-lg 40, stat-md 34, stat-sm 28, stat-note 21, phase 28, author 20, row-title 19, body 18, body-italic 18, meta 16, meta-italic 15, label 14, chip 14 (hero 15), button 17, tab 14, axis 13 |
 | Space | `space-1..5` = 4 · 8 · 12 · 16 · 24 |
 | Layout | `page-max` 480 (md 1040, lg 1280) widest content column · `page-gutter` 24 (md 32, lg 48) · `page-top` 48 · `tabbar-bottom` 34 (12 in a browser tab, `display-mode: browser`, where the browser toolbar covers the home indicator area; the home-screen app keeps 34) · `tap-min` 44 · `tabbar-tab-h` 48 · `tabbar-pad-bottom` (= max(34px, home indicator area)) · `tabbar-h` (whole tab bar height; the Undo toast sits on it; 0 at lg) · `topbar-h` (top bar height at lg, else 0; sticky blocks sit under it) |
 | Radius | `radius-sm` 3 (bar ends) · `radius-md` 6 (default) · `radius-track` 1 (chart tracks) |
+
+## Dark theme
+
+Light is the default; dark follows the system (`@media (prefers-color-scheme: dark)` in `tokens.css`). There is no toggle, no JavaScript and no cookie, so there is no flash. `color-scheme: light dark` is set on `:root`, so native controls, scrollbars and the iOS overscroll follow. The theme is the two colours swapped ("Maroon Room"): no new hue.
+
+| Token | Light | Dark | Dark contrast |
+|---|---|---|---|
+| `ground` | `#FCF3DC` | `#500101` | page |
+| `on-ink` | `#FCF3DC` | `#500101` | on `ink` 14.1:1 |
+| `ink` | `#500101` | `#FCF3DC` | on `ground` 14.1:1 |
+| `ink-2` | `#7A3A2E` | `#D1B6A5` | on `ground` 8.1:1, on `wash` 6.2:1 |
+| `wash` | `#F8DF9C` | `#651E1B` | `ink` on it 10.8:1 |
+| `rule` | `#D9BE82` | `#7B3E38` | hairlines only (1.9:1), never text |
+| `hatch-opacity` | .55 | .6 | |
+
+**Rule: never hard-code a colour.** Every colour must come from a token, so both themes work. No hex, `rgb()`, `hsl()` or `color-mix()` in `components.css` or in a component (`tests/dark-theme.test.ts` checks the CSS). Marks drawn in SVG use classes (`.rr-chart__*`, `.rr-mark__*`), not colour attributes. A mark that needs two colours (the brain on the sign-in screen) is inline SVG, not an `<img>`, because an image cannot read the tokens. Native checkbox / select / range follow `color-scheme`.
+
+Printing Today, Path or Progress from a dark system restores the light values (`@media print` in `tokens.css`), so the paper is dark ink on light ground. Exceptions: the autofill override in `components.css` (an inset `box-shadow` filled with `--rr-ground`; it is not a shadow, it is the only way to recolour browser autofill, and uses a token); the paper (see "Print screen") is black on white in both themes, and the home screen files in the next section hold one value each.
 
 ## Screen sizes (breakpoints)
 
@@ -69,7 +87,7 @@ Rules: every wide-screen change goes inside `@media (min-width: 720px)` or `(min
 | `.rr-progress` `--sm/--md/--lg` (`--outlined`) | 6 / 8 / 10px bar; outlined on Progress | `<div class="rr-progress rr-progress--md rr-progress--outlined" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="100" aria-label="2% read"><div class="rr-progress__fill" style="width:2%"></div></div>` |
 | `.rr-stat` (`--end`), `.rr-stat-pair`, `.rr-tally` | label, number `__number--xl/lg/md/sm` (+`__unit`), `__empty`, `__helper` (`--lg`) | `<div class="rr-stat"><h2 class="rr-label">Streak</h2><p class="rr-stat__number rr-stat__number--sm">2 days</p><p class="rr-stat__helper">since Fri 9 Oct</p></div>` |
 | `.rr-tabbar` + `__tab` | hairline top, rule over active (`aria-current="page"`). At lg it moves to the top by CSS only (`order`): sticky, hairline under, tabs left at content width, ink line under the active tab. On a phone a ground-coloured underlay (`::after`, clipped by `.rr-screen` so it adds no scroll height; off at lg) continues below the bar, so no page content shows between the bar and a browser toolbar | `<nav class="rr-tabbar" aria-label="Main"><a class="rr-tabbar__tab" href="/today" aria-current="page">Today</a>…</nav>` |
-| `.rr-mark` | Not on the boards. The brain mark (`design-system/brand/README.md`) on the sign-in screen: 96px wide, centred, no background so it needs no box | `<BrandMark />` (`components/BrandMark.tsx`) |
+| `.rr-mark` (`__body`, `__folds`) | Not on the boards. The brain mark (`design-system/brand/README.md`) on the sign-in screen: inline SVG, 96px wide, centred, no background so it needs no box. Body in ink, fold lines in ground, so it follows the theme | `<BrandMark />` (`components/BrandMark.tsx`) |
 | `.rr-row--button` | ListRow as a `<button>` (Path row that opens the detail sheet) | `<button class="rr-row rr-row--button" data-item-id="…" aria-haspopup="dialog">…</button>` |
 | `.rr-item` + `__chips/__title/__author/__meta/__why/__note/__actions` | ItemCard (Today card, detail sheet): spacing from the Today board | `<article class="rr-item"><div class="rr-item__chips">…</div><h2 class="rr-item__title rr-display">…</h2>…</article>` |
 | `.rr-sheet` + `__inner`, `__head` | Detail sheet: native `<dialog>` + `showModal()`, ground, ink rule on top, column width (max 640 at md), safe-area padding; the page under it fades to ground and cannot scroll. At lg a full-height side panel on the right (ink rule on its left), same dialog behaviour | `<dialog class="rr-sheet" aria-labelledby="t"><div class="rr-sheet__inner"><div class="rr-sheet__head"><span class="rr-label">Phase 1 · item 3</span><button class="rr-btn rr-btn--link">Close</button></div>…</div></dialog>` |
@@ -142,10 +160,11 @@ One pattern id per page: if two charts need hatching, give each its own id and s
 
 ## Adding a component that is not in the designs
 
-- [ ] Tokens only: no hex, no new colour or tint, no new hue. Text in `ink` or `ink-2`, never `rule`.
+- [ ] Tokens only: no hex, no new colour or tint, no new hue. Never hard-code a colour: it must come from a token so both themes work. Text in `ink` or `ink-2`, never `rule`.
 - [ ] Hairline rules (`rule`, 1px) to separate; no boxes, cards, shadows or gradients.
 - [ ] Tap targets at least 44px (`--rr-tap-min`).
 - [ ] Radius 6px (`--rr-radius-md`) unless it is a bar end or chart track.
+- [ ] Works in light and dark: look at it with the system theme set to each (no light patch, no invisible text, no `rule` text).
 - [ ] Status never by colour alone: add a word, shape, check, dot, dash or strike.
 - [ ] Text 14px minimum (13px only for chart ticks), weights 500-700.
 - [ ] Serif only (`--rr-font-serif`); italic for authors and helpers; uppercase tracked labels.
@@ -155,7 +174,7 @@ One pattern id per page: if two charts need hatching, give each its own id and s
 
 ## Home screen app files (manifest, icons, theme colour)
 
-The web app manifest (`app/manifest.ts`), the generated icons (`app/icon.tsx`, `app/apple-icon.tsx`, drawing in `components/AppIconMark.tsx`) and the `theme-color` meta tag (`app/layout.tsx`) cannot read CSS variables, so they need the colours as hex. **This is the second documented exception to "no hex literals":** the two values live once in `lib/app-colors.ts` (`APP_GROUND` = `--rr-ground`, `APP_INK` = `--rr-ink`) and `tests/app-colors.test.ts` fails if they ever differ from `tokens.css`. No other colour may be added there. The icon is the brain mark (`lib/brain-mark.ts`, see `design-system/brand/README.md`): ink fill with ground-colour fold lines on the ground, no third colour.
+The web app manifest (`app/manifest.ts`), the generated icons (`app/icon.tsx`, `app/apple-icon.tsx`, drawing in `components/AppIconMark.tsx`) and the `theme-color` meta tag (`app/layout.tsx`) cannot read CSS variables, so they need the colours as hex. **This is the second documented exception to "no hex literals":** the values live once in `lib/app-colors.ts` (`APP_GROUND` = light `--rr-ground`, `APP_INK` = light `--rr-ink`, `APP_GROUND_DARK` = dark `--rr-ground`) and `tests/app-colors.test.ts` fails if they ever differ from `tokens.css`. No other colour may be added there. Only the `theme-color` meta tags (an array, light and dark) use the dark value. The manifest and the generated icons can hold only one value, so they stay light in dark mode. The icon is the brain mark (`lib/brain-mark.ts`, see `design-system/brand/README.md`): ink fill with ground-colour fold lines on the ground, no third colour.
 
 ## Print screen (`print.css`)
 
@@ -171,4 +190,4 @@ Loaded only by `components/print/PrintClient.tsx` (the print page), never by Tod
 | `.rr-print-pages`, `.rr-print-page` (`--flow`), `__frame`, `__caption`, `.rr-print-preview__status` | Preview: A4 sheets scaled to the screen (`--rr-print-scale`), "Page 2 of 7" under each sheet (not printed) |
 | `.rr-print-imgtoggle` (`--restore`) | "Remove image" / "Restore image" on a preview image: scaled back up to a real 44px target, not printed |
 
-**Print document: paper output, not UI.** The printed sheet (`.rr-print-sheet` and everything in it: `.rr-print-block`, `.rr-print-dochead`, `.rr-print-docfoot`, `.rr-print-note`, `.rr-print-code`, `.rr-print-table`, `.rr-print-figure`, ...) is what comes out of the printer, so it is black ink on white paper, not the two-colour UI. It uses its own variables, defined once on `.rr-print-sheet` in `print.css`: `--rr-print-paper` (white), `--rr-print-ink` (black), `--rr-print-ink-2` (dark grey), `--rr-print-rule` (grey rules), `--rr-print-wash` (code background). These are the only colour literals outside `tokens.css`, and only paper may use them; every UI element (chrome, captions, buttons) stays on the normal tokens. The preview sheets use the same variables, so the preview looks like the paper. Formats: Default (Lora text, Inter headings) and Monospace (JetBrains Mono, typewriter draft), switched by `data-format` / `data-font` on `.rr-print-doc`.
+**Print document: paper output, not UI.** The printed sheet (`.rr-print-sheet` and everything in it: `.rr-print-block`, `.rr-print-dochead`, `.rr-print-docfoot`, `.rr-print-note`, `.rr-print-code`, `.rr-print-table`, `.rr-print-figure`, ...) is what comes out of the printer, so it is black ink on white paper in light and dark alike, not the two-colour UI (`.rr-print-sheet` sets its own `color`, `background-color` and `color-scheme: light`, so nothing on the paper reads the themed tokens; the preview sheets stay white on the maroon page). It uses its own variables, defined once on `.rr-print-sheet` in `print.css`: `--rr-print-paper` (white), `--rr-print-ink` (black), `--rr-print-ink-2` (dark grey), `--rr-print-rule` (grey rules), `--rr-print-wash` (code background). Besides these paper variables, the only colour literals outside `tokens.css` are the home-screen files (`lib/app-colors.ts`); only paper may use the paper variables, every UI element (chrome, captions, buttons) stays on the normal tokens. The preview sheets use the same variables, so the preview looks like the paper. Formats: Default (Lora text, Inter headings) and Monospace (JetBrains Mono, typewriter draft), switched by `data-format` / `data-font` on `.rr-print-doc`.

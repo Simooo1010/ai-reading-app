@@ -15,6 +15,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/today",
     scope: "/",
     display: "standalone",
+    // One value only: the light pair. The dark theme-color is set by the meta
+    // tags in app/layout.tsx; the icons stay light too (lib/app-colors.ts).
     background_color: APP_GROUND,
     theme_color: APP_GROUND,
     icons: APP_ICONS.map((icon) => ({

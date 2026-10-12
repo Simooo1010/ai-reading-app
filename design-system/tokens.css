@@ -1,15 +1,19 @@
 /*
  * Reading Room — design tokens.
  * Two colours only: ground + ink. Every other colour is a tint of those two.
- * Light theme only. Dark theme is NOT designed yet (open item): do not add one.
+ * Two themes: light (default) and dark. Dark follows the system
+ * (prefers-color-scheme), no toggle, no JS. Dark = "Maroon Room": ground and
+ * ink swapped (maroon ground, cream ink), same two colours, no new hue.
+ * Never hard-code a colour in a component: every colour must come from a
+ * token here, so both themes work.
  * Open item: wash and rule were derived against an earlier ground (#FFECB7);
  * review them against #FCF3DC.
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: light dark; /* native controls, scrollbars and overscroll follow the theme */
 
-  /* Colour */
+  /* Colour (light). The dark values are in the media query below. */
   --rr-ground: #FCF3DC;   /* page background */
   --rr-on-ink: #FCF3DC;   /* text on ink fills (same value as ground) */
   --rr-ink: #500101;      /* primary text, primary fill, strong rules, filled bars */
@@ -127,6 +131,42 @@
   --rr-radius-sm: 3px;    /* progress bar ends */
   --rr-radius-md: 6px;    /* buttons, chips: the default */
   --rr-radius-track: 1px; /* thin chart tracks */
+}
+
+/* Dark theme: follows the system. Pure swap of the two colours: the maroon
+   becomes the ground, the cream becomes the ink. Every colour token is set
+   here again (tests/dark-theme.test.ts checks all seven and the contrast).
+   Contrast on ground: ink 14.1, ink-2 8.1. Contrast on wash: ink 10.8, ink-2 6.2. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --rr-ground: #500101;   /* page background (the light ink) */
+    --rr-on-ink: #500101;   /* text on ink fills (same value as ground) */
+    --rr-ink: #FCF3DC;      /* primary text, primary fill, strong rules, filled bars */
+    --rr-ink-2: #D1B6A5;    /* secondary text, track outlines (cream ~75% on maroon) */
+    --rr-wash: #651E1B;     /* bar tracks, "Done" button fill (cream ~12% on maroon) */
+    --rr-rule: #7B3E38;     /* hairlines and chip borders ONLY, never text (cream ~25%) */
+    --rr-hatch-opacity: 0.6; /* ink opacity of hatch lines in charts */
+  }
+}
+
+/* Printing from a dark system: the paper is light, so the colours go back to
+   the light values (dark ink on a light ground). Must come after the dark
+   block. The print screen paper has its own paper colours (print.css)
+   and its chrome is hidden when printing, so it is not affected. */
+@media print {
+  :root {
+    color-scheme: light;
+
+    --rr-ground: #FCF3DC;
+    --rr-on-ink: #FCF3DC;
+    --rr-ink: #500101;
+    --rr-ink-2: #7A3A2E;
+    --rr-wash: #F8DF9C;
+    --rr-rule: #D9BE82;
+    --rr-hatch-opacity: 0.55;
+  }
 }
 
 /*

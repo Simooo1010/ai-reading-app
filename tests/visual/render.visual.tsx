@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { it } from "vitest";
 import AppError from "@/app/(app)/error";
+import { BrandMark } from "@/components/BrandMark";
 import { ActionButtons } from "@/components/ActionButtons";
 import { PathView } from "@/components/PathView";
 import { ProgressView } from "@/components/ProgressView";
@@ -106,6 +107,21 @@ it("renders fixture pages", () => {
   page("today-empty", "Today", <TodayView context="All done" card={null} actions={null} upNext={[]} />);
   page("today-loading", "Today", <ScreenSkeleton title="Today" variant="card" />);
   page("path-loading", "Path", <ScreenSkeleton title="Path" variant="list" />);
+  // Sign in: same markup as app/login/page.tsx (the form is a client component
+  // wired to a server action, so the static fixture draws its fields directly).
+  page("login", "Today",
+    <div className="rr-screen__body">
+      <BrandMark />
+      <form className="rr-login">
+        <p className="rr-body-italic">Enter the password to open your reading list.</p>
+        <div className="rr-field">
+          <label htmlFor="password" className="rr-field__label">Password</label>
+          <input id="password" type="password" className="rr-field__input" aria-invalid="true" />
+          <p className="rr-field__error" role="alert">That password is not right. Try again.</p>
+        </div>
+        <div className="rr-login__actions"><button type="button" className="rr-btn rr-btn--primary">Enter</button></div>
+      </form>
+    </div>);
   page("error", "Today", <AppError error={new Error("fixture")} retry={() => {}} />);
   page("path-all-statuses", "Path", <PathView summary="8 items · 4.7 h" phases={PHASES} />);
 

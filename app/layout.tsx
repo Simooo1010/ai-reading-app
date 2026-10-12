@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader } from "next/font/google";
-import { APP_GROUND } from "@/lib/app-colors";
+import { APP_GROUND, APP_GROUND_DARK } from "@/lib/app-colors";
 import "@/design-system/tokens.css"; // 1. tokens + base
 import "@/design-system/components.css"; // 2. rr- classes
 
@@ -34,8 +34,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  colorScheme: "light",
-  themeColor: APP_GROUND, // = --rr-ground
+  // Light and dark follow the system (tokens.css). The browser / home-screen
+  // bar colour follows too. The manifest and the generated icons can only hold
+  // one value, so they stay light (app/manifest.ts, lib/app-colors.ts).
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: APP_GROUND }, // = --rr-ground (light)
+    { media: "(prefers-color-scheme: dark)", color: APP_GROUND_DARK }, // = --rr-ground (dark)
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

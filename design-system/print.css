@@ -479,7 +479,7 @@
 
 /* ===================================================================
  * 2. The printed document: paper output, not UI.
- * These are the ONLY colour literals outside tokens.css (README.md,
+ * Besides lib/app-colors.ts, these are the ONLY colour literals outside tokens.css (README.md,
  * "Print document: paper output, not UI").
  * =================================================================== */
 
@@ -489,6 +489,7 @@
   --rr-print-ink-2: #444444;  /* byline, captions, notes */
   --rr-print-rule: #b3b3b3;   /* rules, table lines, note borders */
   --rr-print-wash: #f2f2f2;   /* code block background */
+  color-scheme: light;        /* paper stays black on white in the dark theme */
 
   /* Fonts (next/font variables from components/print/fonts.ts) */
   --rr-print-serif: var(--rr-print-font-serif, "Lora"), Georgia, serif;
