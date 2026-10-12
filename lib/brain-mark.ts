@@ -9,11 +9,11 @@ import { APP_GROUND, APP_INK } from "@/lib/app-colors";
 /** Width / height of the mark's drawing area. */
 export const BRAIN_ASPECT = 2183 / 1401;
 
-const VIEW_BOX = "32 25 2183 1401";
+export const BRAIN_VIEW_BOX = "32 25 2183 1401";
 // Mirror so the front of the brain points right (the drawing faces left).
-const MIRROR = "translate(2247 0) scale(-1 1)";
-const OUTLINE = "M 83.9,541 C 273.2,248.8 598,78 953.1,37.9 C 1211.5,5.9 1499.6,29.7 1725.8,133.9 C 1978.1,275.7 2179.3,474.9 2211.6,746.3 C 2221.3,840.3 2206,938.7 2156.8,1022.5 C 2112.6,1097.9 1900,1445 1620,1425 C 1420,1410 1260,1360 1110.8,1317.7 C 978.2,1384.9 789.9,1413.2 669.4,1311.5 C 588.6,1259.6 564,1149 513.1,1094.1 C 345,1093.4 142.9,1047.5 71.2,891 C 20.1,778 12.8,701.7 83.6,540.1";
-const FOLDS = [
+export const BRAIN_MIRROR = "translate(2247 0) scale(-1 1)";
+export const BRAIN_OUTLINE = "M 83.9,541 C 273.2,248.8 598,78 953.1,37.9 C 1211.5,5.9 1499.6,29.7 1725.8,133.9 C 1978.1,275.7 2179.3,474.9 2211.6,746.3 C 2221.3,840.3 2206,938.7 2156.8,1022.5 C 2112.6,1097.9 1900,1445 1620,1425 C 1420,1410 1260,1360 1110.8,1317.7 C 978.2,1384.9 789.9,1413.2 669.4,1311.5 C 588.6,1259.6 564,1149 513.1,1094.1 C 345,1093.4 142.9,1047.5 71.2,891 C 20.1,778 12.8,701.7 83.6,540.1";
+export const BRAIN_FOLDS = [
   "M 1676.6,1427.3 C 1558.7,1408.2 1497.9,1278.1 1380.9,1250.8 C 1260.1,1170.1 1350,1049.8 1458.4,1012.9 C 1549.2,931 1688.5,992.9 1791.2,933 C 1895.3,886.2 2025.1,921.8 2113.1,977.8 C 2205.6,1064.5 2137.9,1179.7 2085,1265.7 C 2012.7,1366.9 1882,1411.1 1757.5,1429.4 C 1731.5,1429.3 1702.5,1423.6 1676.6,1427.3",
   "M 715.8,1341.6 C 751.8,1357.2 842,1336.5 856.2,1275.9",
   "M 767.9,1217.9 C 810.5,1287.3 921.8,1294.5 981.4,1224.7 C 1031.6,1206.1 951.8,1149.1 1028.5,1186.2 C 1047.9,1190.6 1063.6,1206.2 1083.6,1195",
@@ -100,11 +100,11 @@ const FOLDS = [
 
 /** The mark as an SVG string, no background (the page or icon supplies the ground). */
 export function brainMarkSvg(): string {
-  const folds = FOLDS.map((d) => `<path d="${d}"/>`).join("");
+  const folds = BRAIN_FOLDS.map((d) => `<path d="${d}"/>`).join("");
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VIEW_BOX}">` +
-    `<g transform="${MIRROR}">` +
-    `<path fill="${APP_INK}" d="${OUTLINE}"/>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${BRAIN_VIEW_BOX}">` +
+    `<g transform="${BRAIN_MIRROR}">` +
+    `<path fill="${APP_INK}" d="${BRAIN_OUTLINE}"/>` +
     `<g fill="none" stroke="${APP_GROUND}" stroke-width="10.8" stroke-linecap="round" stroke-linejoin="round">` +
     folds +
     `</g></g></svg>`

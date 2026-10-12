@@ -969,6 +969,19 @@
   margin: var(--rr-space-3) auto var(--rr-space-5);
 }
 
+/* Inline SVG: body in ink, fold lines in ground, so the mark follows the theme */
+.rr-mark__body {
+  fill: var(--rr-ink);
+}
+
+.rr-mark__folds {
+  fill: none;
+  stroke: var(--rr-ground);
+  stroke-width: 10.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* ---------- ItemCard (Today card, detail sheet) ---------- */
 /* chips row, title, "by Author", meta line, Why read this, actions.
    Spacing from the Today board. */
@@ -1357,6 +1370,15 @@
 .rr-field__input[aria-invalid="true"] {
   border-bottom-color: var(--rr-ink);
   border-bottom-width: 2px;
+}
+
+/* Browser autofill paints its own pale background and dark text: keep the
+   field on the theme colours (an inset fill is the only way to override it). */
+.rr-input:-webkit-autofill,
+.rr-field__input:-webkit-autofill {
+  -webkit-text-fill-color: var(--rr-ink);
+  caret-color: var(--rr-ink);
+  box-shadow: 0 0 0 100px var(--rr-ground) inset;
 }
 
 /* ---------- Print entry points (not on the boards) ---------- */

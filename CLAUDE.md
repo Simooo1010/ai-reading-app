@@ -44,7 +44,7 @@ vercel.json        # framework preset (the Vercel project preset was "Other")
 
 ## Design system
 - All UI follows `design-system/` ("Reading Room"). Read `design-system/README.md` before any UI work.
-- Use only `--rr-` tokens and `rr-` classes. No hex literals, no new colours, no sans fonts.
+- Use only `--rr-` tokens and `rr-` classes. No hex literals, no new colours, no sans fonts. Light and dark (system) are both supported: every colour must come from a token (never hard-code one), and a new component must work in light and dark. The print paper stays black on white.
 - Layout is adaptive: phone (< 720px) = the boards, unchanged; md (>= 720px) and lg (>= 1100px) changes go only inside `@media (min-width: …)` blocks (breakpoints in `design-system/README.md`).
 - New components not in the designs must follow the "Adding a component" checklist in the README.
 - UI copy in simple English (B1).

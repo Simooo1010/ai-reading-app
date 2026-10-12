@@ -1,6 +1,6 @@
 # Brand mark
 
-The app icon is a filled ink brain (side view, facing right) on the ground colour. Only the two design-system colours: ink `#500101` and ground `#FCF3DC` (hex lives once in `lib/app-colors.ts`).
+The app icon is a filled ink brain (side view, facing right) on the ground colour. Only the two design-system colours: ink `#500101` and ground `#FCF3DC` (hex lives once in `lib/app-colors.ts`). The icons and the favicon are fixed light images (they do not change in dark mode); the sign-in mark is inline SVG on the tokens, so it swaps with the theme.
 
 ## Where it is used
 
@@ -8,7 +8,7 @@ The app icon is a filled ink brain (side view, facing right) on the ground colou
 |---|---|---|
 | The drawing | `lib/brain-mark.ts` | One source. `brainMarkSvg()` and `brainMarkDataUri()`. No background. |
 | iPhone home screen, web app manifest icons | `app/apple-icon.tsx`, `app/icon.tsx` via `components/AppIconMark.tsx` | The brain is 54.6% of the icon width, centred on the ground. Generated at build time (`next/og`). Sizes and scale: `lib/app-icons.ts`. |
-| Sign-in screen | `components/BrandMark.tsx` (`.rr-mark`) | 96px wide above the form. |
+| Sign-in screen | `components/BrandMark.tsx` (`.rr-mark`, `__body`, `__folds`) | 96px wide above the form. Inline SVG from the same paths (`BRAIN_*` in `lib/brain-mark.ts`); colours from the tokens, so it is visible in dark too. |
 | Browser tab | `app/favicon.ico` (16, 32, 48 px) | A small-size cut of the same drawing: bigger brain (about 90% of the width), fewer and bolder fold lines, so it still reads at 16 px. A static file; to change it, redraw it from `lib/brain-mark.ts` and export again. |
 
 ## Source and licence

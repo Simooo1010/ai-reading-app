@@ -148,7 +148,7 @@ Known hard pages (show "may not print well" before the user starts): interactive
 - **Exclude video embeds:** on/off.
 - **Remove single images:** a tap on an image removes it from the printout (and back).
 - **Print / Save as PDF** button, with the tip: set margins to "None" in the print dialog.
-- Not carried over: Pressroom's "latest N posts from a publication" mode and its own light/dark toggle (this app follows the system).
+- Not carried over: Pressroom's "latest N posts from a publication" mode and its own light/dark toggle (this app follows the system; see §9).
 
 The controls look like the rest of this app. Pressroom's own styling is not copied.
 
@@ -177,7 +177,7 @@ The controls look like the rest of this app. Pressroom's own styling is not copi
 ## 9. Design
 - Visual model: the Reading Room design system (`design-system/`). Mobile-first (iPhone width first), adaptive: phone, tablet, desktop. Phone (< 720 px): one centred column, fluid up to 480 px, exactly the boards. Tablet (>= 720 px): wider column, two-column Today / Path / Progress. Desktop (>= 1100 px): tab bar at the top, Progress grid, Path detail as a side panel, Print controls beside the preview. Breakpoints: `design-system/README.md`.
 - Text-only tabs: Today · Path · Progress (bottom tab bar on phone and tablet, top bar on desktop).
-- Light theme only for now (a dark theme is not designed yet). Large tap targets (≥44 px). No clutter.
+- Light and dark theme, following the system (no toggle): dark swaps the two colours (maroon ground, cream ink); see `design-system/README.md`, "Dark theme". The printed paper stays black on white. Large tap targets (≥44 px). No clutter.
 - English UI, simple words (B1). Short labels.
 - Fast: server-side fetch with short caching (e.g. revalidate 60 s) and revalidate immediately after any write.
 
