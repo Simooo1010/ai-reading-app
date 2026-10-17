@@ -2,6 +2,8 @@
 // The print page stores these in localStorage; anything read back is checked
 // here field by field, so a broken or old value never breaks the page.
 
+import { isPrintLanguage, type PrintLanguage } from "./language";
+
 export const PRINT_FORMATS = ["default", "monospace"] as const;
 export type PrintFormat = (typeof PRINT_FORMATS)[number];
 
@@ -19,6 +21,11 @@ export interface PrintSettings {
   margin: number;
   /** Leave out videos and other embeds (they print as links otherwise). */
   excludeEmbeds: boolean;
+  /**
+   * The last language chosen on the print screen. Remembered only: the screen
+   * always opens in English and translates only after a tap on Italiano.
+   */
+  language: PrintLanguage;
 }
 
 export const DEFAULT_SETTINGS: Readonly<PrintSettings> = Object.freeze({
@@ -28,6 +35,7 @@ export const DEFAULT_SETTINGS: Readonly<PrintSettings> = Object.freeze({
   lineSpacing: 1.6,
   margin: 25,
   excludeEmbeds: false,
+  language: "en",
 });
 
 export const LIMITS = {
@@ -89,6 +97,7 @@ export function clampSettings(input: unknown): PrintSettings {
     lineSpacing: clampNumber(o.lineSpacing, LIMITS.lineSpacing.min, LIMITS.lineSpacing.max, LIMITS.lineSpacing.step, d.lineSpacing),
     margin: clampNumber(o.margin, LIMITS.margin.min, LIMITS.margin.max, LIMITS.margin.step, d.margin),
     excludeEmbeds: typeof o.excludeEmbeds === "boolean" ? o.excludeEmbeds : d.excludeEmbeds,
+    language: isPrintLanguage(o.language) ? o.language : d.language,
   };
 }
 
@@ -115,6 +124,7 @@ export function sameSettings(a: PrintSettings, b: PrintSettings): boolean {
     a.size === b.size &&
     a.lineSpacing === b.lineSpacing &&
     a.margin === b.margin &&
-    a.excludeEmbeds === b.excludeEmbeds
+    a.excludeEmbeds === b.excludeEmbeds &&
+    a.language === b.language
   );
 }

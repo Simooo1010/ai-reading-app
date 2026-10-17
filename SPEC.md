@@ -165,6 +165,16 @@ The controls look like the rest of this app. Pressroom's own styling is not copi
 
 **Dependencies (approved by Marcus 2026-10-10).** `jsdom`, `@mozilla/readability`, `sanitize-html`. `cheerio` is not needed (jsdom does the same job), so the list stays at the three approved.
 
+**Italian (added 2026-10-17).** Marcus can print any source in Italian.
+- Scope: the print screen only. An `English | Italiano` switch in the print controls changes the preview and the printout. The app UI stays in English. No separate reading page.
+- On demand: nothing is translated until Italiano is tapped (a server action, `app/print/[id]/actions.ts`, auth first). Print still costs nothing until used, and Today is not slower.
+- Italian replaces English: title, subtitle, paragraphs, headings, quotes, list items, captions, tables and embed text. The structure stays the same (same blocks, same order). Code, equations, formulas, links (URLs), placeholders, author, date and the source URL stay as they are. Inline formatting and links are kept (tags are masked as numbered markers and sanitized again after).
+- Hidden for PDFs, "Open PDF" results and blocked or failed pages (only where a document exists).
+- Engine: Gemini free tier (`GEMINI_API_KEY`, server only; model in `GEMINI_MODEL`, default `gemini-3.8-flash`). Automatic fallback per batch to the keyless Google Translate endpoint (no key, Gemini cooling down, or Gemini still refusing after its retries). Code: `lib/print/translate/`.
+- Rate limits ("too many requests" is common on the free tier): Gemini calls one at a time per server, a minimum gap between calls (default 6 s, `TRANSLATE_MIN_GAP_MS`), up to 3 tries per batch honouring Retry-After with backoff, a time budget of 50 s, and a pause of Gemini calls (1 hour after the daily quota is used up, 1 minute after repeated refusals or a refused key / unknown model). Translated parts are cached 24 h, so a second try only sends what is missing.
+- Partial rule: a part whose translation failed stays English. If not every part was translated, the printout says "Partial translation" (like "Partial printout", fidelity rule 3), and the result is not cached so a retry can finish it (the screen asks again when English, then Italiano, is tapped; a retry never replaces Italian with a less complete one). Nothing translated at all: "Italian is not available right now. Try again in a few minutes." and the English stays.
+- The printout says "Translated to Italian by machine. It may contain errors." The check line counts the Italian words (found = printed) and says "Translated to Italian". An English check that failed stays failed in Italian (never "Check passed").
+
 **Out of scope for Print v1.** Substack Notes, "latest N posts from a publication" mode, the four other Pressroom formats (Newspaper, Scientific, Book, Magazine), saving PDFs on the server.
 
 ## 8. Access

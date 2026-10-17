@@ -15,6 +15,8 @@ import {
   type PrintFormat,
   type PrintSettings,
 } from "@/lib/print/settings";
+import { LANGUAGE_LABELS, PRINT_LANGUAGES, type PrintLanguage } from "@/lib/print/language";
+import { TRANSLATE_MESSAGES } from "@/lib/print/translate/types";
 
 function NumberControl({
   label,
@@ -95,16 +97,66 @@ function NumberControl({
   );
 }
 
+export interface LanguageControlProps {
+  /** The chosen option (Italiano while it is being made). */
+  value: PrintLanguage;
+  /** Italian is being made: quiet status line, Print is off. */
+  translating: boolean;
+  /** Italian could not be made (the page stays English). */
+  error: string | null;
+  /** Italiano was the last choice (remembered), but this page is still English. */
+  rememberedItalian: boolean;
+  onChange: (lang: PrintLanguage) => void;
+}
+
+/**
+ * English | Italiano: the same segmented radio group as Format. The Italian
+ * text is made on the server only after a tap (never on load).
+ */
+function LanguageControl({ value, translating, error, rememberedItalian, onChange }: LanguageControlProps) {
+  const id = useId();
+  return (
+    <div className="rr-print-lang">
+      <fieldset className="rr-print-seg" aria-busy={translating || undefined}>
+        <legend className="rr-print-field__label">Language</legend>
+        <div className="rr-print-seg__options">
+          {PRINT_LANGUAGES.map((l) => (
+            <label key={l} className="rr-print-seg__option" lang={l}>
+              <input type="radio" name={`${id}-lang`} value={l} checked={value === l} onChange={() => onChange(l)} />
+              <span>{LANGUAGE_LABELS[l]}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      {/* Always in the page, so screen readers hear the change. */}
+      <p className="rr-meta-italic rr-print-lang__msg" role="status" aria-live="polite">
+        {translating ? TRANSLATE_MESSAGES.loading : ""}
+      </p>
+      {error ? (
+        <p className="rr-field__error rr-print-lang__msg" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {rememberedItalian && !translating && !error ? (
+        <p className="rr-meta-italic rr-print-lang__msg">You chose Italian last time. Tap Italiano to translate this page.</p>
+      ) : null}
+    </div>
+  );
+}
+
 export function PrintControls({
   settings,
   onChange,
   onReset,
   hasEmbeds,
+  language,
 }: {
   settings: PrintSettings;
   onChange: (patch: Partial<PrintSettings>) => void;
   onReset: () => void;
   hasEmbeds: boolean;
+  /** Shown only for a page that can be printed. */
+  language?: LanguageControlProps;
 }) {
   const id = useId();
   return (
@@ -117,6 +169,8 @@ export function PrintControls({
           Reset
         </button>
       </div>
+
+      {language ? <LanguageControl {...language} /> : null}
 
       <fieldset className="rr-print-seg">
         <legend className="rr-print-field__label">Format</legend>

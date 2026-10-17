@@ -123,6 +123,34 @@
   color: var(--rr-ink);
 }
 
+/* Partial translation (Italian): a visible note, not an error. Ink, a thin
+   ink-2 bar on the left and the words "Partial translation" (never colour only). */
+.rr-print-check__warn {
+  margin: var(--rr-space-2) 0 0;
+  padding-left: var(--rr-space-3);
+  border-left: 1px solid var(--rr-ink-2);
+  font-size: var(--rr-text-meta-size);
+  line-height: var(--rr-text-meta-lh);
+  font-weight: 600;
+  font-style: italic;
+  color: var(--rr-ink);
+}
+
+/* Language switch (English | Italiano): the .rr-print-seg group plus its
+   status, error and hint lines. The status line is always in the page (live
+   region); empty, it takes no space. */
+.rr-print-lang {
+  min-width: 0;
+}
+
+.rr-print-lang .rr-print-lang__msg {
+  margin: var(--rr-space-2) 0 0;
+}
+
+.rr-print-lang .rr-print-lang__msg:empty {
+  margin: 0;
+}
+
 /* Options */
 .rr-print-controls {
   display: flex;

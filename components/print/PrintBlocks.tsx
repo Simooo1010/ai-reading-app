@@ -16,8 +16,8 @@ import type { BlockTraits } from "@/lib/print/pages";
 import { placeholderText, type PrintDocument, type PrintElement } from "@/lib/print/types";
 
 export type BlockSpec =
-  | { id: string; kind: "head"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; partialNote?: string; traits: BlockTraits }
-  | { id: string; kind: "foot"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; fallbackUrl: string; partialNote?: string; traits: BlockTraits }
+  | { id: string; kind: "head"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; partialNote?: string; translationNotes?: readonly string[]; traits: BlockTraits }
+  | { id: string; kind: "foot"; doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; fallbackUrl: string; partialNote?: string; translationNotes?: readonly string[]; traits: BlockTraits }
   | { id: string; kind: "el"; el: PrintElement; traits: BlockTraits }
   /** One item of a list: lists are packed item by item, so a long list never needs a page of its own. */
   | { id: string; kind: "li"; list: Extract<PrintElement, { type: "list" }>; item: number; traits: BlockTraits }
@@ -132,7 +132,32 @@ function Element({ el, actions }: { el: PrintElement; actions: ImageActions }) {
   }
 }
 
-function DocHead({ doc, fallbackTitle, fallbackAuthor, partialNote }: { doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; partialNote?: string }) {
+/**
+ * Machine translation note (Italian printout): on the paper itself, header and
+ * footer, like "Partial printout". The note is English text on an Italian page.
+ */
+function TranslationNote({ notes }: { notes?: readonly string[] }) {
+  if (!notes || notes.length === 0) return null;
+  return (
+    <p className="rr-print-partial" data-kind="translation" lang="en">
+      {notes.join(" ")}
+    </p>
+  );
+}
+
+function DocHead({
+  doc,
+  fallbackTitle,
+  fallbackAuthor,
+  partialNote,
+  translationNotes,
+}: {
+  doc: PrintDocument;
+  fallbackTitle: string;
+  fallbackAuthor: string;
+  partialNote?: string;
+  translationNotes?: readonly string[];
+}) {
   const date = formatPrintDate(doc.date);
   const byline = [doc.author || fallbackAuthor, doc.publication, date].filter((s) => s && s.trim()).join(" · ");
   return (
@@ -141,12 +166,27 @@ function DocHead({ doc, fallbackTitle, fallbackAuthor, partialNote }: { doc: Pri
       {doc.subtitle ? <p className="rr-print-dochead__subtitle">{doc.subtitle}</p> : null}
       {byline ? <p className="rr-print-dochead__byline">{byline}</p> : null}
       {doc.url ? <p className="rr-print-dochead__url">{doc.url}</p> : null}
+      <TranslationNote notes={translationNotes} />
       {partialNote ? <p className="rr-print-partial">Partial printout. {partialNote}</p> : null}
     </header>
   );
 }
 
-function DocFoot({ doc, fallbackTitle, fallbackAuthor, fallbackUrl, partialNote }: { doc: PrintDocument; fallbackTitle: string; fallbackAuthor: string; fallbackUrl: string; partialNote?: string }) {
+function DocFoot({
+  doc,
+  fallbackTitle,
+  fallbackAuthor,
+  fallbackUrl,
+  partialNote,
+  translationNotes,
+}: {
+  doc: PrintDocument;
+  fallbackTitle: string;
+  fallbackAuthor: string;
+  fallbackUrl: string;
+  partialNote?: string;
+  translationNotes?: readonly string[];
+}) {
   const date = formatPrintDate(doc.date);
   const who = [doc.author || fallbackAuthor, date].filter((s) => s && s.trim()).join(" · ");
   return (
@@ -154,6 +194,7 @@ function DocFoot({ doc, fallbackTitle, fallbackAuthor, fallbackUrl, partialNote 
       <p className="rr-print-docfoot__title">{doc.title || fallbackTitle}</p>
       {who ? <p>{who}</p> : null}
       <p className="rr-print-docfoot__url">Source: {doc.url || fallbackUrl}</p>
+      <TranslationNote notes={translationNotes} />
       {partialNote ? <p className="rr-print-partial">Partial printout. {partialNote}</p> : null}
     </footer>
   );
@@ -164,11 +205,26 @@ export const PrintBlock = memo(function PrintBlock({ block, actions }: { block: 
   let inner: ReactNode;
   switch (block.kind) {
     case "head":
-      inner = <DocHead doc={block.doc} fallbackTitle={block.fallbackTitle} fallbackAuthor={block.fallbackAuthor} partialNote={block.partialNote} />;
+      inner = (
+        <DocHead
+          doc={block.doc}
+          fallbackTitle={block.fallbackTitle}
+          fallbackAuthor={block.fallbackAuthor}
+          partialNote={block.partialNote}
+          translationNotes={block.translationNotes}
+        />
+      );
       break;
     case "foot":
       inner = (
-        <DocFoot doc={block.doc} fallbackTitle={block.fallbackTitle} fallbackAuthor={block.fallbackAuthor} fallbackUrl={block.fallbackUrl} partialNote={block.partialNote} />
+        <DocFoot
+          doc={block.doc}
+          fallbackTitle={block.fallbackTitle}
+          fallbackAuthor={block.fallbackAuthor}
+          fallbackUrl={block.fallbackUrl}
+          partialNote={block.partialNote}
+          translationNotes={block.translationNotes}
+        />
       );
       break;
     case "removed":
