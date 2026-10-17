@@ -93,11 +93,14 @@ export function PrintPages({
   settings,
   actions,
   onReport,
+  lang,
 }: {
   blocks: BlockSpec[];
   settings: PrintSettings;
   actions: ImageActions;
   onReport: (report: PagesReport | null) => void;
+  /** Language of the printed text ("it" for an Italian printout): set on the sheets, not on the screen text around them. */
+  lang?: string;
 }) {
   const [layout, setLayout] = useState<Layout | null>(null);
   const [nonce, setNonce] = useState(0);
@@ -295,7 +298,7 @@ export function PrintPages({
             aria-label={`Page ${i + 1} of ${total}`}
           >
             <div className="rr-print-page__frame">
-              <div className={`rr-print-sheet${p.flow ? " rr-print-sheet--flow" : ""}`}>
+              <div className={`rr-print-sheet${p.flow ? " rr-print-sheet--flow" : ""}`} lang={lang}>
                 <div className="rr-print-sheet__body">
                   {p.ids.map((id) => {
                     const b = byId.get(id);
@@ -313,7 +316,7 @@ export function PrintPages({
       </div>
       {measuring ? (
         <div className="rr-print-measure-box" aria-hidden="true">
-          <div className="rr-print-sheet rr-print-sheet--measure" ref={measurerRef}>
+          <div className="rr-print-sheet rr-print-sheet--measure" ref={measurerRef} lang={lang}>
             <div className="rr-print-sheet__body">
               {blocks.map((b) => (
                 <PrintBlock key={b.id} block={b} actions={measureActions} />

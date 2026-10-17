@@ -20,6 +20,7 @@ describe("print settings", () => {
       lineSpacing: 1.6,
       margin: 25,
       excludeEmbeds: false,
+      language: "en",
     });
     expect(SETTINGS_STORAGE_KEY).toBe("rr-print-settings-v1");
   });
@@ -30,7 +31,7 @@ describe("print settings", () => {
   });
 
   it("round-trips valid settings", () => {
-    const s = { format: "monospace", font: "times", size: 36, lineSpacing: 3, margin: 80, excludeEmbeds: true } as const;
+    const s = { format: "monospace", font: "times", size: 36, lineSpacing: 3, margin: 80, excludeEmbeds: true, language: "it" } as const;
     expect(parseSettings(serializeSettings(s))).toEqual(s);
     expect(parseSettings(s)).toEqual(s);
   });
@@ -39,7 +40,7 @@ describe("print settings", () => {
     for (const raw of [null, undefined, "", "not json", "[]", "42", "null", 7, true, [], "{"]) {
       expect(parseSettings(raw)).toEqual(DEFAULT_SETTINGS);
     }
-    expect(parseSettings(JSON.stringify({ format: "newspaper", font: "comic", size: "big", lineSpacing: null, margin: {}, excludeEmbeds: "yes" }))).toEqual(
+    expect(parseSettings(JSON.stringify({ format: "newspaper", font: "comic", size: "big", lineSpacing: null, margin: {}, excludeEmbeds: "yes", language: "fr" }))).toEqual(
       DEFAULT_SETTINGS,
     );
     expect(parseSettings(JSON.stringify({ font: "serif", size: "x" }))).toEqual({ ...DEFAULT_SETTINGS, font: "serif" });
@@ -73,5 +74,17 @@ describe("print settings", () => {
   it("compares settings", () => {
     expect(sameSettings(DEFAULT_SETTINGS, { ...DEFAULT_SETTINGS })).toBe(true);
     expect(sameSettings(DEFAULT_SETTINGS, { ...DEFAULT_SETTINGS, margin: 24 })).toBe(false);
+    expect(sameSettings(DEFAULT_SETTINGS, { ...DEFAULT_SETTINGS, language: "it" })).toBe(false);
+  });
+
+  it("remembers the language: English or Italiano only, English by default", () => {
+    expect(parseSettings(JSON.stringify({ language: "it" })).language).toBe("it");
+    expect(parseSettings(JSON.stringify({ language: "en" })).language).toBe("en");
+    for (const language of ["IT", "italian", "fr", "", 1, null, ["it"], { it: true }]) {
+      expect(clampSettings({ language }).language).toBe("en");
+    }
+    // Settings stored before the language existed still load, in English.
+    const old = JSON.stringify({ format: "monospace", font: "mono", size: 14, lineSpacing: 2, margin: 20, excludeEmbeds: true });
+    expect(parseSettings(old)).toEqual({ format: "monospace", font: "mono", size: 14, lineSpacing: 2, margin: 20, excludeEmbeds: true, language: "en" });
   });
 });

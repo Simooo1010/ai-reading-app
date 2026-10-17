@@ -21,6 +21,7 @@ app/
   (app)/error.tsx
   login/page.tsx, login/actions.ts
   print/[id]/page.tsx         # Print source (loading.tsx, error.tsx beside it); outside (app): no tab bar
+  print/[id]/actions.ts       # server action: translateToItalian (SPEC §7.4, Italian)
 proxy.ts                      # Next 16 name for middleware: redirects to /login without a valid rr_auth cookie (icons + manifest are public)
 lib/
   notion.ts        # client, paginated query, typed mapping, the only place that touches Notion
@@ -31,6 +32,8 @@ lib/
   progress.ts, path.ts, today.ts   # pure view models for the three screens
   print/           # Print source: fetch (SSRF-safe), route/classify, load, cache, extract (substack, generic,
                    #   convert, sanitize, fidelity, text, meta, dom), pages/options/settings/format (print screen logic)
+  print/translate/ # Italian (SPEC §7.4): segments, mask, batch, gemini, google (keyless fallback), engine (rate limits,
+                   #   breaker, segment cache), index (translatePrintResult); action in app/print/[id]/actions.ts
 components/
   print/           # print screen (client): PrintClient, controls, pages, blocks, settings hook, fonts
 design-system/
