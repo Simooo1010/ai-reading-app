@@ -71,3 +71,7 @@ vercel.json        # framework preset (the Vercel project preset was "Other")
 - Ask before adding any dependency beyond Next.js, `@notionhq/client`, and the three Print libraries above (dev tooling like ESLint/test runner excepted). There is no chart library.
 - Run `npm run lint` and `npm run build` (and `npm test` once tests exist) before saying a step is done. Show what works.
 - Keep UI text in simple English (B1).
+
+## Language
+
+Chat with me in Italian. Write all code, comments, commit messages, docs, config files, skills and subagent prompts in English. Exception: deliverables explicitly meant for Italian readers stay in Italian.
