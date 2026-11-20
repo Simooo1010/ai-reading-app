@@ -14,7 +14,14 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="rr-login">
-      <p className="rr-body-italic">Enter the password to open your reading list.</p>
+      {/* One closed book: shakes on a wrong password, opens while signing in. */}
+      <div
+        className={`rr-cover rr-cover--closed${error ? " rr-cover--shake" : ""}${pending ? " rr-cover--opening" : ""}`}
+        aria-hidden="true"
+      >
+        <span className="rr-cover__title">AI Reading Path</span>
+      </div>
+      <p className="rr-body">Enter the password to open your reading list.</p>
       {/* Hidden user name so iPhone Passwords can save and fill the password
           (it needs a user name field). Not shown, not focusable, not read
           out; the login action reads only "password". */}
@@ -53,7 +60,7 @@ export function LoginForm() {
       </div>
       <div className="rr-login__actions">
         <button type="submit" className="rr-btn rr-btn--primary" disabled={pending}>
-          Enter
+          Open
         </button>
       </div>
     </form>

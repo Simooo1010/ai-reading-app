@@ -1,9 +1,8 @@
-import { PathRow } from "@/components/PathRow";
-import { PhaseBlock } from "@/components/PhaseBlock";
+import { PathShelves } from "@/components/PathShelves";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import type { PhaseView } from "@/lib/path";
 
-/** Path screen (board E). Presentational: plain props, no data fetching. */
+/** Path screen (Shelf design). Presentational: plain props, no data fetching. */
 export function PathView({
   summary,
   phases,
@@ -14,27 +13,9 @@ export function PathView({
 }) {
   return (
     <>
-      <ScreenHeader title="Path" context={summary} />
+      <ScreenHeader title="The shelf" context={summary} />
       <div className="rr-screen__body">
-        <div className="rr-path">
-          {phases.map((p) => (
-            <PhaseBlock
-              key={p.phase}
-              listId={`phase-${p.number}`}
-              title={p.phase}
-              isNow={p.isNow}
-              countText={p.countText}
-              hoursDone={p.hoursDone}
-              hoursTotal={p.hoursTotal}
-              percent={p.percent}
-              initiallyOpen={p.isNow}
-            >
-              {p.rows.map((row) => (
-                <PathRow key={row.id} row={row} />
-              ))}
-            </PhaseBlock>
-          ))}
-        </div>
+        <PathShelves phases={phases} />
       </div>
     </>
   );

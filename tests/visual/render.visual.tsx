@@ -11,7 +11,6 @@ import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { it } from "vitest";
 import AppError from "@/app/(app)/error";
-import { BrandMark } from "@/components/BrandMark";
 import { ActionButtons } from "@/components/ActionButtons";
 import { PathView } from "@/components/PathView";
 import { ProgressView } from "@/components/ProgressView";
@@ -19,7 +18,7 @@ import { TargetForm } from "@/components/WeeklyHours";
 import { progressData } from "@/lib/progress";
 import { SheetContent } from "@/components/SheetContent";
 import { ScreenSkeleton } from "@/components/Skeleton";
-import { TodayView } from "@/components/TodayView";
+import { TodayView, type ShelfPreview } from "@/components/TodayView";
 import { UndoToast } from "@/components/UndoToast";
 import type { CardData } from "@/lib/today";
 import {
@@ -31,8 +30,6 @@ import {
   PROGRESS_THIS_WEEK_HIGH,
   PROGRESS_TODAY,
   READING_COUNTERWEIGHT,
-  UP_NEXT,
-  UP_NEXT_LONG,
   card,
 } from "./fixtures";
 
@@ -85,41 +82,49 @@ function sheet(name: string, c: CardData, opts: Partial<Parameters<typeof Action
   );
 }
 
+const SHELF: ShelfPreview = {
+  label: "PHASE 1 SHELF · 6 ITEMS · 2.3 H",
+  spines: PHASES[0].rows.map((r) => ({ ...r, layer: r.layer })),
+  nextId: PHASES[0].rows[3].id,
+  following: "Fixture item 5",
+  wall: PHASES.map((p, i) => ({ label: p.phase.toUpperCase(), current: i === 0, spines: p.rows })),
+};
+
 it("renders fixture pages", () => {
   mkdirSync(OUT, { recursive: true });
   const ctx = "Phase 1 · item 3 of 9";
 
   page("today-reading-counterweight", "Today",
-    <TodayView context={ctx} card={READING_COUNTERWEIGHT} actions={buttons(READING_COUNTERWEIGHT)} upNext={UP_NEXT} />);
+    <TodayView context={ctx} card={READING_COUNTERWEIGHT} actions={buttons(READING_COUNTERWEIGHT)} streak="3 DAY STREAK" shelf={SHELF} />);
   page("today-skip-confirm", "Today",
-    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN, { confirmSkip: true })} upNext={UP_NEXT.slice(0, 1)} />);
+    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN, { confirmSkip: true })} streak="3 DAY STREAK" shelf={SHELF} />);
   page("today-action-error", "Today",
-    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN, { error: "Could not save. Please try again." })} upNext={[]} />);
+    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN, { error: "Could not save. Please try again." })} streak="3 DAY STREAK" shelf={SHELF} />);
   page("today-undo-toast", "Today",
-    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} upNext={UP_NEXT} />,
+    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} streak="3 DAY STREAK" shelf={SHELF} />,
     <UndoToast message="Skipped." pending={false} showClose={false} />);
   page("today-undo-error", "Today",
-    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} upNext={UP_NEXT} />,
+    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} streak="3 DAY STREAK" shelf={SHELF} />,
     <UndoToast message="Could not save. Please try again." pending={false} showClose />);
   // Long author lists must wrap, never make the page wider than the phone.
   page("today-long-authors", "Today",
-    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} upNext={UP_NEXT_LONG} />);
-  page("today-empty", "Today", <TodayView context="All done" card={null} actions={null} upNext={[]} />);
+    <TodayView context={ctx} card={PLAIN} actions={buttons(PLAIN)} streak="3 DAY STREAK" shelf={SHELF} />);
+  page("today-empty", "Today", <TodayView context="ALL DONE" streak={null} card={null} actions={null} shelf={null} />);
   page("today-loading", "Today", <ScreenSkeleton title="Today" variant="card" />);
   page("path-loading", "Path", <ScreenSkeleton title="Path" variant="list" />);
   // Sign in: same markup as app/login/page.tsx (the form is a client component
   // wired to a server action, so the static fixture draws its fields directly).
   page("login", "Today",
     <div className="rr-screen__body">
-      <BrandMark />
       <form className="rr-login">
-        <p className="rr-body-italic">Enter the password to open your reading list.</p>
+        <div className="rr-cover rr-cover--closed" aria-hidden="true"><span className="rr-cover__title">AI Reading Path</span></div>
+        <p className="rr-body">Enter the password to open your reading list.</p>
         <div className="rr-field">
           <label htmlFor="password" className="rr-field__label">Password</label>
           <input id="password" type="password" className="rr-field__input" aria-invalid="true" />
           <p className="rr-field__error" role="alert">That password is not right. Try again.</p>
         </div>
-        <div className="rr-login__actions"><button type="button" className="rr-btn rr-btn--primary">Enter</button></div>
+        <div className="rr-login__actions"><button type="button" className="rr-btn rr-btn--primary">Open</button></div>
       </form>
     </div>);
   page("error", "Today", <AppError error={new Error("fixture")} retry={() => {}} />);

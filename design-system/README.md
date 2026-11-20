@@ -1,31 +1,24 @@
-# Reading Room — design system (code side)
+# Shelf — design system (code side)
 
-The single visual model for the AI Reading App. Bookish and quiet: one serif (Newsreader), hairline rules instead of boxes, no shadows, no gradients, no emoji, no icons in the tab bar.
+The visual model for the AI Reading App ("two-ink risograph"). Spec: the Notion page "AI Reading App — Shelf design spec" and the canvas https://claude.ai/artifact/RfgEXdZ35rugqRCxpBJyk4. It replaces the older "Reading Room" system. Class names keep the `rr-` prefix and token names keep their old names (`ground`, `ink`, `on-ink`, `wash`, `rule`), so existing markup works.
 
-**Two-colour rule.** Only cream `#FCF3DC` and maroon `#500101`. In the light theme cream is the ground and maroon is the ink; in the dark theme they swap (maroon ground, cream ink). Every other colour is a tint of these two (`ink-2`, `wash`, `rule`). No third hue, ever. Charts use ink, ink opacity, hatching, outlines and direct labels.
+**Grammar.** An item is always a book: a *spine* when small (WIDTH = reading time, HEIGHT = difficulty, FILL = status), a *cover* when large. A set of items is a *shelf*: spines on a 3px ink board. Ink on paper plus one highlighter yellow, used only for "the next thing" (next item, the primary action, the NOW tag). Type: Space Grotesk 700/500 for titles and numbers, Space Mono for every label and metadata line. Status is a fill pattern (outline = To read, yellow = Next / Reading, solid = Done, dashed and short = Skipped, 135deg hatch = Counterweight layer) and the detail sheet always says the word. No serif, no third colour, no shadows, no progress bars where a shelf can show progress, no icons in the tab bar.
 
-Visual source of truth: the Design System artifact https://claude.ai/artifact/ADzKSrembPx1X6ZEur54AX and the screens board https://claude.ai/artifact/SmmXSGmcU3JAgy8sBzGSLA. If code and boards disagree, the boards win.
-
-Open items: `wash` and `rule` were derived against an older ground and need a review against `#FCF3DC` (light). The dark values were checked for contrast (see "Dark theme"). The browser tab icon (`app/favicon.ico`), the manifest and the generated app icons are one fixed light image each and do not change in dark.
+Not done yet (open): Progress as shelves (the weekly chart and layer bars still use the old SVG charts, retheme only), the Print screen chrome (pills with popovers; it is themed by tokens only), the "rotateY" open of the login cover after success is a short animation while signing in.
 
 ## Import
 
 ```tsx
 // app/layout.tsx
-import { Newsreader } from "next/font/google";
+import { Space_Grotesk, Space_Mono } from "next/font/google";
 import "@/design-system/tokens.css";      // 1. tokens + base
 import "@/design-system/components.css";  // 2. rr- classes
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],                 // variable font: wght 400-700 + opsz 6-72
-  variable: "--font-newsreader",  // tokens.css maps this into --rr-font-serif
-  display: "swap",
-});
+const grotesk = Space_Grotesk({ subsets: ["latin"], weight: ["500", "700"], variable: "--font-grotesk", display: "swap" });
+const mono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono", display: "swap" });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="en" className={newsreader.variable}><body>{children}</body></html>;
+  return <html lang="en" className={`${grotesk.variable} ${mono.variable}`}><body>{children}</body></html>;
 }
 ```
 
@@ -40,19 +33,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 | Layout | `page-max` 480 (md 1040, lg 1280) widest content column · `page-gutter` 24 (md 32, lg 48) · `page-top` 48 · `tabbar-bottom` 34 (12 in a browser tab, `display-mode: browser`, where the browser toolbar covers the home indicator area; the home-screen app keeps 34) · `tap-min` 44 · `tabbar-tab-h` 48 · `tabbar-pad-bottom` (= max(34px, home indicator area)) · `tabbar-h` (whole tab bar height; the Undo toast sits on it; 0 at lg) · `topbar-h` (top bar height at lg, else 0; sticky blocks sit under it) |
 | Radius | `radius-sm` 3 (bar ends) · `radius-md` 6 (default) · `radius-track` 1 (chart tracks) |
 
-## Dark theme
+## Colour tokens
 
-Light is the default; dark follows the system (`@media (prefers-color-scheme: dark)` in `tokens.css`). There is no toggle, no JavaScript and no cookie, so there is no flash. `color-scheme: light dark` is set on `:root`, so native controls, scrollbars and the iOS overscroll follow. The theme is the two colours swapped ("Maroon Room"): no new hue.
-
-| Token | Light | Dark | Dark contrast |
+| Token | Light | Dark | Use |
 |---|---|---|---|
-| `ground` | `#FCF3DC` | `#500101` | page |
-| `on-ink` | `#FCF3DC` | `#500101` | on `ink` 14.1:1 |
-| `ink` | `#500101` | `#FCF3DC` | on `ground` 14.1:1 |
-| `ink-2` | `#7A3A2E` | `#D1B6A5` | on `ground` 8.1:1, on `wash` 6.2:1 |
-| `wash` | `#F8DF9C` | `#651E1B` | `ink` on it 10.8:1 |
-| `rule` | `#D9BE82` | `#7B3E38` | hairlines only (1.9:1), never text |
-| `hatch-opacity` | .55 | .6 | |
+| `ground` | `#F4F1EA` paper | `#0E1440` deep ultramarine | page |
+| `ink` | `#1A2AB8` | `#F4F1EA` | all text, rules, filled spines, cover ground (9:1 on paper) |
+| `on-ink` | `#F4F1EA` | `#0E1440` | text on ink fills |
+| `ink-2` | = `ink` | = `ink` | secondary text (hierarchy comes from type, not a third colour) |
+| `highlight` | `#FFE14A` | `#FFE14A` | next item, primary action, NOW tag |
+| `on-highlight` | `#1A2AB8` (8:1) | `#0E1440` | text on yellow |
+| `ink-tint` | `#7C89F0` | `#5560B8` | hairlines and outlined numerals on the cover only |
+| `wash` | `#E8E4DA` desk | `#1F2A66` | quiet fills, tracks |
+| `rule` | `#B9BFEF` | `#3A4287` | hairlines only, never text |
+
+Dark follows the system (`prefers-color-scheme`), no toggle, no JavaScript, no flash. Printing from a dark system restores the light values. `tests/dark-theme.test.ts` checks the tokens and the contrast.
 
 **Rule: never hard-code a colour.** Every colour must come from a token, so both themes work. No hex, `rgb()`, `hsl()` or `color-mix()` in `components.css` or in a component (`tests/dark-theme.test.ts` checks the CSS). Marks drawn in SVG use classes (`.rr-chart__*`, `.rr-mark__*`), not colour attributes. A mark that needs two colours (the brain on the sign-in screen) is inline SVG, not an `<img>`, because an image cannot read the tokens. Native checkbox / select / range follow `color-scheme`.
 

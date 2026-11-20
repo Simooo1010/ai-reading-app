@@ -43,6 +43,13 @@ export function ItemActions({ id, status, allowReset, onSkipped }: Props) {
     setError(null);
     setFocusSkip(false);
     setBusy(kind);
+    // Done slides the cover back into its slot, Skip slides it off to the left.
+    const cover =
+      kind === "done" || kind === "skip"
+        ? document.querySelector<HTMLElement>(".rr-cover--hero")
+        : null;
+    if (kind === "skip") setConfirmSkip(false);
+    cover?.classList.add(kind === "done" ? "rr-cover--shelve" : "rr-cover--skip");
     startTransition(async () => {
       let result: Awaited<ReturnType<(typeof RUN)[ActionKind]>>;
       try {
@@ -50,6 +57,7 @@ export function ItemActions({ id, status, allowReset, onSkipped }: Props) {
       } catch {
         // No network, or the request was cut off: show a short message here
         // instead of the full-screen error page.
+        cover?.classList.remove("rr-cover--shelve", "rr-cover--skip");
         setBusy(null);
         setError("Could not save. Please try again.");
         setConfirmSkip(false);
@@ -57,6 +65,7 @@ export function ItemActions({ id, status, allowReset, onSkipped }: Props) {
       }
       setBusy(null);
       if (!result.ok) {
+        cover?.classList.remove("rr-cover--shelve", "rr-cover--skip");
         setError(result.error);
         setConfirmSkip(false);
         return;

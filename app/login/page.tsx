@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { BrandMark } from "@/components/BrandMark";
 import { LoginForm } from "@/components/LoginForm";
 import { ScreenHeader } from "@/components/ScreenHeader";
 
@@ -15,7 +14,6 @@ export default function LoginPage() {
       <main className="rr-screen__main">
         <ScreenHeader title="Sign in" />
         <div className="rr-screen__body">
-          <BrandMark />
           <LoginForm />
         </div>
       </main>

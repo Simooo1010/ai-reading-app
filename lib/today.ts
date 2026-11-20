@@ -75,6 +75,7 @@ export type CardData = Pick<
   | "readingTimeMin"
   | "whyRead"
   | "link"
+  | "published"
 > & {
   /** Notes text when it starts with "Read:", else null. */
   scope: string | null;
@@ -99,6 +100,7 @@ export function toCardData(item: Item, all: readonly Item[]): CardData {
     readingTimeMin: item.readingTimeMin,
     whyRead: item.whyRead,
     link: item.link,
+    published: item.published,
     scope: readScope(item.notes),
     answers:
       item.layer === "5 · Counterweights" ? pairedTitles(item, all) : [],

@@ -1,14 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader } from "next/font/google";
+import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { APP_GROUND, APP_GROUND_DARK } from "@/lib/app-colors";
 import "@/design-system/tokens.css"; // 1. tokens + base
 import "@/design-system/components.css"; // 2. rr- classes
 
-const newsreader = Newsreader({
+const grotesk = Space_Grotesk({
   subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"], // variable font: wght 400-700 + opsz 6-72
-  variable: "--font-newsreader", // tokens.css maps this into --rr-font-serif
+  weight: ["500", "700"],
+  variable: "--font-grotesk", // tokens.css maps this into --rr-font-sans
+  display: "swap",
+});
+
+const mono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-mono", // tokens.css maps this into --rr-font-mono
   display: "swap",
 });
 
@@ -46,7 +52,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={newsreader.variable}>
+    <html lang="en" className={`${grotesk.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );
