@@ -1,53 +1,56 @@
 /*
- * Reading Room — design tokens.
- * Two colours only: ground + ink. Every other colour is a tint of those two.
- * Two themes: light (default) and dark. Dark follows the system
- * (prefers-color-scheme), no toggle, no JS. Dark = "Maroon Room": ground and
- * ink swapped (maroon ground, cream ink), same two colours, no new hue.
- * Never hard-code a colour in a component: every colour must come from a
- * token here, so both themes work.
- * Open item: wash and rule were derived against an earlier ground (#FFECB7);
- * review them against #FCF3DC.
+ * Shelf — design tokens ("two-ink risograph").
+ * Ultramarine ink on warm paper, plus one highlighter yellow used only for
+ * "the next thing". Two themes: light (default) and dark, following the
+ * system (prefers-color-scheme), no toggle, no JS.
+ * Never hard-code a colour in a component: every colour comes from a token
+ * here, so both themes work. Token names kept from the old system
+ * (ground / ink / on-ink ...) so existing classes keep working.
  */
 
 :root {
   color-scheme: light dark; /* native controls, scrollbars and overscroll follow the theme */
 
   /* Colour (light). The dark values are in the media query below. */
-  --rr-ground: #FCF3DC;   /* page background */
-  --rr-on-ink: #FCF3DC;   /* text on ink fills (same value as ground) */
-  --rr-ink: #500101;      /* primary text, primary fill, strong rules, filled bars */
-  --rr-ink-2: #7A3A2E;    /* secondary text, track outlines (~7:1 on ground) */
-  --rr-wash: #F8DF9C;     /* bar tracks, "Done" button fill */
-  --rr-rule: #D9BE82;     /* hairlines and chip borders ONLY, never text */
-  --rr-hatch-opacity: 0.55; /* ink opacity of hatch lines in charts */
+  --rr-ground: #F4F1EA;   /* paper: page background */
+  --rr-on-ink: #F4F1EA;   /* text on ink fills (same value as ground) */
+  --rr-ink: #1A2AB8;      /* all text, rules, filled spines, cover ground (9:1 on paper) */
+  --rr-ink-2: #1A2AB8;    /* secondary text: same ink, hierarchy comes from type, not a third colour */
+  --rr-wash: #E8E4DA;     /* the desk: tracks, quiet fills */
+  --rr-rule: #B9BFEF;     /* hairlines only, never text */
+  --rr-highlight: #FFE14A; /* next item, primary action, NOW tag, target line */
+  --rr-on-highlight: #1A2AB8; /* ink on highlight (8:1) */
+  --rr-ink-tint: #7C89F0; /* hairlines and outlined numerals on the ink cover only */
+  --rr-hatch-opacity: 1;  /* hatch lines are solid ink (Counterweight layer) */
 
   /* Font */
-  /* --font-newsreader is set by next/font on <html> (see README); "Newsreader" is the fallback name */
-  --rr-font-serif: var(--font-newsreader, "Newsreader"), Georgia, "Times New Roman", serif;
+  /* --font-grotesk and --font-mono are set by next/font on <html> (see layout.tsx) */
+  --rr-font-sans: var(--font-grotesk, "Space Grotesk"), "Helvetica Neue", Arial, sans-serif;
+  --rr-font-mono: var(--font-mono, "Space Mono"), ui-monospace, Menlo, Consolas, monospace;
+  --rr-font-serif: var(--rr-font-sans); /* legacy name, now Space Grotesk (no serif in Shelf) */
 
   /* Type: size / line-height / weight / tracking */
-  --rr-text-display-size: 48px;
-  --rr-text-display-lh: 1.02;
-  --rr-text-display-weight: 600;
-  --rr-text-display-tracking: -0.018em;
+  --rr-text-display-size: 50px;
+  --rr-text-display-lh: 0.96;
+  --rr-text-display-weight: 700;
+  --rr-text-display-tracking: -0.035em;
 
   --rr-text-stat-xl-size: 64px;
   --rr-text-stat-xl-lh: 1;
-  --rr-text-stat-xl-weight: 600;
+  --rr-text-stat-xl-weight: 700;
   --rr-text-stat-xl-tracking: -0.02em;
 
   --rr-text-stat-lg-size: 40px;
   --rr-text-stat-lg-lh: 1.05;
-  --rr-text-stat-lg-weight: 600;
+  --rr-text-stat-lg-weight: 700;
 
   --rr-text-stat-md-size: 34px;
   --rr-text-stat-md-lh: 1;
-  --rr-text-stat-md-weight: 600;
+  --rr-text-stat-md-weight: 700;
 
   --rr-text-stat-sm-size: 28px;
   --rr-text-stat-sm-lh: 32px;
-  --rr-text-stat-sm-weight: 600;
+  --rr-text-stat-sm-weight: 700;
 
   /* stat-note: italic text in place of a number ("Not enough data yet"), from the Progress board */
   --rr-text-stat-note-size: 21px;
@@ -56,7 +59,7 @@
 
   --rr-text-phase-size: 28px;
   --rr-text-phase-lh: 1.1;
-  --rr-text-phase-weight: 600;
+  --rr-text-phase-weight: 700;
   --rr-text-phase-tracking: -0.01em;
 
   --rr-text-author-size: 20px;
@@ -65,7 +68,7 @@
 
   --rr-text-row-title-size: 19px;
   --rr-text-row-title-lh: 1.25;
-  --rr-text-row-title-weight: 600;
+  --rr-text-row-title-weight: 700;
 
   --rr-text-body-size: 18px;
   --rr-text-body-lh: 1.45;
@@ -83,17 +86,17 @@
   --rr-text-meta-italic-lh: 20px;
   --rr-text-meta-italic-weight: 500;
 
-  --rr-text-label-size: 14px;
+  --rr-text-label-size: 13px;
   --rr-text-label-lh: 20px;
   --rr-text-label-weight: 700;
-  --rr-text-label-tracking: 0.12em;
+  --rr-text-label-tracking: 0.1em;
 
   --rr-text-chip-size: 14px;
   --rr-text-chip-hero-size: 15px;
   --rr-text-chip-weight: 500;
 
   --rr-text-button-size: 17px;
-  --rr-text-button-weight: 600;
+  --rr-text-button-weight: 700;
   --rr-text-button-tracking: 0.01em;
 
   --rr-text-tab-size: 14px;
@@ -128,44 +131,50 @@
   --rr-topbar-h: 0px;
 
   /* Radius */
-  --rr-radius-sm: 3px;    /* progress bar ends */
-  --rr-radius-md: 6px;    /* buttons, chips: the default */
+  --rr-radius-sm: 3px;    /* spine top corners */
+  --rr-radius-md: 6px;    /* cover small corners */
+  --rr-radius-pill: 999px; /* buttons, chips */
+  --rr-radius-cover: 22px; /* cover large corners */
+  --rr-board: 3px;        /* shelf board = 3px ink line */
   --rr-radius-track: 1px; /* thin chart tracks */
 }
 
-/* Dark theme: follows the system. Pure swap of the two colours: the maroon
-   becomes the ground, the cream becomes the ink. Every colour token is set
-   here again (tests/dark-theme.test.ts checks all seven and the contrast).
-   Contrast on ground: ink 14.1, ink-2 8.1. Contrast on wash: ink 10.8, ink-2 6.2. */
+/* Dark theme: follows the system. Paper becomes deep ultramarine, ink becomes
+   paper; the highlight is unchanged. Every colour token is set here again
+   (tests/dark-theme.test.ts checks them and the contrast). */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
 
-    --rr-ground: #500101;   /* page background (the light ink) */
-    --rr-on-ink: #500101;   /* text on ink fills (same value as ground) */
-    --rr-ink: #FCF3DC;      /* primary text, primary fill, strong rules, filled bars */
-    --rr-ink-2: #D1B6A5;    /* secondary text, track outlines (cream ~75% on maroon) */
-    --rr-wash: #651E1B;     /* bar tracks, "Done" button fill (cream ~12% on maroon) */
-    --rr-rule: #7B3E38;     /* hairlines and chip borders ONLY, never text (cream ~25%) */
-    --rr-hatch-opacity: 0.6; /* ink opacity of hatch lines in charts */
+    --rr-ground: #0E1440;   /* deep ultramarine paper */
+    --rr-on-ink: #0E1440;   /* text on ink fills (same value as ground) */
+    --rr-ink: #F4F1EA;      /* all text, rules, filled spines, cover ground */
+    --rr-ink-2: #F4F1EA;    /* same ink */
+    --rr-wash: #1F2A66;     /* the desk */
+    --rr-rule: #3A4287;     /* hairlines only, never text */
+    --rr-highlight: #FFE14A; /* unchanged */
+    --rr-on-highlight: #0E1440; /* deep ultramarine on highlight */
+    --rr-ink-tint: #5560B8; /* hairlines and outlined numerals on the (now paper) cover */
+    --rr-hatch-opacity: 1;
   }
 }
 
 /* Printing from a dark system: the paper is light, so the colours go back to
-   the light values (dark ink on a light ground). Must come after the dark
-   block. The print screen paper has its own paper colours (print.css)
-   and its chrome is hidden when printing, so it is not affected. */
+   the light values. Must come after the dark block. */
 @media print {
   :root {
     color-scheme: light;
 
-    --rr-ground: #FCF3DC;
-    --rr-on-ink: #FCF3DC;
-    --rr-ink: #500101;
-    --rr-ink-2: #7A3A2E;
-    --rr-wash: #F8DF9C;
-    --rr-rule: #D9BE82;
-    --rr-hatch-opacity: 0.55;
+    --rr-ground: #F4F1EA;
+    --rr-on-ink: #F4F1EA;
+    --rr-ink: #1A2AB8;
+    --rr-ink-2: #1A2AB8;
+    --rr-wash: #E8E4DA;
+    --rr-rule: #B9BFEF;
+    --rr-highlight: #FFE14A;
+    --rr-on-highlight: #1A2AB8;
+    --rr-ink-tint: #7C89F0;
+    --rr-hatch-opacity: 1;
   }
 }
 
@@ -223,11 +232,10 @@ body {
   margin: 0;
   background-color: var(--rr-ground);
   color: var(--rr-ink);
-  font-family: var(--rr-font-serif);
+  font-family: var(--rr-font-sans);
   font-size: var(--rr-text-body-size);
   line-height: var(--rr-text-body-lh);
   font-weight: var(--rr-text-body-weight);
-  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

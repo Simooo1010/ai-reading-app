@@ -122,7 +122,7 @@ export function formatOrder(order: number): string {
 /** One Path row (only what the row shows). */
 export type PathRowData = Pick<
   Item,
-  "id" | "order" | "title" | "readingTimeMin" | "status"
+  "id" | "order" | "title" | "readingTimeMin" | "status" | "difficulty" | "layer" | "author" | "type"
 > & {
   /** Only when the source is already a PDF: the link the Print icon opens. Left out otherwise (saves bytes on 189 rows). */
   pdfLink?: string;
@@ -164,6 +164,10 @@ export function pathPhases(items: readonly Item[]): PhaseView[] {
         title: i.title,
         readingTimeMin: i.readingTimeMin,
         status: i.status,
+        difficulty: i.difficulty,
+        layer: i.layer,
+        author: i.author,
+        type: i.type,
       })),
     };
   });

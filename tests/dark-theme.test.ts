@@ -10,7 +10,7 @@ const tokens = read("tokens.css");
 const components = read("components.css");
 const print = read("print.css");
 
-const COLOURS = ["ground", "on-ink", "ink", "ink-2", "wash", "rule", "hatch-opacity"] as const;
+const COLOURS = ["ground", "on-ink", "ink", "ink-2", "wash", "rule", "highlight", "on-highlight", "ink-tint", "hatch-opacity"] as const;
 
 // Light = the first :root block; dark = the :root inside prefers-color-scheme: dark.
 const darkMedia = tokens.match(/@media\s*\(prefers-color-scheme:\s*dark\)\s*\{([\s\S]*?)\n\}/);
@@ -46,9 +46,13 @@ describe("dark theme tokens", () => {
     for (const name of COLOURS) expect(dark, name).toContain(`--rr-${name}:`);
   });
 
-  it("is a pure swap of the two colours (no new hue)", () => {
-    expect(tok(dark, "ground").toUpperCase()).toBe(tok(light, "ink").toUpperCase());
+  it("dark ink is the light paper; the highlight and its tint rules stay", () => {
+    // Shelf: dark paper is its own deep ultramarine (#0E1440), ink is the light paper.
+    expect(tok(dark, "ground").toUpperCase()).toBe("#0E1440");
     expect(tok(dark, "ink").toUpperCase()).toBe(tok(light, "ground").toUpperCase());
+    expect(tok(dark, "highlight").toUpperCase()).toBe(tok(light, "highlight").toUpperCase());
+    expect(contrast(tok(dark, "on-highlight"), tok(dark, "highlight"))).toBeGreaterThanOrEqual(7);
+    expect(contrast(tok(light, "on-highlight"), tok(light, "highlight"))).toBeGreaterThanOrEqual(7);
     expect(tok(dark, "on-ink")).toBe(tok(dark, "ground"));
   });
 
@@ -97,9 +101,8 @@ describe("dark theme tokens", () => {
       if (/(^|;|\s)(color|fill)\s*:\s*var\(--rr-rule\)/.test(m[2])) used.push(m[1].replace(/\/\*[\s\S]*?\*\//g, "").trim());
     }
     expect(used).toEqual([".rr-sep"]);
-    const op = parseFloat(tok(dark, "hatch-opacity"));
-    expect(op).toBeGreaterThan(0.3);
-    expect(op).toBeLessThan(1);
+    // Hatching is solid ink in both themes (Counterweight spines).
+    expect(parseFloat(tok(dark, "hatch-opacity"))).toBe(1);
   });
 });
 

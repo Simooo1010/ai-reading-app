@@ -29,7 +29,6 @@
   line-height: var(--rr-text-display-lh);
   font-weight: var(--rr-text-display-weight);
   letter-spacing: var(--rr-text-display-tracking);
-  font-variation-settings: "opsz" 72;
   color: var(--rr-ink);
   overflow-wrap: break-word;
 }
@@ -39,7 +38,7 @@
   font-size: var(--rr-text-author-size);
   line-height: var(--rr-text-author-lh);
   font-weight: var(--rr-text-author-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
 }
 
@@ -48,7 +47,6 @@
   font-size: var(--rr-text-body-size);
   line-height: var(--rr-text-body-lh);
   font-weight: var(--rr-text-body-weight);
-  font-variation-settings: "opsz" 16;
   color: var(--rr-ink);
 }
 
@@ -57,7 +55,7 @@
   font-size: var(--rr-text-body-italic-size);
   line-height: var(--rr-text-body-italic-lh);
   font-weight: var(--rr-text-body-italic-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
 }
 
@@ -87,7 +85,7 @@
   font-size: var(--rr-text-meta-italic-size);
   line-height: var(--rr-text-meta-italic-lh);
   font-weight: var(--rr-text-meta-italic-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
   font-variant-numeric: lining-nums;
 }
@@ -104,7 +102,6 @@
   line-height: var(--rr-text-phase-lh);
   font-weight: var(--rr-text-phase-weight);
   letter-spacing: var(--rr-text-phase-tracking);
-  font-variation-settings: "opsz" 48;
   font-variant-numeric: lining-nums;
   color: var(--rr-ink);
 }
@@ -163,7 +160,7 @@
   font-size: var(--rr-text-meta-italic-size);
   line-height: var(--rr-text-meta-italic-lh);
   font-weight: var(--rr-text-meta-italic-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
   font-variant-numeric: lining-nums tabular-nums;
   text-align: right;
@@ -296,7 +293,7 @@
 
 .rr-status--skipped {
   border: 1px dashed var(--rr-ink-2);
-  font-style: italic;
+  font-style: normal;
 }
 
 /* ---------- Button ---------- */
@@ -356,7 +353,7 @@
   padding: 0 var(--rr-space-1);
   border: 0;
   color: var(--rr-ink-2);
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
   letter-spacing: 0;
   text-decoration: underline;
@@ -485,7 +482,7 @@
   font-size: var(--rr-text-meta-italic-size);
   line-height: var(--rr-text-meta-italic-lh);
   font-weight: var(--rr-text-meta-italic-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
   font-variant-numeric: lining-nums tabular-nums;
   /* Short meta ("30 min") stays on one line; a long author list wraps */
@@ -507,7 +504,7 @@
 /* Skipped item: struck, quiet title (the status chip also says "Skipped") */
 .rr-row--skipped .rr-row__title {
   font-weight: 500;
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
@@ -532,7 +529,7 @@
 /* Unknown / loading row */
 .rr-row--placeholder .rr-row__title {
   font-weight: 500;
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
 }
 
@@ -608,7 +605,7 @@
   font-size: var(--rr-text-meta-size);
   line-height: var(--rr-text-meta-lh);
   font-weight: var(--rr-text-meta-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
   font-variant-numeric: lining-nums tabular-nums;
 }
@@ -625,7 +622,7 @@
 
 .rr-phase__of {
   font-weight: 500;
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
 }
 
@@ -690,21 +687,18 @@
   line-height: var(--rr-text-stat-xl-lh);
   font-weight: var(--rr-text-stat-xl-weight);
   letter-spacing: var(--rr-text-stat-xl-tracking);
-  font-variation-settings: "opsz" 72;
 }
 
 .rr-stat__number--lg {
   font-size: var(--rr-text-stat-lg-size);
   line-height: var(--rr-text-stat-lg-lh);
   font-weight: var(--rr-text-stat-lg-weight);
-  font-variation-settings: "opsz" 60;
 }
 
 .rr-stat__number--md {
   font-size: var(--rr-text-stat-md-size);
   line-height: var(--rr-text-stat-md-lh);
   font-weight: var(--rr-text-stat-md-weight);
-  font-variation-settings: "opsz" 60;
 }
 
 .rr-stat__number--sm {
@@ -727,7 +721,7 @@
   font-size: var(--rr-text-stat-note-size);
   line-height: var(--rr-text-stat-note-lh);
   font-weight: var(--rr-text-stat-note-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink);
 }
 
@@ -736,7 +730,7 @@
   font-size: var(--rr-text-meta-italic-size);
   line-height: var(--rr-text-meta-italic-lh);
   font-weight: var(--rr-text-meta-italic-weight);
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink-2);
   font-variant-numeric: lining-nums;
 }
@@ -812,7 +806,7 @@
   margin: 6px 0 0;
   font-size: var(--rr-text-meta-italic-size);
   line-height: var(--rr-text-meta-italic-lh);
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
   color: var(--rr-ink-2);
 }
@@ -830,11 +824,11 @@
 .rr-chart__bar--current { fill: var(--rr-ink); }
 .rr-chart__baseline { stroke: var(--rr-ink); stroke-width: 1; }
 .rr-chart__target { stroke: var(--rr-ink); stroke-width: 1.25; stroke-dasharray: 5 4; fill: none; }
-.rr-chart__target-label { font-size: var(--rr-text-label-size); font-style: italic; font-weight: 600; fill: var(--rr-ink); }
+.rr-chart__target-label { font-size: var(--rr-text-label-size); font-style: normal; font-weight: 600; fill: var(--rr-ink); }
 .rr-chart__value { font-size: var(--rr-text-axis-size); font-weight: 600; fill: var(--rr-ink-2); }
 .rr-chart__value--on-ink { font-weight: 700; fill: var(--rr-on-ink); }
 .rr-chart__tick { font-size: var(--rr-text-label-size); font-weight: 600; fill: var(--rr-ink-2); }
-.rr-chart__month { font-size: var(--rr-text-axis-size); font-style: italic; font-weight: 500; fill: var(--rr-ink-2); }
+.rr-chart__month { font-size: var(--rr-text-axis-size); font-style: normal; font-weight: 500; fill: var(--rr-ink-2); }
 .rr-chart__tick--current,
 .rr-chart__month--current { font-weight: 700; fill: var(--rr-ink); }
 
@@ -1213,7 +1207,7 @@
   font-size: var(--rr-text-body-italic-size);
   line-height: var(--rr-text-body-italic-lh);
   font-weight: var(--rr-text-body-italic-weight);
-  font-style: italic;
+  font-style: normal;
   letter-spacing: 0;
   font-variation-settings: normal;
   color: var(--rr-ink-2);
@@ -1300,7 +1294,7 @@
   font-size: var(--rr-text-meta-italic-size);
   line-height: var(--rr-text-meta-italic-lh);
   font-weight: 600;
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink);
 }
 
@@ -1333,7 +1327,7 @@
   font-weight: var(--rr-text-label-weight);
   letter-spacing: var(--rr-text-label-tracking);
   text-transform: uppercase;
-  font-style: italic;
+  font-style: normal;
   color: var(--rr-ink);
 }
 
@@ -1396,7 +1390,7 @@
   font-size: var(--rr-text-meta-italic-size);
   line-height: var(--rr-text-meta-italic-lh);
   font-weight: var(--rr-text-meta-italic-weight);
-  font-style: italic;
+  font-style: normal;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -1483,7 +1477,6 @@
 
 /* Layout wrappers: no box on a phone, a grid from md up */
 .rr-today,
-.rr-path,
 .rr-progress-grid,
 .rr-skeleton-cell {
   display: contents;
@@ -1496,28 +1489,18 @@
 
 /* ---------- md: >= 720px ---------- */
 @media (min-width: 720px) {
-  /* Today: card left (3/5), Up next right (2/5), hairline between */
+  /* Today: cover left (max 420px), the shelf wall right (lg) */
   .rr-today {
     display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
     column-gap: var(--rr-page-gutter);
     align-items: start;
   }
 
-  .rr-today > .rr-item,
-  .rr-today > .rr-skeleton-group:first-child {
-    padding-right: var(--rr-page-gutter);
-    border-right: 1px solid var(--rr-rule);
-  }
-
-  /* No Up next (last items): the card takes the full width */
   .rr-today > .rr-item:only-child {
     grid-column: 1 / -1;
-    padding-right: 0;
-    border-right: 0;
   }
 
-  /* Up next stays in view while the card scrolls */
   .rr-today > .rr-section {
     position: sticky;
     top: calc(var(--rr-topbar-h) + var(--rr-space-5));
@@ -1532,14 +1515,6 @@
   .rr-item__why > .rr-body,
   .rr-item__why > .rr-item__note {
     max-width: 62ch;
-  }
-
-  /* Path: phases in two columns; each one opens and closes on its own */
-  .rr-path {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--rr-space-5) var(--rr-page-gutter);
-    align-items: start;
   }
 
   /* Progress: two columns, three rows */
@@ -1706,4 +1681,662 @@
     max-width: 420px;
     margin: 0;
   }
+}
+
+/* ===================================================================
+ * SHELF LAYER ("two-ink risograph"). Loaded last on purpose: it restyles
+ * the shared classes above for the Shelf design and adds Spine, Shelf,
+ * Cover, SelectedBar and the pill controls. Tokens only, no colour literals.
+ * Grammar: an item is a book (spine small, cover large); a set is a shelf;
+ * ink on paper plus yellow only for "the next thing".
+ * =================================================================== */
+
+/* Mono for every label and metadata line */
+.rr-label,
+.rr-header__context,
+.rr-meta,
+.rr-meta-italic,
+.rr-chip,
+.rr-mono-line,
+.rr-phase__count,
+.rr-phase__hours,
+.rr-phase__now,
+.rr-legend,
+.rr-selected__meta,
+.rr-cover__meta,
+.rr-cover__note,
+.rr-stat__helper,
+.rr-tally,
+.rr-tabbar__tab,
+.rr-core,
+.rr-chart__caption,
+.rr-chart__tick,
+.rr-chart__value,
+.rr-chart__month,
+.rr-chart__series-value,
+.rr-field__label,
+.rr-toast__text {
+  font-family: var(--rr-font-mono);
+}
+
+.rr-header {
+  border-bottom: var(--rr-board) solid var(--rr-ink);
+}
+
+.rr-header__context {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rr-mono-line {
+  margin: var(--rr-space-3) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--rr-ink);
+}
+
+/* Chips: mono 12, pill, outlined or yellow */
+.rr-chip {
+  height: 26px;
+  padding: 0 11px;
+  border: 1.5px solid var(--rr-ink);
+  border-radius: var(--rr-radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--rr-ink);
+}
+.rr-chip--highlight {
+  border-color: var(--rr-highlight);
+  background-color: var(--rr-highlight);
+  color: var(--rr-on-highlight);
+}
+
+/* Buttons: pills 48-56px. Yellow = the one primary action per screen. */
+.rr-btn {
+  height: 52px;
+  padding: 0 24px;
+  border: 1.5px solid var(--rr-ink);
+  border-radius: var(--rr-radius-pill);
+  font-size: 16px;
+}
+.rr-btn--primary {
+  width: 100%;
+  height: 56px;
+  justify-content: space-between;
+  font-size: 18px;
+  background-color: var(--rr-highlight);
+  border-color: var(--rr-ink);
+  color: var(--rr-on-highlight);
+}
+.rr-btn--secondary {
+  background-color: transparent;
+  color: var(--rr-ink);
+}
+.rr-btn--affirm {
+  flex: 2 1 0;
+  background-color: var(--rr-ink);
+  border-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+}
+.rr-btn--link {
+  height: auto;
+  min-height: var(--rr-tap-min);
+  padding: 0 var(--rr-space-2);
+  border: 0;
+  border-radius: 0;
+  font-family: var(--rr-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration-color: var(--rr-ink);
+  color: var(--rr-ink);
+}
+.rr-actions {
+  align-items: stretch;
+  gap: var(--rr-space-3);
+}
+.rr-actions__row {
+  gap: var(--rr-space-3);
+}
+.rr-actions__row > .rr-btn--secondary {
+  flex: 1 1 0;
+}
+.rr-item__actions {
+  margin-top: var(--rr-space-4);
+}
+.rr-item__print {
+  margin: var(--rr-space-1) 0 0;
+  text-align: center;
+}
+
+/* ---------- Tab bar: text only, active tab underlined 3px ---------- */
+.rr-tabbar {
+  border-top: var(--rr-board) solid var(--rr-ink);
+}
+.rr-tabbar__tab {
+  color: var(--rr-ink);
+  font-weight: 500;
+}
+.rr-tabbar__tab::before {
+  /* the old short rule above the label becomes the 3px underline below it */
+  order: 2;
+  width: 40px;
+  height: 3px;
+  border-radius: 0;
+  background-color: transparent;
+}
+.rr-tabbar__tab[aria-current="page"]::before,
+.rr-tabbar__tab:has([data-pending])::before {
+  background-color: var(--rr-ink);
+}
+
+/* ---------- Spine ---------- */
+/* WIDTH = reading time, HEIGHT = difficulty, FILL = status. The height
+   (--rr-spine-h) is a share of the shelf height. */
+.rr-spine {
+  position: relative;
+  flex: none;
+  align-self: flex-end;
+  height: var(--rr-spine-h, 76%);
+  min-width: 3px;
+  padding: 0;
+  border: 1.5px solid var(--rr-ink);
+  border-bottom: 0;
+  border-radius: var(--rr-radius-sm) var(--rr-radius-sm) 0 0;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  transition: transform 0.25s ease, background-color 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.rr-spine--stretch {
+  min-width: 4px;
+}
+.rr-spine--todo {
+  background-color: transparent;
+}
+.rr-spine--active {
+  background-color: var(--rr-highlight);
+}
+.rr-spine--done {
+  background-color: var(--rr-ink);
+}
+.rr-spine--skipped {
+  border-style: dashed;
+}
+/* Counterweight: 135deg hatch, 1.5px ink and 4px gap */
+.rr-spine--hatch:not(.rr-spine--done):not(.rr-spine--selected) {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--rr-ink) 0 1.5px,
+    transparent 1.5px 5.5px
+  );
+}
+.rr-spine--hatch.rr-spine--active:not(.rr-spine--selected) {
+  background-color: var(--rr-highlight);
+}
+/* Selection: the spine fills ink and lifts 8px */
+.rr-spine--selected {
+  background-color: var(--rr-ink);
+  transform: translateY(-8px);
+}
+.rr-spine:focus-visible {
+  outline: 2px solid var(--rr-ink);
+  outline-offset: 3px;
+  border-radius: var(--rr-radius-sm);
+}
+/* Little triangle over the next spine (Today preview) */
+.rr-spine__marker {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  width: 0;
+  height: 0;
+  margin-left: -6px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 9px solid var(--rr-ink);
+  animation: rr-bounce 1.6s ease-in-out infinite;
+}
+
+/* ---------- Shelf: spines on a 3px ink board ---------- */
+.rr-shelf {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding-top: 12px; /* room for the lift and the marker */
+  border-bottom: var(--rr-board) solid var(--rr-ink);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  box-sizing: content-box;
+}
+.rr-shelf--scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: none; /* a drag on a shelf scrubs; it does not scroll the page */
+  scrollbar-width: none;
+}
+.rr-shelf--scroll::-webkit-scrollbar {
+  display: none;
+}
+.rr-shelf--stretch {
+  width: 100%;
+}
+.rr-shelf--current {
+  touch-action: none;
+}
+.rr-today__shelf .rr-shelf {
+  margin-top: var(--rr-space-3);
+}
+
+/* Spines rise from the board on load, shelf by shelf (no stagger when reduced) */
+@keyframes rr-rise {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes rr-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.rr-shelf > .rr-spine:not(.rr-spine--selected) {
+  animation: rr-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.rr-shelf > .rr-spine:nth-child(3n + 1) { animation-delay: 12ms; }
+.rr-shelf > .rr-spine:nth-child(3n + 2) { animation-delay: 26ms; }
+.rr-shelf > .rr-spine:nth-child(3n) { animation-delay: 40ms; }
+
+/* ---------- Cover ---------- */
+/* Ink card, radius 6 / 22 / 22 / 6, 10px yellow strip on the spine side. */
+.rr-cover {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 404px;
+  padding: var(--rr-space-4) var(--rr-space-4) var(--rr-space-4) 28px;
+  overflow: hidden;
+  border-radius: var(--rr-radius-md) var(--rr-radius-cover) var(--rr-radius-cover) var(--rr-radius-md);
+  background-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+  animation: rr-cover-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.rr-cover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  background-color: var(--rr-highlight);
+}
+@keyframes rr-cover-in {
+  from { opacity: 0; transform: translateY(40px) rotate(-3deg); }
+  to { opacity: 1; transform: none; }
+}
+/* Done: the cover slides back down into its slot */
+.rr-cover--shelve {
+  animation: rr-shelve 0.6s cubic-bezier(0.3, 0.9, 0.2, 1) forwards;
+}
+@keyframes rr-shelve {
+  to { transform: translateY(150px) scale(0.82) rotate(2deg); }
+}
+/* Skip: the cover slides off to the left */
+.rr-cover--skip {
+  animation: rr-skip 0.5s ease-in forwards;
+}
+@keyframes rr-skip {
+  to { transform: translateX(-120%); }
+}
+
+/* Counterweight: hatch band across the cover's top edge */
+.rr-cover--hatch::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 0;
+  height: 14px;
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--rr-ink-tint) 0 1.5px,
+    transparent 1.5px 5.5px
+  );
+}
+
+/* Giant outlined numeral bleeding off the top right */
+.rr-cover__numeral {
+  position: absolute;
+  top: -18px;
+  right: -10px;
+  font-size: 190px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--rr-ink-tint);
+  pointer-events: none;
+  user-select: none;
+}
+.rr-cover__chips {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rr-space-2);
+}
+.rr-cover .rr-chip--outline {
+  border-color: var(--rr-on-ink);
+  color: var(--rr-on-ink);
+}
+.rr-cover__title {
+  position: relative;
+  margin: auto 0 0;
+  padding-top: 120px;
+  font-size: var(--rr-text-display-size);
+  line-height: var(--rr-text-display-lh);
+  font-weight: var(--rr-text-display-weight);
+  letter-spacing: var(--rr-text-display-tracking);
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.rr-cover__author {
+  position: relative;
+  margin: var(--rr-space-2) 0 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+.rr-cover__why {
+  position: relative;
+  margin: var(--rr-space-4) 0 0;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rr-cover__note {
+  position: relative;
+  margin: var(--rr-space-2) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+}
+.rr-cover__meta {
+  position: relative;
+  margin: var(--rr-space-4) 0 0;
+  padding-top: var(--rr-space-3);
+  border-top: 1.5px solid var(--rr-ink-tint);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.rr-cover .rr-sep {
+  color: var(--rr-ink-tint);
+}
+/* In the sheet: the cover at about 80% */
+.rr-cover--sheet {
+  min-height: 0;
+  animation: none;
+}
+.rr-cover--sheet .rr-cover__numeral {
+  font-size: 140px;
+}
+.rr-cover--sheet .rr-cover__title {
+  padding-top: 64px;
+  font-size: 36px;
+}
+
+/* ---------- Selected-item bar (Path) ---------- */
+.rr-selected {
+  display: flex;
+  align-items: center;
+  gap: var(--rr-space-3);
+  min-height: 92px;
+  padding: var(--rr-space-3) var(--rr-space-3) var(--rr-space-3) var(--rr-space-4);
+  border-radius: var(--rr-radius-md);
+  background-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+}
+.rr-selected__num {
+  flex: none;
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--rr-highlight);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.rr-selected__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.rr-selected__title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+.rr-selected__meta {
+  font-size: 12px;
+  line-height: 16px;
+  color: inherit;
+}
+.rr-selected__go {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rr-tap-min);
+  height: var(--rr-tap-min);
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--rr-highlight);
+  color: var(--rr-on-highlight);
+  cursor: pointer;
+}
+.rr-selected__go:focus-visible {
+  outline: 2px solid var(--rr-on-ink);
+  outline-offset: 2px;
+}
+
+/* ---------- Path: legend, phases as shelves ---------- */
+.rr-path {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-4);
+}
+.rr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rr-space-2) var(--rr-space-4);
+  font-size: 12px;
+  line-height: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.rr-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.rr-legend__swatch {
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  border: 1.5px solid var(--rr-ink);
+  border-radius: 2px 2px 0 0;
+}
+.rr-phase {
+  border-top: 0;
+}
+.rr-phase__toggle {
+  padding: var(--rr-space-2) 0;
+}
+.rr-phase__now {
+  padding: 2px 8px;
+  border-radius: var(--rr-radius-pill);
+  background-color: var(--rr-highlight);
+  color: var(--rr-on-highlight);
+  font-size: 12px;
+  font-weight: 700;
+}
+.rr-phase__count,
+.rr-phase__hours {
+  font-size: 12px;
+}
+/* Thin fill line under the board: hours done / total */
+.rr-phase__fill {
+  display: block;
+  height: 3px;
+  margin-top: 3px;
+  background-color: var(--rr-wash);
+}
+.rr-phase__fill > span {
+  display: block;
+  height: 100%;
+  background-color: var(--rr-ink);
+}
+
+/* ---------- Sheet: paper bottom sheet with a 3px ink top rule ---------- */
+.rr-sheet {
+  border-top: var(--rr-board) solid var(--rr-ink);
+}
+.rr-sheet__head {
+  border-bottom: 0;
+}
+
+/* ---------- Toast: ink pill, Undo in yellow ---------- */
+.rr-toast__bar {
+  border-radius: var(--rr-radius-pill);
+  padding-left: var(--rr-space-5);
+}
+.rr-toast__action {
+  color: var(--rr-highlight);
+}
+
+/* ---------- Big numbers ---------- */
+.rr-stat__number--xl {
+  font-size: 64px;
+}
+.rr-stat-pair,
+.rr-stat-pair > .rr-stat:first-child {
+  border-color: var(--rr-ink);
+}
+
+/* ---------- Inputs ---------- */
+.rr-field__input,
+.rr-input {
+  border-radius: var(--rr-radius-pill);
+  border: 1.5px solid var(--rr-ink);
+  padding-left: var(--rr-space-4);
+}
+
+/* ---------- Skeleton: outlined spines, no shimmer ---------- */
+.rr-skeleton {
+  background: transparent;
+  border: 1.5px solid var(--rr-ink);
+  border-radius: var(--rr-radius-sm) var(--rr-radius-sm) 0 0;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rr-shelf > .rr-spine,
+  .rr-spine__marker {
+    animation: none !important;
+  }
+  .rr-cover--shelve,
+  .rr-cover--skip {
+    animation: rr-fade 0.3s linear forwards !important;
+  }
+  @keyframes rr-fade {
+    to { opacity: 0; }
+  }
+}
+
+/* Wall of five shelves: Today, wide screens only (the phone shows the current phase) */
+.rr-wall { display: none; }
+@media (min-width: 1040px) {
+  .rr-wall { display: block; }
+  .rr-today__shelf--phase { display: none; }
+  .rr-wall__shelf + .rr-wall__shelf { margin-top: var(--rr-space-4); }
+}
+
+/* ---------- Cover: long titles, closed book (sign in) ---------- */
+.rr-cover__title--long {
+  font-size: 38px;
+}
+
+/* Sign in: one closed book, then the password pill and the ink button */
+.rr-login {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rr-space-4);
+  perspective: 900px;
+}
+.rr-cover--closed {
+  min-height: 300px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  animation: none;
+  transform-origin: 0 50%; /* hinges on the spine side */
+}
+.rr-cover--closed .rr-cover__title {
+  margin: 0;
+  padding: 0;
+}
+/* Wrong password: the cover shakes 6px twice */
+.rr-cover--shake {
+  animation: rr-shake 0.4s ease-in-out;
+}
+@keyframes rr-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+/* Signing in: the cover opens (rotateY) */
+.rr-cover--opening {
+  animation: rr-open 0.6s ease-in forwards;
+}
+@keyframes rr-open {
+  to { transform: rotateY(-75deg); opacity: 0.4; }
+}
+.rr-login__actions .rr-btn--primary {
+  background-color: var(--rr-ink);
+  color: var(--rr-on-ink);
+}
+.rr-field__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------- Error boundary: a fallen spine ---------- */
+.rr-fallen {
+  display: block;
+  width: 28px;
+  height: 120px;
+  margin: var(--rr-space-4) 0 var(--rr-space-5);
+  border: 1.5px solid var(--rr-ink);
+  border-bottom: 0;
+  border-radius: var(--rr-radius-sm) var(--rr-radius-sm) 0 0;
+  background-color: var(--rr-highlight);
+  transform: rotate(80deg);
+  transform-origin: 0 100%;
+}
+.rr-state {
+  gap: var(--rr-space-3);
+}
+.rr-login__actions .rr-btn--primary {
+  justify-content: center;
 }

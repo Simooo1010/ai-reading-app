@@ -239,7 +239,7 @@ describe("pathPhases", () => {
     });
     expect(phases[1].rows.map((r) => r.order)).toEqual([3, 4]);
     expect(Object.keys(phases[1].rows[0]).sort()).toEqual(
-      ["id", "order", "readingTimeMin", "status", "title"],
+      ["author", "difficulty", "id", "layer", "order", "readingTimeMin", "status", "title", "type"],
     );
     // pdfLink is set only when the source is already a PDF (Print icon).
     expect(phases[1].rows[0].pdfLink).toBeUndefined();

@@ -9,6 +9,7 @@ export default function AppError({ retry }: { error: Error; retry: () => void })
       <ScreenHeader title="Error" />
       <div className="rr-screen__body">
         <section className="rr-state" role="alert">
+          <span className="rr-fallen" aria-hidden="true" />
           <h2 className="rr-phase-title">Something went wrong</h2>
           <p className="rr-body-italic">
             We could not load your reading list. Please try again.

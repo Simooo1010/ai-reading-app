@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { PathRow } from "@/components/PathRow";
+import { ItemCard } from "@/components/ItemCard";
 import { PrintLink } from "@/components/PrintLink";
 import { opensAsPdf } from "@/lib/print/classify";
 import { backLink, findItem, printFrom, printHref } from "@/lib/print/screen";
@@ -62,16 +62,20 @@ describe("PrintLink", () => {
     expect(out).toContain('target="_blank"');
   });
 
-  it("Path row: the print link is a sibling of the row button, never inside it", () => {
+  it("cover: the print link sits under the actions, outside the cover", () => {
     const out = renderToStaticMarkup(
-      createElement(PathRow, { row: { id: ID, order: 3, title: "Fixture", readingTimeMin: 10, status: "To read" } }),
+      createElement(ItemCard, {
+        card: {
+          id: ID, order: 3, title: "Fixture", author: "", type: "Essay", layer: "1 · Foundations",
+          priority: "Core", phase: "Phase 1", status: "To read", difficulty: "Easy", readingTimeMin: 10,
+          whyRead: "", link: "https://example.com/a", published: null, scope: null, answers: [],
+        },
+        size: "hero", titleId: "t", showStatus: false, actions: null, printFrom: "today",
+      }),
     );
-    expect(out).toMatch(/^<li class="rr-row-item"><button[^]*<\/button><a class="rr-print-icon"[^>]*><\/a><\/li>$/);
-    const button = out.slice(out.indexOf("<button"), out.indexOf("</button>"));
-    expect(button).not.toContain("<a ");
-    // Small: the link adds about 120 bytes to a row (no inline SVG).
-    const link = out.slice(out.indexOf("</button>") + 9, out.indexOf("</li>"));
-    expect(link.length).toBeLessThan(140);
+    const cover = out.slice(out.indexOf("<article"), out.indexOf("</article>"));
+    expect(cover).not.toContain("rr-print-icon");
+    expect(out).toContain(`href="/print/${ID}?from=today"`);
   });
 });
 

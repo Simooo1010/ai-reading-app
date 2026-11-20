@@ -19,6 +19,7 @@ export function card(extra: Partial<CardData> = {}): CardData {
     whyRead:
       "Fixture text. It argues the other side, so you can test the main idea against a strong critic.",
     link: "https://example.com/fixture",
+    published: "2019-03-13",
     scope: null,
     answers: [],
     ...extra,
@@ -71,6 +72,10 @@ function row(order: number, status: Status, min = 15, title?: string): PathRowDa
     title: title ?? `Fixture item ${order}`,
     readingTimeMin: min,
     status,
+    difficulty: (["Easy", "Medium", "Hard"] as const)[order % 3],
+    layer: order % 5 === 0 ? "5 · Counterweights" : "1 · Foundations",
+    author: "Fixture Author",
+    type: "Essay",
   };
 }
 

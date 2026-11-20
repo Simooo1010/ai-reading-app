@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { ArrowUpRightIcon } from "@/components/Icons";
 import { PrintLink } from "@/components/PrintLink";
 import { safeHttpUrl } from "@/lib/links";
-import { StatusChip } from "@/components/StatusChip";
+import { coverChip, coverNumeral, isCounterweight } from "@/lib/shelf";
 import { formatMinutes, type CardData } from "@/lib/today";
 
 type Props = {
@@ -20,63 +20,63 @@ type Props = {
 };
 
 /**
- * Item card (Today board): chips, title, "by Author", meta line, Why read
- * this (+ reading scope and "This answers" as italic lines), Open source and
- * the actions. Presentational: plain props, no data fetching.
+ * Cover (Shelf design): an ink book cover with a yellow spine strip, chips,
+ * the giant outlined order numeral, title, author, "why read this" and a meta
+ * rail. Under it: Open source (the one yellow control), the actions and a
+ * quiet Print link. Presentational: plain props, no data fetching.
+ * `size` "sheet" is the smaller cover inside the detail sheet.
  */
 export function ItemCard({ card, size, titleId, showStatus, actions, printFrom }: Props) {
   const time = formatMinutes(card.readingTimeMin);
-  const meta = [card.type, time, card.difficulty, card.phase].filter(
+  const meta = [card.type, time, card.difficulty, card.published ? card.published.slice(0, 4) : null].filter(
     (part): part is string => Boolean(part),
   );
-  const hasNotes = Boolean(card.whyRead || card.scope || card.answers.length);
   const sourceHref = safeHttpUrl(card.link);
+  const counterweight = isCounterweight(card.layer);
+  const chip = showStatus ? card.status : coverChip(card.status, card.priority);
 
   return (
-    <article className="rr-item" aria-labelledby={titleId}>
-      <div className="rr-item__chips">
-        <span className="rr-chip rr-chip--hero">{card.layer}</span>
-        {card.priority === "Core" && <span className="rr-core">Core</span>}
-        {showStatus && <StatusChip status={card.status} />}
-      </div>
-
-      <h2
-        id={titleId}
-        className={`rr-item__title ${size === "hero" ? "rr-display" : "rr-phase-title"}`}
+    <div className={`rr-item rr-item--${size}`}>
+      <article
+        className={`rr-cover rr-cover--${size}${counterweight ? " rr-cover--hatch" : ""}`}
+        aria-labelledby={titleId}
+        data-cover
       >
-        {card.title}
-      </h2>
-      {card.author && <p className="rr-author rr-item__author">by {card.author}</p>}
+        <span className="rr-cover__numeral" aria-hidden="true">
+          {coverNumeral(card.order)}
+        </span>
+        <div className="rr-cover__chips">
+          <span className="rr-chip rr-chip--outline">{card.layer}</span>
+          <span className="rr-chip rr-chip--highlight">{chip}</span>
+        </div>
 
-      <p className="rr-meta rr-meta-line rr-item__meta">
-        {meta.map((part, i) => (
-          <span key={i} className="rr-meta-line">
-            {i > 0 && (
-              <span className="rr-sep" aria-hidden="true">
-                ·
-              </span>
-            )}
-            <span>{part}</span>
-          </span>
-        ))}
-      </p>
+        <h2
+          id={titleId}
+          className={`rr-cover__title${card.title.length > 38 ? " rr-cover__title--long" : ""}`}
+        >
+          {card.title}
+        </h2>
+        {card.author && <p className="rr-cover__author">by {card.author}</p>}
 
-      {hasNotes && (
-        <section className="rr-section rr-section--hair rr-item__why">
-          {card.whyRead && (
-            <>
-              <h3 className="rr-label">Why read this</h3>
-              <p className="rr-body">{card.whyRead}</p>
-            </>
-          )}
-          {card.scope && <p className="rr-meta-italic rr-item__note">{card.scope}</p>}
-          {card.answers.length > 0 && (
-            <p className="rr-meta-italic rr-item__note">
-              This answers: {card.answers.join(" · ")}
-            </p>
-          )}
-        </section>
-      )}
+        {card.whyRead && <p className="rr-cover__why">{card.whyRead}</p>}
+        {card.scope && <p className="rr-cover__note">{card.scope}</p>}
+        {card.answers.length > 0 && (
+          <p className="rr-cover__note">This answers: {card.answers.join(" · ")}</p>
+        )}
+
+        <p className="rr-cover__meta">
+          {meta.map((part, i) => (
+            <span key={i}>
+              {i > 0 && (
+                <span className="rr-sep" aria-hidden="true">
+                  {" · "}
+                </span>
+              )}
+              {part}
+            </span>
+          ))}
+        </p>
+      </article>
 
       <div className="rr-actions rr-item__actions">
         {sourceHref ? (
@@ -103,6 +103,6 @@ export function ItemCard({ card, size, titleId, showStatus, actions, printFrom }
       <p className="rr-item__print">
         <PrintLink id={card.id} title={card.title} pdfLink={card.pdfLink} from={printFrom} variant="text" />
       </p>
-    </article>
+    </div>
   );
 }
